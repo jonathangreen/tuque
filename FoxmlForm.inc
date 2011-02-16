@@ -64,7 +64,7 @@ class FoxmlDocument extends DOMDocument {
       $children = array_merge($children, $this->createIngestFileDatastreams());
     }
     $policy = $this->createPolicy();
-    if (get_class($policy) == DOMElement) {
+    if (get_class($policy) == 'DOMElement') {
       $children[] = $policy;
     }
     $children[] = $this->createDocumentDatastream();
@@ -72,7 +72,9 @@ class FoxmlDocument extends DOMDocument {
     $children[] = $this->createCollectionPolicy();
     $children[] = $this->createWorkflowStream();
     foreach ($children as $child) {
-      $root->appendChild($child);
+      if (isset($child)) {
+        $root->appendChild($child);
+      }
     }
     $this->appendChild($root);
   }
@@ -89,7 +91,7 @@ class FoxmlDocument extends DOMDocument {
           'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
           'xsi:schemaLocation' => 'info:fedora/fedora-system:def/foxml# http://www.fedora.info/definitions/1/0/foxml1-1.xsd')
     );
-    $this->appendChild($root);
+    return $root;
   }
 
   /**
@@ -426,8 +428,8 @@ class FoxmlDocument extends DOMDocument {
     $xsl = new DOMDocument();
     $xsl->load($this->tranform);
     $xslt = new XSLTProcessor();
-    $proc->importStyleSheet($xsl);
-    $transformed_document = $proc->transformToDoc($this->document);
+    $xslt->importStyleSheet($xsl);
+    $transformed_document = $xslt->transformToDoc($this->document);
     return $this->importNode($transformed_document->documentElement);
   }
 
@@ -435,10 +437,12 @@ class FoxmlDocument extends DOMDocument {
    * Ingests this Foxml document into fedora.
    */
   public function ingest() {
+    $ret = FALSE;
     try {
       $object = Fedora_Item::ingest_from_FOXML($this);
       if (!empty($object->pid)) {
         drupal_set_message(t("Item !pid created successfully.", array('!pid' => l($object->pid, 'fedora/repository/' . $object->pid))), "status");
+        $ret = TRUE;
       }
       if (!empty($_SESSION['fedora_ingest_files'])) {
         foreach ($_SESSION['fedora_ingest_files'] as $dsid => $created_file) {
@@ -450,6 +454,7 @@ class FoxmlDocument extends DOMDocument {
       drupal_set_message(t('Error ingesting object: !e', array('!e' => $exception->getMessage())), 'error');
       watchdog(t("Fedora_Repository"), t("Error ingesting object: !e", array('!e' => $exception->getMessage())), NULL, WATCHDOG_ERROR);
     }
+    return $ret;
   }
 
 }
