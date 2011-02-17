@@ -58,6 +58,7 @@ class FoxmlDocument extends DOMDocument {
    */
   private function createDocument() {
     $root = $this->createRootElement();
+    $root = $this->appendChild($root);
     $children[] = $this->createObjectProperties();
     $children[] = $this->createRelationships();
     if (!empty($this->ingestFileLocation)) {
@@ -76,7 +77,6 @@ class FoxmlDocument extends DOMDocument {
         $root->appendChild($child);
       }
     }
-    $this->appendChild($root);
   }
 
   /**
@@ -102,20 +102,19 @@ class FoxmlDocument extends DOMDocument {
    */
   private function &createElementWithAttributes($name, $attributes) {
     $element = $this->createElement($name);
-    return $this->setAttributes($element, $attributes);
+    $this->setAttributes($element, $attributes);
+    return $element;
   }
 
   /**
    *
    * @param DOMElement $element
    * @param array $attributes
-   * @return DOMElement
    */
-  private function &setAttributes(&$element, &$attributes) {
+  private function setAttributes(&$element, &$attributes) {
     foreach ($attributes as $key => $val) {
       $element->setAttribute($key, $val);
     }
-    return $element;
   }
 
   /**
@@ -123,7 +122,8 @@ class FoxmlDocument extends DOMDocument {
    * @return DOMElement
    */
   private function createObjectProperties() {
-    $object_properties = $this->createElementWithAttributes('foxml:objectProperties', array(
+    $object_properties = $this->createElement('foxml:objectProperties');
+    $properties[] = $this->createElementWithAttributes('foxml:property', array(
           "NAME" => "info:fedora/fedora-system:def/model#state",
           "VALUE" => "A")
     );
@@ -206,23 +206,23 @@ class FoxmlDocument extends DOMDocument {
       $begin_index = strrpos($file_url, '/');
       $dtitle = substr($file_url, $begin_index + 1);
       $dtitle = urldecode($dtitle);
-      $dsl = $this->createElementWithAttributes('foxml:datastream', array(
+      $datastream = $this->createElementWithAttributes('foxml:datastream', array(
             "ID" => "OBJ",
             "STATE" => "A",
             "CONTROL_GROUP" => "M")
       );
-      $ds1v = $ds1->appendChild($this->createElementWithAttributes('foxml:datastreamVersion', array(
-                "ID" => "OBJ.0",
-                "MIMETYPE" => $mime_type,
-                "LABEL" => $dtitle)
-              )
+      $datastream_version = $this->createElementWithAttributes('foxml:datastreamVersion', array(
+            "ID" => "OBJ.0",
+            "MIMETYPE" => $mime_type,
+            "LABEL" => $dtitle)
       );
-      $ds1v->appendChild($this->createElementWithAttributes('foxml:contentLocation', array(
+      $content = $this->createElementWithAttributes('foxml:contentLocation', array(
             "REF" => $file_url,
             "TYPE" => "URL")
-          )
       );
-      $datastreams[] = $dsl;
+      $datastream->appendChild($datastream_version);
+      $datastream_version->appendChild($content);
+      $datastreams[] = $datastream;
     }
     if (!empty($_SESSION['fedora_ingest_files'])) {
       foreach ($_SESSION['fedora_ingest_files'] as $dsid => $created_file) {
@@ -242,23 +242,23 @@ class FoxmlDocument extends DOMDocument {
         $beginIndex = strrpos($file_url, '/');
         $dtitle = substr($file_url, $beginIndex + 1);
         $dtitle = urldecode($dtitle);
-        $dsl = $this->createElementWithAttributes('foxml:datastream', array(
+        $datastream = $this->createElementWithAttributes('foxml:datastream', array(
               "ID" => $dsid,
               "STATE" => "A",
               "CONTROL_GROUP" => "M")
         );
-        $ds1v = $ds1->appendChild($this->createElementWithAttributes('foxml:datastreamVersion', array(
+        $datastream_version = $this->createElementWithAttributes('foxml:datastreamVersion', array(
                   "ID" => "$dsid.0",
                   "MIMETYPE" => "$mime_type",
                   "LABEL" => "$dtitle")
-                )
         );
-        $ds1v->appendChild($this->createElementWithAttributes('foxml:contentLocation', array(
+        $content = $this->createElementWithAttributes('foxml:contentLocation', array(
               "REF" => "$file_url",
               "TYPE" => "URL")
-            )
         );
-        $datastreams[] = $dsl;
+        $datastream->appendChild($datastream_version);
+        $datastream_version->appendChild($content);
+        $datastreams[] = $datastream;
       }
     }
     return $datastreams;
@@ -295,8 +295,8 @@ class FoxmlDocument extends DOMDocument {
    */
   private function getPolicyStreamElement() {
     module_load_include('inc', 'fedora_repository', 'ObjectHelper');
-    $objectHelper = new ObjectHelper();
-    $policy_stream = $objectHelper->getStream($this->collectionPid, 'CHILD_SECURITY', FALSE);
+    $object_helper = new ObjectHelper();
+    $policy_stream = $object_helper->getStream($this->collectionPid, 'CHILD_SECURITY', FALSE);
     if (!isset($policy_stream)) {
       return NULL; //there is no policy stream so object will not have a policy stream
     }
