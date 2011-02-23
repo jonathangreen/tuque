@@ -61,7 +61,7 @@ class FoxmlDocument extends DOMDocument {
     $this->relationship = isset($relationship) ? $relationship : 'isMemberOfCollection';
     $this->ingestFileLocation = $ingest_file_location;
     $this->document = $document;
-    $this->tranform = $transform;
+    $this->transform = $transform;
     $this->root = $this->createRootElement();
     $this->createDocument();
   }
@@ -367,7 +367,7 @@ class FoxmlDocument extends DOMDocument {
    */
   private function applyTransformation() {
     $xsl = new DOMDocument();
-    $xsl->load($this->tranform);
+    $xsl->load($this->transform);
     $xslt = new XSLTProcessor();
     $xslt->importStyleSheet($xsl);
     $document = new DOMDocument();
