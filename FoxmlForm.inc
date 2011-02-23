@@ -9,11 +9,22 @@
 module_load_include('inc', 'islandora_form_builder', 'Utilities');
 
 class FoxmlDocument extends DOMDocument {
+  const foxml = 'info:fedora/fedora-system:def/foxml#';
+  const xlink = 'http://www.w3.org/1999/xlink';
+  const xsi = 'http://www.w3.org/2001/XMLSchema-instance';
+  const xmlns = 'http://www.w3.org/2000/xmlns/';
+  const rdf = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
+  const rdfs = 'http://www.w3.org/2000/01/rdf-schema#';
+  const fedora = 'info:fedora/fedora-system:def/relations-external#';
+  const dc = 'http://purl.org/dc/elements/1.1/';
+  const oai_dc = 'http://www.openarchives.org/OAI/2.0/oai_dc/';
+  const fedora_model = 'info:fedora/fedora-system:def/model#';
 
   /**
    *
    * @var <type>
    */
+  protected $root;
   protected $pid;
   protected $dsid;
   protected $collectionPid;
@@ -40,6 +51,7 @@ class FoxmlDocument extends DOMDocument {
     global $user;
     parent::__construct("1.0", "UTF-8"); // DomDocument
     $this->formatOutput = TRUE;
+    $this->preserveWhiteSpace = FALSE;
     $this->label = $label;
     $this->user = $user->name;
     $this->pid = $pid;
@@ -50,94 +62,61 @@ class FoxmlDocument extends DOMDocument {
     $this->ingestFileLocation = $ingest_file_location;
     $this->document = $document;
     $this->tranform = $transform;
+    $this->root = $this->createRootElement();
     $this->createDocument();
   }
 
-  /**
-   * 
-   */
-  private function createDocument() {
-    $root = $this->createRootElement();
-    $root = $this->appendChild($root);
-    $children[] = $this->createObjectProperties();
-    $children[] = $this->createRelationships();
-    if (!empty($this->ingestFileLocation)) {
-      $children = array_merge($children, $this->createIngestFileDatastreams());
-    }
-    $policy = $this->createPolicy();
-    if (get_class($policy) == 'DOMElement') {
-      $children[] = $policy;
-    }
-    $children[] = $this->createDocumentDatastream();
-    $children[] = $this->createDublinCoreDatastream();
-    $children[] = $this->createCollectionPolicy();
-    $children[] = $this->createWorkflowStream();
-    foreach ($children as $child) {
-      if (isset($child)) {
-        $root->appendChild($child);
-      }
-    }
-  }
-
-  /**
-   * 
-   */
   private function createRootElement() {
-    $pid = $this->pid;
-    $root = $this->createElementWithAttributes('foxml:digitalObject', array(
-          'VERSION' => '1.1',
-          'PID' => "{$this->pid}",
-          'xmlns:foxml' => 'info:fedora/fedora-system:def/foxml#',
-          'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-          'xsi:schemaLocation' => 'info:fedora/fedora-system:def/foxml# http://www.fedora.info/definitions/1/0/foxml1-1.xsd')
-    );
+    $root = $this->createElementNS(self::foxml, 'foxml:digitalObject');
+    $root->setAttribute('VERSION', '1.1');
+    $root->setAttribute('PID', "{$this->pid}");
+    $root->setAttributeNS(self::xmlns, 'xmlns', self::foxml);
+    $root->setAttributeNS(self::xmlns, 'xmlns:foxml', self::foxml);
+    $root->setAttributeNS(self::xmlns, 'xmlns:xsi', self::xsi);
+    $root->setAttributeNS(self::xsi, 'xsi:schemaLocation', self::foxml . " http://www.fedora.info/definitions/1/0/foxml1-1.xsd");
+    $this->appendChild($root);
     return $root;
   }
 
-  /**
-   *
-   * @param string $name
-   * @param array $attributes
-   * @return DOMElement
-   */
-  private function &createElementWithAttributes($name, $attributes) {
-    $element = $this->createElement($name);
-    $this->setAttributes($element, $attributes);
-    return $element;
+  private function createDocument() {
+    /**
+     * If DOMNodes are not appended in the corrected order root -> leaf, namespaces may break...
+     * So be be cautious, add DOMNode's to thier parent element before adding child elements to them.
+     */
+    $this->createObjectProperties();
+    $this->createRelationships();
+    $this->createIngestFileDatastreams();
+    $this->createPolicy();
+    $this->createDocumentDatastream();
+    $this->createDublinCoreDatastream();
+    $this->createCollectionPolicy();
+    $this->createWorkflowStream();
   }
 
   /**
    *
-   * @param DOMElement $element
-   * @param array $attributes
-   */
-  private function setAttributes(&$element, &$attributes) {
-    foreach ($attributes as $key => $val) {
-      $element->setAttribute($key, $val);
-    }
-  }
-
-  /**
-   *
+   * @param DOMElement $root
    * @return DOMElement
    */
   private function createObjectProperties() {
-    $object_properties = $this->createElement('foxml:objectProperties');
-    $properties[] = $this->createElementWithAttributes('foxml:property', array(
-          "NAME" => "info:fedora/fedora-system:def/model#state",
-          "VALUE" => "A")
-    );
-    $properties[] = $this->createElementWithAttributes('foxml:property', array(
-          "NAME" => "info:fedora/fedora-system:def/model#label",
-          "VALUE" => $this->label)
-    );
-    $properties[] = $this->createElementWithAttributes('foxml:property', array(
-          "NAME" => "info:fedora/fedora-system:def/model#ownerId",
-          "VALUE" => $this->user)
-    );
-    foreach ($properties as $property) {
-      $object_properties->appendChild($property);
-    }
+    global $user;
+    $object_properties = $this->createElementNS(self::foxml, 'foxml:objectProperties');
+    $this->root->appendChild($object_properties);
+
+    $property = $this->createElementNS(self::foxml, 'foxml:property');
+    $property->setAttribute('NAME', 'info:fedora/fedora-system:def/model#state');
+    $property->setAttribute('VALUE', 'A');
+    $object_properties->appendChild($property);
+
+    $property = $this->createElementNS(self::foxml, 'foxml:property');
+    $property->setAttribute('NAME', 'info:fedora/fedora-system:def/model#label');
+    $property->setAttribute('VALUE', $this->label);
+    $object_properties->appendChild($property);
+
+    $property = $this->createElementNS(self::foxml, 'foxml:property');
+    $property->setAttribute('NAME', 'info:fedora/fedora-system:def/model#ownerId');
+    $property->setAttribute('VALUE', $user->name);
+    $object_properties->appendChild($property);
     return $object_properties;
   }
 
@@ -146,147 +125,85 @@ class FoxmlDocument extends DOMDocument {
    * @return DOMElement
    */
   private function createRelationships() {
-    $drdf = $this->createElementWithAttributes('foxml:datastream', array(
-          "ID" => "RELS-EXT",
-          "CONTROL_GROUP" => "X")
-    );
-    $dvrdf = $this->createElementWithAttributes('foxml:datastreamVersion', array(
-          "FORMAT_URI" => "info:fedora/fedora-system:FedoraRELSExt-1.0",
-          "ID" => "RELS-EXT.0",
-          "MIMETYPE" => "application/rdf+xml",
-          "LABEL" => "RDF Statements about this Object")
-    );
-    $rdf = $this->createElementWithAttributes('rdf:RDF', array(
-          "xmlns:rdf" => "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-          "xmlns:rdfs" => "http://www.w3.org/2000/01/rdf-schema#",
-          "xmlns:fedora" => "info:fedora/fedora-system:def/relations-external#",
-          "xmlns:dc" => "http://purl.org/dc/elements/1.1/",
-          "xmlns:oai_dc" => "http://www.openarchives.org/OAI/2.0/oai_dc/",
-          "xmlns:fedora-model" => "info:fedora/fedora-system:def/model#")
-    );
-    $rdfdesc = $this->createElementWithAttributes('rdf:Description', array(
-          "rdf:about" => "info:fedora/{$this->pid}")
-    );
-    $member = $this->createElementWithAttributes("fedora:{$this->relationship}", array(
-          "rdf:resource" => "info:fedora/{$this->collectionPid}")
-    );
-    $has_rdf_model = $this->createElementWithAttributes('fedora-model:hasModel', array(
-          "rdf:resource" => "info:fedora/{$this->contentModelPid}")
-    );
-    $dvcontent = $this->createElement("foxml:xmlContent");
-    $drdf->appendChild($dvrdf);
-    $dvrdf->appendChild($dvcontent);
-    $dvcontent->appendChild($rdf);
-    $rdf->appendChild($rdfdesc);
-    $rdfdesc->appendChild($member);
-    $rdfdesc->appendChild($has_rdf_model);
-    return $drdf;
+    $datastream = $this->createDatastreamElement('RELS-EXT', NULL, 'X');
+    $version = $this->createDatastreamVersionElement('RELS-EXT.0', 'RDF Statements about this Object', 'application/rdf+xml', 'info:fedora/fedora-system:FedoraRELSExt-1.0');
+    $content = $this->createDatastreamContentElement();
+
+    $rdf = $this->createElementNS(self::rdf, 'rdf:RDF');
+    $rdf->setAttributeNS(self::xmlns, 'xmlns:rdf', self::rdf);
+    $rdf->setAttributeNS(self::xmlns, 'xmlns:rdfs', self::rdfs);
+    $rdf->setAttributeNS(self::xmlns, 'xmlns:fedora', self::fedora);
+    $rdf->setAttributeNS(self::xmlns, 'xmlns:dc', self::dc);
+    $rdf->setAttributeNS(self::xmlns, 'xmlns:oai_dc', self::oai_dc);
+    $rdf->setAttributeNS(self::xmlns, 'xmlns:fedora-model', self::fedora_model);
+
+    $rdf_description = $this->createElementNS(self::rdf, 'rdf:Description');
+    $rdf_description->setAttributeNS(self::rdf, 'rdf:about', "info:fedora/{$this->pid}");
+
+    $member = $this->createElementNS(self::fedora, "fedora:{$this->relationship}");
+    $member->setAttributeNS(self::rdf, 'rdf:resource', "info:fedora/{$this->collectionPid}");
+
+    $has_rdf_model = $this->createElementNS(self::fedora_model, 'fedora-model:hasModel');
+    $has_rdf_model->setAttributeNS(self::rdf, "rdf:resource", "info:fedora/{$this->contentModelPid}");
+
+    $this->root->appendChild($datastream)->appendChild($version)->appendChild($content);
+    $content->appendChild($rdf)->appendChild($rdf_description);
+    $rdf_description->appendChild($member);
+    $rdf_description->appendChild($has_rdf_model);
   }
 
-  /**
-   *
-   * @global string $base_url
-   * @return array
-   */
   private function createIngestFileDatastreams() {
-    module_load_include('inc', 'fedora_repository', 'MimeClass');
-    $datastreams = array();
-    global $base_url;
-    $mime = new MimeClass();
-    $server = NULL;
-    $file = $this->ingestFileLocation;
-    if (!empty($file)) {
-      $mime_type = $mime->getType($file);
-      $parts = explode('/', $file);
-      foreach ($parts as $n => $part) {
-        $parts[$n] = rawurlencode($part);
-      }
-      $path = implode('/', $parts);
-      $file_url = $base_url . '/' . $path;
-      $begin_index = strrpos($file_url, '/');
-      $dtitle = substr($file_url, $begin_index + 1);
-      $dtitle = urldecode($dtitle);
-      $datastream = $this->createElementWithAttributes('foxml:datastream', array(
-            "ID" => "OBJ",
-            "STATE" => "A",
-            "CONTROL_GROUP" => "M")
-      );
-      $datastream_version = $this->createElementWithAttributes('foxml:datastreamVersion', array(
-            "ID" => "OBJ.0",
-            "MIMETYPE" => $mime_type,
-            "LABEL" => $dtitle)
-      );
-      $content = $this->createElementWithAttributes('foxml:contentLocation', array(
-            "REF" => $file_url,
-            "TYPE" => "URL")
-      );
-      $datastream->appendChild($datastream_version);
-      $datastream_version->appendChild($content);
-      $datastreams[] = $datastream;
-    }
+    if (empty($this->ingestFileLocation))
+      return;
+
+    list($label, $mime_type, $file_url) = $this->getFileAttributes($this->ingestFileLocation);
+    $datastream = $this->createDatastreamElement('OBJ', 'A', 'M');
+    $version = $this->createDatastreamVersionElement('OBJ.0', $label, $mime_type);
+    $content = $this->createDatastreamContentLocationElement('URL', $file_url);
+    $this->root->appendChild($datastream)->appendChild($version)->appendChild($content);
+
     if (!empty($_SESSION['fedora_ingest_files'])) {
       foreach ($_SESSION['fedora_ingest_files'] as $dsid => $created_file) {
-        if (!empty($file)) {
-          $found = strstr($created_file, $file);
+        if (!empty($this->ingestFileLocation)) {
+          $found = strstr($created_file, $this->ingestFileLocation);
           if ($found !== FALSE) {
             $created_file = $found;
           }
         }
-        $mime_type = $mime->getType($created_file);
-        $parts = explode('/', $created_file);
-        foreach ($parts as $n => $part) {
-          $parts[$n] = rawurlencode($part);
-        }
-        $path = implode('/', $parts);
-        $file_url = $base_url . '/' . $path;
-        $beginIndex = strrpos($file_url, '/');
-        $dtitle = substr($file_url, $beginIndex + 1);
-        $dtitle = urldecode($dtitle);
-        $datastream = $this->createElementWithAttributes('foxml:datastream', array(
-              "ID" => $dsid,
-              "STATE" => "A",
-              "CONTROL_GROUP" => "M")
-        );
-        $datastream_version = $this->createElementWithAttributes('foxml:datastreamVersion', array(
-                  "ID" => "$dsid.0",
-                  "MIMETYPE" => "$mime_type",
-                  "LABEL" => "$dtitle")
-        );
-        $content = $this->createElementWithAttributes('foxml:contentLocation', array(
-              "REF" => "$file_url",
-              "TYPE" => "URL")
-        );
-        $datastream->appendChild($datastream_version);
-        $datastream_version->appendChild($content);
-        $datastreams[] = $datastream;
+        list($label, $mime_type, $file_url) = $this->getFileAttributes($created_file);
+        $datastream = $this->createDatastreamElement($dsid, 'A', 'M');
+        $version = $this->createDatastreamVersionElement("$dsid.0", $label, $mime_type);
+        $content = $this->createDatastreamContentLocationElement('URL', $file_url);
+        $this->root->appendChild($datastream)->appendChild($version)->appendChild($content);
       }
     }
-    return $datastreams;
   }
 
-  /**
-   *
-   * @return DOMElement
-   */
+  private function getFileAttributes($file) {
+    global $base_url;
+    module_load_include('inc', 'fedora_repository', 'MimeClass');
+    $mime = new MimeClass();
+    $mime_type = $mime->getType($file);
+    $parts = explode('/', $file);
+    foreach ($parts as $n => $part) {
+      $parts[$n] = rawurlencode($part);
+    }
+    $path = implode('/', $parts);
+    $file_url = $base_url . '/' . $path;
+    $beginIndex = strrpos($file_url, '/');
+    $dtitle = substr($file_url, $beginIndex + 1);
+    $dtitle = urldecode($dtitle);
+    return array($dtitle, $mime_type, $file_url);
+  }
+
   private function createPolicy() {
     $policy_element = $this->getPolicyStreamElement();
-    if ($policy_element === FALSE || $policy_element === NULL) {
-      return $policy_element;
+    if ($policy_element) {
+      $datastream = $this->createDatastreamElement('POLICY', 'A', 'X');
+      $version = $this->createDatastreamVersionElement('POLICY.0', 'POLICY', 'text/xml');
+      $content = $this->createDatastreamContentElement();
+      $this->root->appendChild($datastream)->appendChild($version)->appendChild($content)->appendChild($policy_element);
     }
-    $dsl = $this->createElementWithAttributes('foxml:datastream', array(
-          "ID" => "POLICY",
-          "STATE" => "A",
-          "CONTROL_GROUP" => "X")
-    );
-    $ds1v = $ds1->appendChild($this->createElementWithAttributes('foxml:datastreamVersion', array(
-              "ID" => "POLICY.0",
-              "MIMETYPE" => "text/xml",
-              "LABEL" => "POLICY")
-            )
-    );
-    $content = $ds1v->appendChild($this->createElement("foxml:xmlContent"));
-    $content->appendChild($policy_element);
-    return $dsl;
   }
 
   /**
@@ -339,29 +256,60 @@ class FoxmlDocument extends DOMDocument {
       $collection_policy_template_root = $collection_policy_template_dom->getElementsByTagName('collection_policy');
       if ($collection_policy_template_root->length > 0) {
         $collection_policy_template_root = $collection_policy_template_root->item(0);
-        $new_node = $this->importNode($collection_policy_template_root, TRUE);
-        $attributes = array('ID' => 'COLLECTION_POLICY', 'STATE' => 'A', 'CONTROL_GROUP' => 'X');
-        $version_attributes = array('ID' => 'COLLECTION_POLICY.0', 'LABEL' => 'Collection Policy', 'MIMETYPE' => 'text/xml');
-        list($datastream, $content) = $this->createXMLDatastream($attributes, $version_attributes);
-        $content->appendChild($new_node);
-        return $datastream;
+        $node = $this->importNode($collection_policy_template_root, TRUE);
+        $datastream = $this->createDatastreamElement('COLLECTION_POLICY', 'A', 'X');
+        $version = $this->createDatastreamVersionElement('COLLECTION_POLICY.0', 'Collection Policy', 'text/xml');
+        $content = $this->createDatastreamContentElement();
+        $this->root->appendChild($datastream)->appendChild($version)->appendChild($content)->appendChild($node);
       }
     }
   }
 
-  /**
-   *
-   * @param array $attributes
-   * @param array $version_attributes
-   * @return array
-   */
-  private function createXMLDatastream($attributes, $version_attributes) {
-    $datastream = $this->createElementWithAttributes("foxml:datastream", $attributes);
-    $version = $this->createElementWithAttributes('foxml:datastreamVersion', $version_attributes);
-    $datastream->appendChild($version);
-    $content = $this->createElement("foxml:xmlContent");
-    $version->appendChild($content);
-    return array(&$datastream, &$content);
+  private function createDatastreamElement($id = NULL, $state = NULL, $control_group = NULL) {
+    $datastream = $this->createElementNS(self::foxml, 'foxml:datastream');
+    if (isset($id)) {
+      $datastream->setAttribute('ID', $id);
+    }
+    if (isset($state)) {
+      $datastream->setAttribute('STATE', $state);
+    }
+    if (isset($control_group)) {
+      $datastream->setAttribute('CONTROL_GROUP', $control_group);
+    }
+    return $datastream;
+  }
+
+  private function createDatastreamVersionElement($id = NULL, $label = NULL, $mime_type = NULL, $format_uri = NULL) {
+    $version = $this->createElementNS(self::foxml, 'foxml:datastreamVersion');
+    if (isset($id)) {
+      $version->setAttribute('ID', $id);
+    }
+    if (isset($label)) {
+      $version->setAttribute('LABEL', $label);
+    }
+    if (isset($mime_type)) {
+      $version->setAttribute('MIMETYPE', $mime_type);
+    }
+    if (isset($format_uri)) {
+      $version->setAttribute('FORMAT_URI', $format_uri);
+    }
+    return $version;
+  }
+
+  private function createDatastreamContentElement() {
+    $content = $this->createElementNS(self::foxml, 'foxml:xmlContent');
+    return $content;
+  }
+
+  private function createDatastreamContentLocationElement($type = NULL, $ref = NULL) {
+    $location = $this->createElementNS(self::foxml, 'foxml:contentLocation');
+    if (isset($type)) {
+      $location->setAttribute('TYPE', $type);
+    }
+    if (isset($ref)) {
+      $location->setAttribute('REF', $ref);
+    }
+    return $location;
   }
 
   /**
@@ -379,42 +327,35 @@ class FoxmlDocument extends DOMDocument {
       $work_flow_template_root = $work_flow_template_dom->getElementsByTagName('workflow');
       if ($work_flow_template_root->length > 0) {
         $work_flow_template_root = $work_flow_template_root->item(0);
-        $new_node = $this->importNode($work_flow_template_root, TRUE);
-        $attributes = array('ID' => 'WORKFLOW', 'STATE' => 'A', 'CONTROL_GROUP' => 'X');
-        $version_attributes = array('ID' => "{$this->dsid}.0", 'LABEL' => "{$this->dsid} Record", 'MIMETYPE' => 'text/xml');
-        list($datastream, $content) = $this->createXMLDatastream($this, $attributes, $version_attributes);
-        $content->appendChild($new_node);
-        return $datastream;
+        $node = $this->importNode($work_flow_template_root, TRUE);
+        $datastream = $this->createDatastreamElement('WORKFLOW', 'A', 'X');
+        $version = $this->createDatastreamVersionElement("{$this->dsid}.0", "{$this->dsid} Record", 'text/xml');
+        $content = $this->createDatastreamContentElement();
+        $this->root->appendChild($datastream)->appendChild($version)->appendChild($content)->appendChild($node);
       }
     }
   }
 
   /**
    * Creates an xml based datastream by importing the root node from $this->document.
-   *
-   * @return DOMElement
    */
   public function createDocumentDatastream() {
-    $attributes = array('ID' => $this->dsid, 'STATE' => 'A', 'CONTROL_GROUP' => 'X');
-    $version_attributes = array('ID' => "{$this->dsid}.0", 'LABEL' => "{$this->dsid} Record", 'MIMETYPE' => 'text/xml');
-    list($datastream, $content) = $this->createXMLDatastream($attributes, $version_attributes);
+    $datastream = $this->createDatastreamElement($this->dsid, 'A', 'X');
+    $version = $this->createDatastreamVersionElement("{$this->dsid}.0", "{$this->dsid} Record", 'text/xml');
+    $content = $this->createDatastreamContentElement();
     $node = $this->importNode($this->document->documentElement, TRUE);
-    $content->appendChild($node);
-    return $datastream;
+    $this->root->appendChild($datastream)->appendChild($version)->appendChild($content)->appendChild($node);
   }
 
   /**
    * Creates a Dublin Core document by transforming $this->document.
-   *
-   * @return DOMElement
    */
   private function createDublinCoreDatastream() {
-    $attributes = array('ID' => 'DC', 'STATE' => 'A', 'CONTROL_GROUP' => 'X');
-    $version_attributes = array('ID' => 'DC.0', 'LABEL' => 'Dublin Core Record', 'MIMETYPE' => 'text/xml');
-    list($datastream, $content) = $this->createXMLDatastream($attributes, $version_attributes);
+    $datastream = $this->createDatastreamElement('DC', 'A', 'X');
+    $version = $this->createDatastreamVersionElement('DC.0', 'Dublic Core Record', 'text/xml');
+    $content = $this->createDatastreamContentElement();
     $dublin_core = $this->applyTransformation();
-    $content->appendChild($dublin_core);
-    return $datastream;
+    $this->root->appendChild($datastream)->appendChild($version)->appendChild($content)->appendChild($dublin_core);
   }
 
   /**
@@ -429,8 +370,11 @@ class FoxmlDocument extends DOMDocument {
     $xsl->load($this->tranform);
     $xslt = new XSLTProcessor();
     $xslt->importStyleSheet($xsl);
-    $transformed_document = $xslt->transformToDoc($this->document);
-    return $this->importNode($transformed_document->documentElement);
+    $document = new DOMDocument();
+    $document->loadXML($this->document->saveXML());
+    $document = $xslt->transformToDoc($document->documentElement);
+    $document->formatOutput = TRUE;
+    return $this->importNode($document->documentElement, TRUE);
   }
 
   /**
