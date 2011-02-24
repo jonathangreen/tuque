@@ -345,6 +345,12 @@ class FoxmlDocument extends DOMDocument {
     $content = $this->createDatastreamContentElement();
     $node = $this->importNode($this->document->documentElement, TRUE);
     $this->root->appendChild($datastream)->appendChild($version)->appendChild($content)->appendChild($node);
+    // Once again god damn you libxml...
+    $class = get_class($this->document);
+    $namespaces = call_user_func(array($class, 'getRequiredNamespaces'));
+    foreach($namespaces as $prefix => $uri) {
+      $node->setAttributeNS(self::xmlns, "xmlns:$prefix", $uri);
+    }
   }
 
   /**
@@ -356,6 +362,7 @@ class FoxmlDocument extends DOMDocument {
     $content = $this->createDatastreamContentElement();
     $dublin_core = $this->applyTransformation();
     $this->root->appendChild($datastream)->appendChild($version)->appendChild($content)->appendChild($dublin_core);
+    $dublin_core->setAttributeNS(self::xmlns, 'xmlns:xsi', self::xsi); // GOD Damn you libxml!
   }
 
   /**
@@ -373,7 +380,6 @@ class FoxmlDocument extends DOMDocument {
     $document = new DOMDocument();
     $document->loadXML($this->document->saveXML());
     $document = $xslt->transformToDoc($document->documentElement);
-    $document->formatOutput = TRUE;
     return $this->importNode($document->documentElement, TRUE);
   }
 
