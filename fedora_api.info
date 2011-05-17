@@ -1,8 +1,8 @@
 ; $Id$
 name = Fedora API
 description = Wrapper for the Fedora Commons Repository REST API.
-package = Fedora Repository
-version = 7.1dev
+package = Islandora
+version = 7.1-dev-$Format:%h$
 core = 7.x
 
 files[] = FedoraRestException.php
