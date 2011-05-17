@@ -3,13 +3,28 @@
 require_once('fedora_api.raw.inc');
 require_once('fedora_api.item.inc');
 require_once('FedoraRestException.php');
+
 /**
  * Wrapper for Fedora Commons API functions that don't operate on existing objects.
  */
 class FedoraClient {
-  
+
+  /**
+   * The FedoraConnection object for this FedoraClient.
+   *
+   * @var FedoraConnection
+   */
   public $connection;
+
   protected $_populated = FALSE;
+
+  /**
+   * Constructs the FedoraClient object. Creates a new FedoraAPI object, and optionally if
+   * one isn't supplied it creates a new FedoraConnection object.
+   *
+   * @param FedoraConnection $connection
+   *   (optional) If this arguement isn't supplied a new FedoraConnection is created.
+   */
   function __construct($connection = NULL) {
     if (empty($connection)) {
       $connection = new FedoraConnection();
@@ -21,10 +36,18 @@ class FedoraClient {
   
   /**
    * Ingest a new object, with either an FOXML file, an FOXML string or neither for a blank object.
+   *
    * @param string $foxml_file
+   *   (optional) Used if ingesting a FOXML file.
    * @param string $foxml_string
+   *   (optional) Used if ingesting FOXML from a string.
    * @param array $options
+   *   (optional) An array of options to be passed to the ingest functions. They array keys for this array are:
+   *   pid, new, label, format, encoding, namespace, ownerId, logmessage.
+   *
    * @return FedoraItem the newly-created item.
+   *
+   * @throws FedoraRestException
    */
   function ingest($foxml_file = NULL, $foxml_string = NULL, 
           $options = array('pid' => NULL, 'new' => NULL, 'label' => NULL, 'format' => NULL, 'encoding' => NULL,
