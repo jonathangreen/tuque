@@ -1,0 +1,98 @@
+<?php
+
+/**
+ * $file
+ * Main module file for the Islandora Fedora API.
+ */
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * This hook adds the fedora settings to the Islandora settings page
+ * when this module is used with Islandora core. If it is used on its own
+ * it is up to the user to pass the Fedora information to the API.
+ *
+ * @todo Implement namespace restrictions.
+ * @todo Make sure we save a value for islandora_repository_title
+ */
+function fedora_api_form_islandora_admin_settings_alter(&$form, &$form_state, $form_id) {
+
+  // get the current value of fedora_drupal_filter for the AJAX callback
+  $fedora_drupal_filter = isset($form_state['values']['fedora_drupal_filter']) ?
+    $form_state['values']['fedora_drupal_filter'] : variable_get('fedora_drupal_filter', 1);
+
+  $form['fedora'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Fedora'),
+    '#weight' => -8,
+    '#group' => 'settings',
+  );
+
+  $form['fedora']['fedora_server_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Fedora server URL'),
+    '#default_value' => variable_get('fedora_server_url', 'http://localhost:8080/fedora'),
+    '#description' => t('The Fedora server URL'),
+    '#required' => TRUE,
+    '#suffix' => '<div id="check-url-div"></div>',
+    '#ajax' => array(
+      'callback' => 'fedora_api_check_url_callback',
+      'wrapper' => 'check-url-div',
+      'effect' => 'none',
+      'progress' => array('type' => 'throbber', 'message' => '',),
+    ),
+  );
+
+  $form['fedora']['fedora_drupal_filter'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use Drupal Filter'),
+    '#description' => t('Uncheck this box if you would like to bypass the drupal servlet filter when connecting
+      to the fedora repository. (Not recommended.)'),
+    '#default_value' => variable_get('fedora_drupal_filter', 1),
+    '#ajax' => array(
+      'callback' => 'fedora_api_filter_callback',
+      'wrapper' => 'drupal-filter-div',
+      'effect' => 'slide',
+      'speed' => 'fast',
+      'progress' => array('type' => 'none'),
+    ),
+  );
+
+  // add the fieldset for the ajax callback to the form array
+  $form['fedora']['filter_fieldset'] = array(
+    '#prefix' => '<div id="drupal-filter-div">',
+    '#suffix' => '</div>',
+    '#type' => 'fieldset',
+  );
+
+  if ($fedora_drupal_filter == 0) {
+    $form['fedora']['filter_fieldset']['fedora_user'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Fedora User',
+      '#default_value' => variable_get('fedora_user', 'fedoraAdmin'),
+      '#description' => t('The username to use when connecting to the Fedora server'),
+      '#required' => FALSE,
+    );
+    $form['fedora']['filter_fieldset']['fedora_password'] = array(
+      '#type' => 'password',
+      '#title' => 'Password',
+      '#default_value' => variable_get('fedora_password', ''),
+      '#description' => t('Password for this Fedora user.'),
+      '#required' => FALSE,
+    );
+  }
+
+}
+
+/**
+ * Implements a AJAX callback that is called when the don't use drupal filter box is checked.
+ *
+ * @todo get this working. currently doesn't save when enabled through ajax.
+ */
+function fedora_api_filter_callback($form, $form_state) {
+  return $form['fedora']['filter_fieldset'];
+}
+
+function fedora_api_check_url_callback($form, $form_state) {
+  return '<div id="check-url-div"><img src="' . url('misc/watchdog-ok.png') . '"/></div><p>';
+}

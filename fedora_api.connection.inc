@@ -3,11 +3,14 @@
  * Represents a connection to a Fedora-Commons Repository using the REST API
  */
 class FedoraConnection {
+
   public $url;
   public $username;
   public $password;
-  
+
   function __construct($url = NULL, $username = NULL, $password = NULL) {
+    global $user;
+
     if (!empty($url)) {
       $this->url = $url;
     }
@@ -19,20 +22,17 @@ class FedoraConnection {
       $fedora_user = $username;
       $fedora_pass = $password;
     }
+    elseif (!variable_get('fedora_drupal_filter',1)) {
+      $fedora_user = variable_get('fedora_user', '');
+      $fedora_pass = variable_get('fedora_password', '');
+    }
+    elseif ($user->uid == 0) {
+      $fedora_user = 'anonymous';
+      $fedora_pass = 'anonymous';
+    }
     else {
-      $user_var = variable_get('fedora_user', '');
-      if (!empty($user_var)) {
-        $fedora_user = variable_get('fedora_user', '');
-        $fedora_pass = variable_get('fedora_password', '');
-      }
-      elseif ($user->uid == 0) {
-        $fedora_user = 'anonymous';
-        $fedora_pass = 'anonymous';
-      }
-      else {
-        $fedora_user = $user->name;
-        $fedora_pass = $user->pass;
-      }
+      $fedora_user = $user->name;
+      $fedora_pass = $user->pass;
     }
     $this->username = $fedora_user;
     $this->password = $fedora_pass;

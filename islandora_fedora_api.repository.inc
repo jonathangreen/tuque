@@ -1,25 +1,24 @@
 <?php
-
-require_once('fedora_api.raw.inc');
-require_once('fedora_api.item.inc');
-require_once('FedoraRestException.php');
+/**
+ * @file
+ * This file contains the class FedoraRepository. It wraps the RAW Fedora REST functions to provide an
+ * interface to repository functions that don't operate on objects, including instantiating an object.
+ */
 
 /**
- * Wrapper for Fedora Commons API functions that don't operate on existing objects.
+ * Wrapper for Fedora Commons API Respository functions (functions that don't operate on existing objects).
  */
-class FedoraClient {
+class FedoraRepository {
 
   /**
-   * The FedoraConnection object for this FedoraClient.
+   * The FedoraConnection object for this FedoraRespository.
    *
    * @var FedoraConnection
    */
   public $connection;
 
-  protected $_populated = FALSE;
-
   /**
-   * Constructs the FedoraClient object. Creates a new FedoraAPI object, and optionally if
+   * Constructs the FedoraRepository object. Creates a new FedoraAPI object, and optionally if
    * one isn't supplied it creates a new FedoraConnection object.
    *
    * @param FedoraConnection $connection
@@ -29,11 +28,11 @@ class FedoraClient {
     if (empty($connection)) {
       $connection = new FedoraConnection();
     }
-    
+
     $this->connection = $connection;
     $this->api = new FedoraAPI($this->connection);
   }
-  
+
   /**
    * Ingest a new object, with either an FOXML file, an FOXML string or neither for a blank object.
    *
@@ -47,25 +46,40 @@ class FedoraClient {
    *
    * @return FedoraItem the newly-created item.
    *
-   * @throws FedoraRestException
+   * @throws FedoraAPIRestException
    */
-  function ingest($foxml_file = NULL, $foxml_string = NULL, 
-          $options = array('pid' => NULL, 'new' => NULL, 'label' => NULL, 'format' => NULL, 'encoding' => NULL,
-                                                     'namespace' => NULL, 'ownerId' => NULL, 'logMessage' => NULL,)) {
-    
-    $response = $this->api->ingest($foxml_file, $foxml_string, !empty($options['pid']) ? $options['pid'] : NULL, 
-            !empty($options['new']) ? $options['new'] : NULL, !empty($options['label']) ? $options['label'] : NULL,
-            !empty($options['format']) ? $options['format'] : NULL, !empty($options['encoding']) ? $options['encoding'] : NULL,
-            !empty($options['namespace']) ? $options['namespace'] : NULL, !empty($options['ownerId']) ? $options['ownerId'] : NULL, 
-            !empty($options['logMessage']) ? $options['logMessage'] : NULL);
-    
+  function ingest(
+    $foxml_file = NULL, $foxml_string = NULL,
+    $options = array(
+      'pid'        => NULL,
+      'new'        => NULL,
+      'label'      => NULL,
+      'format'     => NULL,
+      'encoding'   => NULL,
+      'namespace'  => NULL,
+      'ownerId'    => NULL,
+      'logMessage' => NULL,
+    )
+  ){
+
+    $response = $this->api->ingest(
+      $foxml_file, $foxml_string,
+      !empty($options['pid']) ? $options['pid'] : NULL,
+      !empty($options['new']) ? $options['new'] : NULL,
+      !empty($options['label']) ? $options['label'] : NULL,
+      !empty($options['format']) ? $options['format'] : NULL,
+      !empty($options['encoding']) ? $options['encoding'] : NULL,
+      !empty($options['namespace']) ? $options['namespace'] : NULL,
+      !empty($options['ownerId']) ? $options['ownerId'] : NULL,
+      !empty($options['logMessage']) ? $options['logMessage'] : NULL
+    );
+
     if ($response->code != 201) {
-      throw new FedoraRestException($response->error);
+      throw new FedoraAPIRestException($response);
     }
     return new FedoraItem($response->data);
-    
   }
-  
+
   /**
    * Wrapper for Fedora's findObjects API function.
    * @param string $terms Search terms, e.g. "changeme:*"
@@ -74,10 +88,9 @@ class FedoraClient {
    * @param array $display_fields 
    * @return array The result set with the specified fields populated
    */
-  function findObjects($terms = NULL, $query = NULL, $max_results = 50, 
-          $display_fields = array('pid','label', 'state', 'ownerId', 'cDate', 'mDate', 'dcmDate', 
-              'title', 'creator', 'subject', 'description', 'publisher', 'contributor', 'date', 'type', 
-              'format', 'identifier', 'source', 'language', 'relation', 'coverage', 'rights')) {
+  function findObjects($terms = NULL, $query = NULL, $max_results = 50, $display_fields = array('pid', 'label', 'state', 'ownerId', 'cDate', 'mDate', 'dcmDate',
+    'title', 'creator', 'subject', 'description', 'publisher', 'contributor', 'date', 'type',
+    'format', 'identifier', 'source', 'language', 'relation', 'coverage', 'rights')) {
 
     // pid needs to be part of the displayFields so we can construct the results array.  
     if (!in_array('pid', $display_fields)) {
@@ -102,7 +115,7 @@ class FedoraClient {
     }
     return $resultset;
   }
-  
+
   /**
    * Simple wrapper for findObjects that returns TRUE if an object with the 
    * specified pid exists in the repository.
@@ -113,4 +126,5 @@ class FedoraClient {
     $result = $this->findObjects(NULL, "pid=$pid");
     return count($result) == 1;
   }
+
 }

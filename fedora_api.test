@@ -1,10 +1,6 @@
 <?php
 /*
- * $Id: $
- */
-
-/*
- * $file
+ * @file
  *
  * Run through tests of the Fedora API funcitons.
  */
@@ -14,9 +10,9 @@ class FedoraAPITestCase extends DrupalWebTestCase {
   
   public static function getInfo() {
     return array(
-      'name' => 'Fedora api',
-      'description' => t('The fedora repository API tests'),
-      'group' => t('fedora repository'),
+      'name' => 'IslandoraFedora API',
+      'description' => t('The Islandora Fedora Repository API tests.'),
+      'group' => t('islandora'),
     );
   }
 
@@ -28,18 +24,19 @@ class FedoraAPITestCase extends DrupalWebTestCase {
     $this->pass("Password: ".$this->privileged_user->pass);
 
     $this->drupalLogin($this->privileged_user);
-    module_load_include('inc', 'fedora_api', 'fedora_api.raw');
+
     global $base_url;
+
     variable_set('fedora_user', 'fedoraAdmin');
     variable_set('fedora_password', 'fedoraAdmin');
   }
 
   public function testAPIA() {
     global $base_url;
-    $api = new FedoraAPI();
-    $client = new FedoraClient();
-    
-    $profile = $api->getObjectProfile('islandora:demos');
+      $api = new FedoraAPIA();
+      $client = new FedoraClient();
+
+      $profile = $api->getObjectProfile('islandora:demos');
     
     if (empty($profile->error)) {
       $this->pass('Fedora API-A getObjectProfile passed.');
