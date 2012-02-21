@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * The top level exception for the Islandora Fedora API
+ */
+class FedoraException extends Exception {}
+
+/**
  * General exception thrown on unexpected REST response.
  */
 class FedoraAPIRestException extends Exception {

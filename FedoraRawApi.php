@@ -1,8 +1,9 @@
 <?php
 /**
  * @file
- * Lowest-level wrappers for Fedora Commons's REST API functions. 
- * Functions return the HTTP response directly.
+ * Lowest-level wrappers for Fedora Commons's REST API functions.
+ * This interface describes the PHP implementation of these interfaces
+ * so that we can potentially have different implementations.
  *
  * All of these functions look at the response code of the error and
  * throw FedoraAPIRestException if the response code isn't success (2XX).
@@ -13,62 +14,51 @@
 
 /**
  * A low level wrapper on fedora APIA functions
+ * @todo Fix the Exceptions
  */
-class FedoraAPIA {
-
-  /**
-   * The FedoraConnection object for this FedoraAPI.
-   *
-   * @var FedoraConnection
-   */
-  public $connection;
+interface FedoraApiA {
 
   /**
    * Constructor for a new FedoraAPI object.
    *
+   * @throws FedoraException
+   *
    * @param FedoraConnection $connection
    *   (optional) a new one will be created if not supplied.
    */
-  function __construct($connection = NULL) {
-    if ($connection != NULL) {
-      $this->connection = $connection;
-    }
-    else {
-      // Construct a connection from Drupal's API settings.
-      $this->connection = new FedoraConnection();
-    }
-  }
+  public function __construct($connection = NULL, $request = NULL);
 
   /**
    * Query fedora to return a list of objects.
    *
-   * @param string $terms
-   *   (optional) A phrase represented as a sequence of characters (including the ? and * wildcards) for the search.
-   *   If this sequence is found in any of the fields for an object, the object is considered a match. Do NOT use
-   *   this parameter in combination with the "query" parameter.
+   * @param string $type
+   *   Valid options are: 'terms' or 'query'. This is the type of the search being done. This corresponds to the
+   *   structure of the next arguement.
    * @param string $query
-   *   (optional) A sequence of space-separated conditions. A condition consists of a metadata element name followed
-   *   directly by an operator, followed directly by a value. Valid element names are (pid, label, state, ownerId,
-   *   cDate, mDate, dcmDate, title, creator, subject, description, publisher, contributor, date, type, format,
-   *   identifier, source, language, relation, coverage, rights). Valid operators are: contains (), equals (=),
-   *   greater than (>), less than (<), greater than or equals (>=), less than or equals (<=). The contains () operator
-   *   may be used in combination with the ? and * wildcards to query for simple string patterns. Space-separators
-   *   should be encoded in the URL as %20. Operators must be encoded when used in the URL syntax as follows: the (=)
-   *   operator must be encoded as %3D, the (>) operator as %3E, the (<) operator as %3C, the (>=) operator
-   *   as %3E%3D, the (<=) operator as %3C%3D, and the (~) operator as %7E. Values may be any string. If the string
-   *   contains a space, the value should begin and end with a single quote character ('). If all conditions are met
-   *   for an object, the object is considered a match. Do NOT use this parameter in combination with the
-   *   "terms" parameter.
+   *   There are two different arguements that can be passed into this function depending on the type.
+   *   - Type = Terms:
+   *     A phrase represented as a sequence of characters (including the ? and * wildcards) for the search.
+   *     If this sequence is found in any of the fields for an object, the object is considered a match.
+   *   - Type = Query:
+   *     A sequence of space-separated conditions. A condition consists of a metadata element name followed
+   *     directly by an operator, followed directly by a value. Valid element names are (pid, label, state, ownerId,
+   *     cDate, mDate, dcmDate, title, creator, subject, description, publisher, contributor, date, type, format,
+   *     identifier, source, language, relation, coverage, rights). Valid operators are: contains (), equals (=),
+   *     greater than (>), less than (<), greater than or equals (>=), less than or equals (<=). The contains () operator
+   *     may be used in combination with the ? and * wildcards to query for simple string patterns. Values may be any
+   *     string. If the string contains a space, the value should begin and end with a single quote character ('). If
+   *     all conditions are met for an object, the object is considered a match. Do NOT use this parameter in combination
+   *     with the "terms" parameter.
    * @param string,int $maxResults
    *   (optional) Default: 25. The maximum number of results that the server should provide at once.
-   * @param string $resultFormat
-   *   (optional) Default: XML. The preferred output format. Options: HTML, XML.
    * @param array $displayFields
    *   (optional) Default: array('pid', 'title'). The fields to be returned.
+   * @param string $resultFormat
+   *   (optional) Default: XML. The preferred output format. Options: HTML, XML.
    *
-   * @throws FedoraAPIRestException
+   * @throws FedoraException
    *
-   * @return StdClass HTTP Response object. 'data' has XML set of results
+   * @return Response object. 'data' has XML set of results
    * @code
    *   <?xml version="1.0" encoding="UTF-8"?>
    *   <result xmlns="http://www.fedora.info/definitions/1/0/types/">
@@ -85,32 +75,8 @@ class FedoraAPIA {
    *   </result>
    * @endcode
    */
-  public function findObjects($terms = '', $query = '', $maxResults = '', 
-    $resultFormat = 'xml', $displayFields = array('pid', 'title')
-  ){
-    $fedora_url = $this->connection->requestURL();
-    $request = "$fedora_url/objects?";
-
-    if (!empty($terms)) {
-      $request .= "terms=" . drupal_encode_path($terms);
-    }
-    else if (!empty($query)) {
-      $request .= "query=" . drupal_encode_path($query);
-    }
-
-    $request .= "&resultFormat=$resultFormat";
-
-    foreach ($displayFields as $displayField) {
-      $request .= "&$displayField=true";
-    }
-    $response = drupal_http_request($request);
-
-    if (!FedoraAPIUtils::testSuccess($response)) {
-      throw new FedoraApiRestException($response);
-    }
-
-    return $response;
-  }
+  public function findObjects($type = '', $query = '', $maxResults = '', $displayFields = array('pid', 'title'),
+       $resultFormat = 'xml');
 
   /**
    * Get the default dissemination of a datastream. (Get the contents of the datastream.)
@@ -132,26 +98,11 @@ class FedoraAPIA {
    *   configured in fedora.fcfg.  The file used to map between MIMETYPEs and extensions is mime-to-extensions.xml
    *   located in the server config directory.
    *
-   * @return StdClass HTTP Response object. The direct response from fedora.
+   * @throws FedoraException
+   *
+   * @return Response object.
    */
-  public function getDatastreamDissemination($pid, $dsID, $asOfDateTime = NULL, $download = NULL) {
-    $pid = drupal_encode_path($pid);
-    $fedora_url = $this->connection->requestURL(); 
-    $request = "$fedora_url/objects/$pid/datastreams/$dsID/content";
-    $request .= (!empty($asOfDateTime) ? "&asOfDateTime=$asOfDateTime" : '');
-    if (!empty($download)) {
-      $request .= (!empty($asOfDateTime) ? '&' : '?');
-      $request .= "download=$download";
-    }
-
-    $response = drupal_http_request($request);
-
-    if(!FedoraAPIUtils::testSuccess($response)) {
-      throw new FedoraApiRestException($response);
-    }
-
-    return $response;
-  }
+  public function getDatastreamDissemination($pid, $dsID, $asOfDateTime = NULL, $download = NULL) {}
 
   /**
    * Get a datastream dissemination from Fedora.
@@ -171,7 +122,7 @@ class FedoraAPIA {
     $pid = drupal_encode_path($pid);
     $sdefPid = drupal_encode_path($sdefPid);
 
-    $fedora_url = $this->connection->requestURL(); 
+    $fedora_url = $this->connection->requestURL();
     $request = "$fedora_url/objects/$pid/methods/$sdefPid/$method?";
 
     //$request .= (!empty($asOfDateTime) ? "&asOfDateTime=$asOfDateTime" : '');
@@ -209,7 +160,7 @@ class FedoraAPIA {
    */
   public function getObjectHistory($pid, $format = 'xml') {
     $pid = drupal_encode_path($pid);
-    $fedora_url = $this->connection->requestURL(); 
+    $fedora_url = $this->connection->requestURL();
 
     $request = "$fedora_url/objects/$pid/versions?format=$format";
     $response = drupal_http_request($request);
@@ -259,7 +210,7 @@ class FedoraAPIA {
    */
   public function getObjectProfile($pid, $format = 'xml', $asOfDateTime = '') {
     $pid = drupal_encode_path($pid);
-    $fedora_url = $this->connection->requestURL(); 
+    $fedora_url = $this->connection->requestURL();
 
     $request = "$fedora_url/objects/$pid?format=$format";
     $request .= (!empty($asOfDateTime) ? "&asOfDateTime=$asOfDateTime" : '');
@@ -298,7 +249,7 @@ class FedoraAPIA {
    */
   public function listDatastreams($pid, $format = 'xml', $asOfDateTime = '') {
     $pid = drupal_encode_path($pid);
-    $fedora_url = $this->connection->requestURL(); 
+    $fedora_url = $this->connection->requestURL();
 
     $request = "$fedora_url/objects/$pid/datastreams?format=$format";
     $request .= (!empty($asOfDateTime) ? "&asOfDateTime=$asOfDateTime" : '');
@@ -341,7 +292,7 @@ class FedoraAPIA {
    */
   public function listMethods($pid, $sdefPid = '', $format = 'xml', $asOfDateTime = '') {
     $pid = drupal_encode_path($pid);
-    $fedora_url = $this->connection->requestURL(); 
+    $fedora_url = $this->connection->requestURL();
 
     $request = "$fedora_url/objects/$pid/methods";
     $request .= (!empty($sdefPid) ? "/$sdefPid" : '');
@@ -918,7 +869,7 @@ class FedoraAPIM {
 
 /**
  * A collection of helpful utilities for dealing with fedora.
- * 
+ *
  * @todo Should this be refactored out into its own file?
  */
 class FedoraAPIUtils {
