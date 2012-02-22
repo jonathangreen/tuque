@@ -25,3 +25,6 @@ class FedoraApiA342{
 
 $test = new FedoraApiA342(new RepositoryConnection(new RepositoryConfig()), NULL);
 $test->getObjectHistory('islandora:strict_pdf');
+$test->getObjectHistory('islandora:strict_pdf');
+$test->getObjectHistory('islandora:strict_pdf');
+$test->getObjectHistory('islandora:strict_pdf');
