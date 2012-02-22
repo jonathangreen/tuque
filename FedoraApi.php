@@ -1,9 +1,9 @@
 <?php
 
 abstract class AbstractFedoraApi {
-  public $FedoraApiA;
-  public $FedoraApiM;
-  public function __construct($connection = NULL, $serializer = NULL); 
+  public $ApiA;
+  public $ApiM;
+  public function __construct($ApiA = NULL, $ApiM = NULL); 
 }
 
 interface FedoraApiAInterface {
