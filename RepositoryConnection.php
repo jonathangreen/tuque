@@ -1,5 +1,5 @@
 <?php
-include_once('RepositoryException.php');
+require_once('RepositoryException.php');
 
 class RepositoryConnection {
 
