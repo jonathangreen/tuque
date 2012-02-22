@@ -10,7 +10,7 @@ interface FedoraApiAInterface {
   public function __construct($connection = NULL, $serializer = NULL);
   public function describeRepository();
   public function findObjects($type = '', $query = '', $maxResults = '', $displayFields = array('pid', 'title'));
-  public function resumeFindObjects($sessionToken, $options = array());
+  public function resumeFindObjects($sessionToken);
   public function getDatastreamDissemination($pid, $dsID, $asOfDateTime = NULL, $download = NULL);
   public function getDissemination($pid, $sdefPid, $method, $methodParameters = array());
   public function getObjectHistory($pid);

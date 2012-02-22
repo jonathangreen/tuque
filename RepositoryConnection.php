@@ -1,6 +1,13 @@
 <?php
+/**
+ * @file 
+ * This file defines the classes used to connect to a repository.
+ */
 require_once('RepositoryException.php');
 
+/**
+ * This class defines three HTTP functions used to connect to the Repository.
+ */
 class RepositoryConnection {
 
   const COOKIE_LOCATION = 'fedora_cookie';
@@ -8,6 +15,11 @@ class RepositoryConnection {
   private $cookieFile;
   private $curlContext = NULL;
   
+  /**
+   * The constructor for the repository class, it takes a configuration object.
+   * 
+   * @param RepositoryConfig $config 
+   */
   public function __construct(RepositoryConfig $config) {
     $this->config = $config;
     $this->cookieFile = tempnam(sys_get_temp_dir(), 'curlcookie');
@@ -19,6 +31,12 @@ class RepositoryConnection {
     }
   }
   
+  /**
+   * Destructor for the repository connection. Its main purpose is to make sure 
+   * that the JSESSION cookies from Fedora persist in the browsers session 
+   * variable, so we maintain the same session between page loads. This also
+   * closes the curl context.
+   */
   public function __destruct() {
     // before we go, save our fedora session cookie to the browsers session
     if(isset($_SESSION)) {
@@ -29,6 +47,14 @@ class RepositoryConnection {
     curl_close($this->curlContext);
   }
   
+  /**
+   * This function just sets up the context for curl, making sure it has the
+   * correct options selected. Ones of interest are the SSL options. Because
+   * we set them up securely, they will fail on the default Fedora SSL options. 
+   * This can be changed in the config, we just use secure defaults.
+   * 
+   * @throws RepositoryCurlException
+   */
   private function getCurlContext() {
     if (function_exists("curl_init") && function_exists("curl_setopt")) {
       $this->curlContext = curl_init();
@@ -48,6 +74,13 @@ class RepositoryConnection {
     }
   }
   
+  /**
+   * This takes in a relative URL and outputs a full URL to be used by cURL. It 
+   * also sets up the username and password as part of the cURL context.
+   * 
+   * @param string $url
+   *    The URL relative (to the fedora context) URL to use. 
+   */
   private function buildUrl($url) {
     $user = $this->config->username;
     $pass = $this->config->password;
@@ -61,6 +94,15 @@ class RepositoryConnection {
     curl_setopt($this->curlContext, CURLOPT_URL, $fullurl);
   }
   
+  /**
+   * This function actually does the cURL request. It is a private function 
+   * meant to be called by the public get, post and put methods.
+   * 
+   * @throws RepositoryCurlException
+   * @throws RepositoryHttpErrorException
+   *  
+   * @return array(status, headers, content)
+   */
   private function doRequest() {
     $curl_response = curl_exec($this->curlContext);
     
@@ -77,23 +119,36 @@ class RepositoryConnection {
     $info = curl_getinfo($this->curlContext);
     
     $response = array();
-    $response['code'] = $info['http_code'];
+    $response['status'] = $info['http_code'];
     $response['headers'] = substr($curl_response, 0, $info['header_size']-1);
     $response['content'] = substr($curl_response, $info['header_size']);
     
     // We do some ugly stuff here to strip the error string out
     // of the HTTP headers, since curl doesn't provide any helper.
-    $http_error_string = explode("\n", $response['headers'],2);
+    $http_error_string = explode("\n", $response['headers'], 2);
     $http_error_string = substr($http_error_string[0], 13);
     $http_error_string = trim($http_error_string);
     
     // throw an exception if this isn't a 2XX response
     if(!preg_match("/^2/",$info['http_code'])) {
-      throw new RepositoryHttpErrorException($http_error_string, $info['http_code']);
+      throw new RepositoryHttpErrorException($http_error_string, $info['http_code'], $response);
     }
     return $response;
   }
   
+  /**
+   * This sends a HTTP post request to the relative fedora URL specified.
+   * 
+   * @param string $url 
+   *   The relative URL to post the request to.
+   * @param string $post
+   *   The data to POST.
+   * 
+   * @throws RepositoryCurlException
+   * @throws RepositoryHttpErrorException
+   * 
+   * @return array(status, headers, content)
+   */
   function httpPostRequest($url, $post) {
     curl_setopt($this->curlContext, CURLOPT_POST, TRUE);
     curl_setopt($this->curlContext, CURLOPT_POSTFIELDS, "$post");
@@ -103,6 +158,19 @@ class RepositoryConnection {
     return $results;
   }
   
+  /**
+   * This sends a HTTP PUT request to the relative fedora URL specified.
+   * 
+   * @param string $url 
+   *   The relative URL to post the request to.
+   * @param string $file
+   *   The filename containing the data for the PUT request.
+   * 
+   * @throws RepositoryCurlException
+   * @throws RepositoryHttpErrorException
+   * 
+   * @return array(status, headers, content)
+   */
   function httpPutRequest($url, $file) {
     curl_setopt($this->curlContext, CURLOPT_PUT, TRUE);
     curl_setopt($this->curlContext, CURLOPT_INFILE, $file);
@@ -114,6 +182,17 @@ class RepositoryConnection {
     return $results;
   }
   
+  /**
+   * This sends a HTTP GET request to the relative fedora URL specified.
+   * 
+   * @param string $url 
+   *   The relative URL to post the request to.
+   * 
+   * @throws RepositoryCurlException
+   * @throws RepositoryHttpErrorException
+   * 
+   * @return array(status, headers, content)
+   */
   function httpGetRequest($url) {
     curl_setopt($this->curlContext, CURLOPT_HTTPGET, TRUE);
     $this->buildUrl($url);
