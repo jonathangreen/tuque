@@ -45,6 +45,7 @@ class RepositoryConnection {
     
     // close our curl context
     curl_close($this->curlContext);
+    unlink($this->cookieFile);
   }
   
   /**
@@ -68,6 +69,7 @@ class RepositoryConnection {
       curl_setopt($this->curlContext, CURLOPT_FOLLOWLOCATION, 1); // allow redirects
       curl_setopt($this->curlContext, CURLOPT_RETURNTRANSFER, TRUE); // return to variable
       curl_setopt($this->curlContext, CURLOPT_HEADER, TRUE);
+      curl_setopt($this->curlContext, CURLOPT_VERBOSE, 1);
     }
     else {
       throw new RepositoryCurlException('cURL PHP Module must to enabled.', 0);
@@ -149,12 +151,24 @@ class RepositoryConnection {
    * 
    * @return array(status, headers, content)
    */
-  function httpPostRequest($url, $post) {
+  function httpPostRequest($url, $post, $type = 'string') {
     curl_setopt($this->curlContext, CURLOPT_POST, TRUE);
-    curl_setopt($this->curlContext, CURLOPT_POSTFIELDS, "$post");
+    switch(strtolower($type)) {
+      case 'string':
+        $headers = array("Content-Type: text/plain");
+        curl_setopt($this->curlContext, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($this->curlContext, CURLOPT_POSTFIELDS, $post);
+        break;
+      case 'file':
+        curl_setopt($this->curlContext, CURLOPT_POSTFIELDS, array('file' => "@$post"));
+        break;
+      default:
+        throw new RepositoryBadArguementException('$type must be: string, file. ' . "($type).");
+    }
     $this->buildUrl($url);
-    $results = $this->doRequest();
+    $results = $this->doRequest(); 
     curl_setopt($this->curlContext, CURLOPT_POST, FALSE);
+    curl_setopt($this->curlContext, CURLOPT_HTTPHEADER, array());
     return $results;
   }
   
@@ -175,6 +189,7 @@ class RepositoryConnection {
     curl_setopt($this->curlContext, CURLOPT_PUT, TRUE);
     curl_setopt($this->curlContext, CURLOPT_INFILE, $file);
     /* TODO this might bite us in the ass for files over 2gb */
+    
     curl_setopt($this->curlContext, CURLOPT_INFILESIZE, filesize($file));
     $this->buildUrl($url);
     $results = $this->doRequest();

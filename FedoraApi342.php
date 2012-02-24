@@ -177,7 +177,27 @@ class FedoraApiM {
     $pid = urlencode($pid);
     $dsid = urlencode($dsid);
     
-    $request = "";
+    $request = "/objects/$pid/datastreams/$dsid?";
+    
+    foreach ($params as $param_name => $param_value) {
+      $value = urlencode($param_value);
+      $request .= $param_value != NULL ? "$param_name=$value&" : '';
+    }
+    
+    switch(strtolower($type)) {
+      case 'file':
+      case 'string':
+        break;
+      case 'url':
+        $file = urlencode($file);
+        $request .= "dsLocation=$file";
+        $type = 'string';
+        break;
+      default:
+        throw new RepositoryBadArguementException("Type must be one of: file, string, url. ($type)");
+        break;
+    }
+    return $this->connection->httpPostRequest($request, $file, $type);
   }
 }
 
@@ -274,7 +294,19 @@ class FedoraApiSerializer {
   }
 }
 
-$test = new FedoraApiA342(new RepositoryConnection(new RepositoryConfig()), new FedoraApiSerializer);
-print_r($test->getObjectProfile('islandora:strict_pdf'));
-print_r($test->listDatastreams('islandora:strict_pdf'));
-print_r($test->listMethods('islandora:strict_pdf'));
+$a = new FedoraApiA342(new RepositoryConnection(new RepositoryConfig('http://localhost:8080/fedora', 'fedoraAdmin', 'password')), new FedoraApiSerializer);
+$m = new FedoraApiM(new RepositoryConnection(new RepositoryConfig('http://localhost:8080/fedora', 'fedoraAdmin', 'password')), new FedoraApiSerializer);
+
+//print_r($test->getObjectProfile('islandora:strict_pdf'));
+//print_r($test->listDatastreams('islandora:strict_pdf'));
+//print_r($test->listMethods('islandora:strict_pdf'));
+
+try{
+  
+  //print_r($m->addDatastream('islandora:strict_pdf', 'url', 'url', "http://www.albionresearch.com/images/albionwb75x75.png", array('controlGroup' => 'M', 'mimeType' => 'image/png')));
+  ($m->addDatastream('islandora:strict_pdf', 'string', 'string', "<woot><a><b><c></woot>", array('controlGroup' => 'M', 'mimeType' => 'text/xml')));
+  ($m->addDatastream('islandora:strict_pdf', 'file', 'file', '/home/jgreen/jon.jpg', array('controlGroup' => 'M', 'mimeType' => 'image/jpeg')));
+  //print_r($a->listDatastreams("islandora:strict_pdf"));
+}catch (RepositoryHttpErrorException $e) {
+  print_r($e->response);
+}
