@@ -367,7 +367,7 @@ class CurlConnection extends HttpConnection {
    *   * $return['headers'] = The HTTP headers of the reply
    *   * $return['content'] = The body of the HTTP reply
    */
-  function putRequest($url, $type, $file) {
+  function putRequest($url, $type = 'none', $file = NULL) {
     $this->setupCurlContext($url);
     
     switch(strtolower($type)) {
@@ -376,29 +376,37 @@ class CurlConnection extends HttpConnection {
         fwrite($fh, $file);
         rewind($fh);
         $size = strlen($file);
+        curl_setopt($this->curlContext, CURLOPT_PUT, TRUE);
+        curl_setopt($this->curlContext, CURLOPT_INFILE, $fh);
+        curl_setopt($this->curlContext, CURLOPT_INFILESIZE, $size);
         break;  
       case 'file':
         $fh = fopen($file,'r');
         $size = filesize($file);
+        curl_setopt($this->curlContext, CURLOPT_PUT, TRUE);
+        curl_setopt($this->curlContext, CURLOPT_INFILE, $fh);
+        curl_setopt($this->curlContext, CURLOPT_INFILESIZE, $size);
+        break;
+      case 'none':
+        curl_setopt($this->curlContext, CURLOPT_CUSTOMREQUEST, 'PUT');
         break;
       default:
         throw new HttpConnectionException('$type must be: string, file. ' . "($type).", 0);
     }
     
-    curl_setopt($this->curlContext, CURLOPT_PUT, TRUE);
-    curl_setopt($this->curlContext, CURLOPT_INFILE, $fh);
-    curl_setopt($this->curlContext, CURLOPT_INFILESIZE, $size);
-    
     $results = $this->doCurlRequest();
     
     if($this->reuseConnection) {
       curl_setopt($this->curlContext, CURLOPT_PUT, FALSE);
+      curl_setopt($this->curlContext, CURLOPT_CUSTOMREQUEST, FALSE);
     }
     else {
       $this->unallocateCurlContext();
     }
     
-    fclose($fh);
+    if(isset($fh)) {
+      fclose($fh);
+    }
     return $results;
   }
   

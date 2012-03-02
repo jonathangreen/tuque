@@ -399,15 +399,13 @@ class FedoraApiM {
       $data = $params['dsString'];
     }
     elseif(isset($params['dsLocation'])) {
-      $type = 'string';
-      $data = 'islandorarocks';
+      $type = 'none';
+      $data = NULL;
       $this->addRequestParam($request, $seperator, $params, 'dsLocation');
-      $this->addParam($request, $seperator, 'true', 'ignoreContent');
     }
     else {
-      $type = 'string';
-      $data = 'islandorarocks';
-      $this->addParam($request, $seperator, 'true', 'ignoreContent');
+      $type = 'none';
+      $data = NULL;
     }
    
     $this->addRequestParam($request, $seperator, $params, 'altIDs');
@@ -430,17 +428,13 @@ class FedoraApiM {
     $request = "/objects/$pid";
     $seperator = '?';
     
-    // fake data
-    $type = 'string';
-    $data = 'islandorarocks';
-    
     $this->addRequestParam($request, $seperator, $params, 'label');
     $this->addRequestParam($request, $seperator, $params, 'ownerId');
     $this->addRequestParam($request, $seperator, $params, 'state');
     $this->addRequestParam($request, $seperator, $params, 'logMessage');
     $this->addRequestParam($request, $seperator, $params, 'lastModifiedDate');
    
-    $response = $this->connection->putRequest($request, $type, $data);
+    $response = $this->connection->putRequest($request);
     return $response['content'];
   }
   
@@ -456,8 +450,24 @@ class FedoraApiM {
     $this->addRequestParam($request, $seperator, $params, 'logMessage');
     
     $response = $this->connection->deleteRequest($request);
+    $response = $this->serializer->purgeDatastream($request['content']);
     return $response;
   }
+  
+  public function purgeObject($pid, $logMessage = NULL) {
+    $pid = urlencode($pid);
+    
+    $request = "/objects/{$pid}";
+    $seperator = '?';
+    
+    $this->addParam($request, $seperator, $logMessage, 'logMessage');
+    $response = $this->connection->deleteRequest($request);
+    return $response['content'];
+  }
+  
+  /* skipped purge relationship */
+  
+  
   
 }
 
@@ -575,11 +585,15 @@ class FedoraApiSerializer {
     $result = $this->loadXml($xml);
     return $this->flattenDocument($result);
   }
+  
+  public function purgeDatastream($json) {
+    return json_decode($json);
+  }
 }
 
 $connection = new RepositoryConnection('http://localhost:8080/fedora', 'fedoraAdmin', 'password');
 $serializer = new FedoraApiSerializer();
-$connection->debug = TRUE;
+//$connection->debug = TRUE;
 $a = new FedoraApiA($connection, $serializer);
 $m = new FedoraApiM($connection, $serializer);
 
@@ -602,8 +616,9 @@ try{
   //print_r($m->getRelationships('islandora:strict_pdf'));
   //print_r($m->modifyDatastream('islandora:strict_pdf', 'file', array('dsState' => 'A')));
   //print_r($m->ingest(array('label' => 'woot')));
-  //print_r($m->modifyObject('changeme:12', array('label' => 'test', 'state' => 'I')));
-  print_r($m->purgeDatastream('islandora:strict_pdf', 'file'));
+  //print_r($m->modifyObject('changeme:11', array('label' => 'test', 'state' => 'I')));
+  //print_r($m->purgeDatastream('islandora:strict_pdf', 'file'));
+  print_r($m->purgeObject('changeme:12'));
 }catch (RepositoryException $e) {
   if($e->getPrevious() instanceof HttpConnectionException) {
     print_r($e->getPrevious()->response);

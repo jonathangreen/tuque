@@ -60,7 +60,7 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
     }
   }
   
-  public function putRequest($url, $type, $file) {
+  public function putRequest($url, $type = 'none', $file = NULL) {
     try {
       return parent::putRequest($this->buildUrl($url), $type, $file);
     }
