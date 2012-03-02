@@ -11,23 +11,6 @@
 class RepositoryException extends Exception {}
 
 /**
- * Exception Caused by cURL
- */
-class RepositoryCurlException extends RepositoryException {}
-
-/**
- * Exception caused by a HTTP error 
- */
-class RepositoryHttpErrorException extends RepositoryException {
-  public $response;
-  
-  function __construct($message, $code, $response, $previous = NULL) {
-    parent::__construct($message, $code, $previous);
-    $this->response = $response;
-  }
-}
-
-/**
  * This is thrown when there is an error parsing XML.
  */
 class RepositoryXmlError extends RepositoryException {
