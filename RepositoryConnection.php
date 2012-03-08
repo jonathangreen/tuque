@@ -42,6 +42,27 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
     return "{$this->url}/$url";
   }
   
+  public function addParamArray(&$request, &$seperator, $params, $name) {
+    if(is_array($params)) {
+      if(isset($params[$name])) {
+        $this->addParam($request, $seperator, $name, $params[$name]);
+      }
+    }
+  }
+  
+  public function addParam(&$request, &$seperator, $name, $value) {
+    if($value) {
+      if(is_bool($value)) {
+        $parameter = $value ? 'true' : 'false';
+      }
+      else {
+        $parameter = urlencode($value);
+      }
+      $request .= "{$seperator}{$name}={$parameter}";
+      $seperator = '&';
+    }
+  }
+  
   public function getRequest($url) {
     try {
       return parent::getRequest($this->buildUrl($url));
