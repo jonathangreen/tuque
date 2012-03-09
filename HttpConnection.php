@@ -331,7 +331,7 @@ class CurlConnection extends HttpConnection {
 
     switch (strtolower($type)) {
       case 'string':
-        $headers = array("Content-Type: text/plain");
+        $headers = array("Content-Type: text/xml");
         curl_setopt($this->curlContext, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($this->curlContext, CURLOPT_POSTFIELDS, $data);
         break;

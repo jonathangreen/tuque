@@ -7,106 +7,56 @@
 require_once '../FedoraApi.php';
 require_once '../FedoraApiSerializer.php';
 
-/**
- * This class is injected into the FedoraApi to replace the default serializer.
- * Since it has access to the RAW XML coming back from Fedora we can test if the
- * response is what we expect.
- */
-class FedoraXmlTest extends FedoraApiSerializer {
+define('FEDORAURL', 'http://vm0:8080/fedora');
+define('FEDORAUSER', 'fedoraAdmin');
+define('FEDORAPASS', 'password');
 
-  /**
-   * This tests the XML response from the describeRespository function. It
-   * tests what tags come back, since the contents of the tag will be
-   * dependant on where it is run.
-   *
-   * @param array $request
-   *   HTTP request recieved from Fedora.
-   *
-   * @return string
-   *   Response from parent
-   */
-  public function  describeRepository($request) {
-    $this->test->assertEquals('200', $request['status']);
-    
-    $dom = new DOMDocument();
-    $dom->loadXML($request['content']);
-    $xpath = new DOMXPath($dom);
-    $xpath->registerNamespace('x', 'http://www.fedora.info/definitions/1/0/access/');
 
-    $actual = $xpath->query('/x:fedoraRepository/x:repositoryName');
-    $this->test->assertEquals(1, $actual->length);
-    $actual = $xpath->query('/x:fedoraRepository/x:repositoryBaseURL');
-    $this->test->assertEquals(1, $actual->length);
-    $actual = $xpath->query('/x:fedoraRepository/x:repositoryVersion');
-    $this->test->assertEquals(1, $actual->length);
-    $actual = $xpath->query('/x:fedoraRepository/x:repositoryPID/x:PID-namespaceIdentifier');
-    $this->test->assertEquals(1, $actual->length);
-    $actual = $xpath->query('/x:fedoraRepository/x:repositoryPID/x:PID-delimiter');
-    $this->test->assertEquals(1, $actual->length);
-    $actual = $xpath->query('/x:fedoraRepository/x:repositoryPID/x:PID-sample');
-    $this->test->assertEquals(1, $actual->length);
-    $actual = $xpath->query('/x:fedoraRepository/x:repositoryOAI-identifier/x:OAI-namespaceIdentifier');
-    $this->test->assertEquals(1, $actual->length);
-    $actual = $xpath->query('/x:fedoraRepository/x:repositoryOAI-identifier/x:OAI-delimiter');
-    $this->test->assertEquals(1, $actual->length);
-    $actual = $xpath->query('/x:fedoraRepository/x:repositoryOAI-identifier/x:OAI-sample');
-    $this->test->assertEquals(1, $actual->length);
-    $actual = $xpath->query('/x:fedoraRepository/x:sampleSearch-URL');
-    $this->test->assertEquals(1, $actual->length);
-    $actual = $xpath->query('/x:fedoraRepository/x:sampleAccess-URL');
-    $this->test->assertEquals(1, $actual->length);
-    $actual = $xpath->query('/x:fedoraRepository/x:sampleOAI-URL');
-    $this->test->assertEquals(1, $actual->length);
-    $actual = $xpath->query('/x:fedoraRepository/x:adminEmail');
-    $this->test->assertGreaterThanOrEqual(1, $actual->length);
+class FedoraApiADescribeRespositoryTest extends PHPUnit_Framework_TestCase {
+  protected $pids = array();
+  protected $files = array();
 
-    return parent::describeRepository($request);
-  }
-}
-
-/**
- * This class tests the response that we get back from Fedora. This is helpful
- * when new versions of Fedora come out to make sure we are still recieveing
- * the response that we are expecting.
- */
-class FedoraApiResponseTest extends PHPUnit_Framework_TestCase {
-
-  /**
-   * Sets up an APIA and APIM object for testing.
-   *
-   * @todo Make this read from config file for username password and host.
-   */
   protected function setUp() {
-    $host = 'http://vm0:8080/fedora';
-    $user = 'fedoraAdmin';
-    $pass = 'password';
+    $this->connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+    $this->serializer = new FedoraApiSerializer();
 
-    $this->connection = new RepositoryConnection($host, $user, $pass);
-    $this->serializer = new FedoraXmlTest();
-    $this->serializer->test = $this;
+    $this->connection->debug = TRUE;
+    $this->connection->reuseConnection = TRUE;
 
     $this->apim = new FedoraApiM($this->connection, $this->serializer);
     $this->apia = new FedoraApiA($this->connection, $this->serializer);
-
-    // Purge test objects from previous run.
-    try {
-      $this->apim->purgeObject('test:1');
-    }
-    catch (RepositoryException $e) {}
-    try {
-      $this->apim->purgeObject('test:2');
-    }
-    catch (RepositoryException $e) {}
-    try {
-      $this->apim->purgeObject('test:3');
-    }
-    catch (RepositoryException $e) {}
-
   }
 
-  /**
-   * Make sure describe repository returns the expected keys.
-   */
+  protected function tearDown() {
+    if (isset($this->pids) && is_array($this->pids)) {
+      while ($pid = array_pop($this->pids)) {
+        try {
+          $this->apim->purgeObject($pid);
+        }
+        catch (RepositoryException $e) {}
+      }
+    }
+
+    if (isset($this->files) && is_array($this->files)) {
+      while ($file = array_pop($this->files)) {
+        unlink($file);
+      }
+    }
+  }
+
+  protected function randomString($length) {
+    $length = 10;
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $string ='';
+
+    for ($p = 0; $p < $length; $p++) {
+
+        $string .= $characters[mt_rand(0, (strlen($characters)-1))];
+    }
+
+    return $string;
+  }
+
   public function testDescribeRepository() {
     $describe = $this->apia->describeRepository();
     $this->assertArrayHasKey('repositoryName', $describe);
@@ -126,25 +76,82 @@ class FedoraApiResponseTest extends PHPUnit_Framework_TestCase {
     $this->assertArrayHasKey('adminEmail', $describe);
   }
 
-  /**
-   * Ingest some objects and make sure we get the correct response.
-   */
-  public function testIngest() {
-    $ingest = $this->apim->ingest(array('pid' => 'test:1'));
-    $this->assertEquals('test:1', $ingest);
-    $ingest = $this->apim->ingest(array('pid' => 'test:2'));
-    $this->assertEquals('test:2', $ingest);
-    $ingest = $this->apim->ingest(array('pid' => 'test:3'));
-    $this->assertEquals('test:3', $ingest);
+  public function testIngestNoPid() {
+    $pid = $this->apim->ingest();
+    $this->pids[] = $pid;
+    $results = $this->apia->findObjects('query', "pid=$pid");
+    $this->assertEquals(1, count($results['results']));
+    $this->assertEquals($pid, $results['results'][0]['pid']);
+  }
+  
+  public function testIngestRandomPid() {
+    $string1 = $this->randomString(10);
+    $string2 = $this->randomString(10);
+    $expected_pid = "$string1:$string2";
+    $actual_pid = $this->apim->ingest(array('pid' => $expected_pid));
+    $this->pids[] = $actual_pid;
+    $this->assertEquals($expected_pid, $actual_pid);
+    $results = $this->apia->findObjects('query', "pid=$expected_pid");
+    $this->assertEquals(1, count($results['results']));
+    $this->assertEquals($expected_pid, $results['results'][0]['pid']);
   }
 
-  /**
-   * Find objects and make sure we get the expected response.
+  public function testIngestStringFoxml() {
+    $string1 = $this->randomString(10);
+    $string2 = $this->randomString(10);
+    $expected_pid = "$string1:$string2";
+    $foxml = <<<FOXML
+<?xml version="1.0" encoding="UTF-8"?>
+<foxml:digitalObject
+  xmlns:foxml="info:fedora/fedora-system:def/foxml#"
+  xmlns="info:fedora/fedora-system:def/foxml#"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  VERSION="1.1"
+  PID="$expected_pid"
+  xsi:schemaLocation="info:fedora/fedora-system:def/foxml#
+  http://www.fedora.info/definitions/1/0/foxml1-1.xsd">
+  <foxml:objectProperties>
+    <foxml:property NAME="info:fedora/fedora-system:def/model#state" VALUE="A"/>
+  </foxml:objectProperties>
+</foxml:digitalObject>
+FOXML;
+
+    $actual_pid = $this->apim->ingest(array('string' => $foxml));
+    $this->assertEquals($expected_pid, $actual_pid);
+    $results = $this->apia->findObjects('query', "pid=$expected_pid");
+    $this->assertEquals(1, count($results['results']));
+    $this->assertEquals($expected_pid, $results['results'][0]['pid']);
+  }
+
+  /*
+  public function testIngestFileFoxml() {
+    $file_name = tempnam(sys_get_temp_dir(),'fedora_fixture');
+    $string1 = $this->randomString(10);
+    $string2 = $this->randomString(10);
+    $expected_pid = "$string1:$string2";
+    $foxml = <<<FOXML
+<?xml version="1.0" encoding="UTF-8"?>
+<foxml:digitalObject
+  xmlns:foxml="info:fedora/fedora-system:def/foxml#"
+  xmlns="info:fedora/fedora-system:def/foxml#"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  VERSION="1.1"
+  PID="$expected_pid"
+  xsi:schemaLocation="info:fedora/fedora-system:def/foxml#
+  http://www.fedora.info/definitions/1/0/foxml1-1.xsd">
+  <foxml:objectProperties>
+    <foxml:property NAME="info:fedora/fedora-system:def/model#label" VALUE="foo"/>
+  </foxml:objectProperties>
+</foxml:digitalObject>
+FOXML;
+    file_put_contents($file_name, $foxml);
+    $this->files[] = $file_name;
+
+    $actual_pid = $this->apim->ingest(array('file' => $file_name));
+    $this->assertEquals($expected_pid, $actual_pid);
+  }
    *
-   * @depends testIngest
    */
-  public function testFindObjects() {
-    $objects = $this->apia->findObjects('terms', 'test:*', 1);
 
-  }
+
 }

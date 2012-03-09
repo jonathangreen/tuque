@@ -136,20 +136,20 @@ class FedoraApiA {
    * @throws RepositoryException
    *
    * @return array()
-   *   The results are returned in an array key called 'resultList'. If there
+   *   The results are returned in an array key called 'results'. If there
    *   are more results that aren't returned then the search session information
-   *   is contained in a key called 'listSession'.
+   *   is contained in a key called 'session'.
    *   @code
    *   Array
    *   (
-   *      [listSession] => Array
+   *      [session] => Array
    *          (
    *              [token] => 96b2604f040067645f45daf029062d6e
    *              [cursor] => 0
    *              [expirationDate] => 2012-03-07T14:28:24.886Z
    *          )
    *
-   *      [resultList] => Array
+   *      [results] => Array
    *          (
    *              [0] => Array
    *                  (
@@ -1004,10 +1004,6 @@ class FedoraApiM {
    *     parameter is ignored.
    *   - ownerId: the id of the user to be listed at the object owner.
    *   - logMessage: a message describing the activity being performed.
-   *   - ignoreMime: indicates that the request should not be checked to ensure
-   *     that the content is XML prior to attempting an ingest. This is provided
-   *     to allow for client applications which do not indicate the correct
-   *     Content-Type when submitting a request.
    *
    * @throws RepositoryException
    *
@@ -1029,12 +1025,10 @@ class FedoraApiM {
     if (isset($params['string'])) {
       $type = 'string';
       $data = $params['string'];
-      $this->connection->addParam($request, $seperator, 'ignoreMime', 'true');
     }
     elseif (isset($params['file'])) {
       $type = 'file';
       $data = $params['file'];
-      $this->connection->addParam($request, $seperator, 'ignoreMime', 'true');
     }
     else {
       $type = 'none';
