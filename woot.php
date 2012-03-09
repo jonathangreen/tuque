@@ -18,7 +18,7 @@ $m = new FedoraApiM($connection, $serializer);
 
 try{
   //print_r($a->listMethods('codearl:9065', 'codearl:9055'));
-  //print_r($a->describeRepository());
+  print_r($a->describeRepository());
   //print_r($m->addDatastream('islandora:strict_pdf', 'url', 'url', "http://www.albionresearch.com/images/albionwb75x75.png", array('controlGroup' => 'X', 'mimeType' => 'image/png')));
   //print_r($m->addDatastream('islandora:strict_pdf', 'test', 'string', "<woot><a><b><c></woot>", array('controlGroup' => 'M', 'mimeType' => 'text/xml')));
   //print_r($m->addDatastream('islandora:strict_pdf', 'file', 'file', '/home/jgreen/jon.jpg', array('controlGroup' => 'M', 'mimeType' => 'image/jpeg')));
@@ -31,10 +31,10 @@ try{
   //print_r($m->getRelationships('islandora:strict_pdf'));
   //print_r($m->getRelationships('islandora:strict_pdf'));
   //print_r($m->modifyDatastream('islandora:strict_pdf', 'test', array('dsState' => 'A')));
-  print_r($m->ingest(array('pid' => 'changeme:11','label' => 'woot')));
-  print_r($m->modifyObject('changeme:11', array('label' => 'test', 'state' => 'A')));
+  //print_r($m->ingest(array('pid' => 'changeme:11','label' => 'woot')));
+  //print_r($m->modifyObject('changeme:11', array('label' => 'test', 'state' => 'A')));
   //print_r($m->purgeDatastream('islandora:strict_pdf', 'test'));
-  print_r($m->purgeObject('changeme:11'));
+  //print_r($m->purgeObject('changeme:11'));
 }catch (RepositoryException $e) {
   print($e);
   if($e->getPrevious() instanceof HttpConnectionException) {

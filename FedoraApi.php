@@ -1232,7 +1232,7 @@ class FedoraApiM {
     $request = "/objects/{$pid}";
     $seperator = '?';
 
-    $this->connection->addParam($request, $seperator, $log_message, 'logMessage');
+    $this->connection->addParam($request, $seperator, 'logMessage', $log_message);
     $response = $this->connection->deleteRequest($request);
     $response = $this->serializer->purgeObject($response);
     return $response;
