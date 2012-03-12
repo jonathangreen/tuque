@@ -1009,6 +1009,10 @@ class FedoraApiM {
    *
    * @return string
    *   The PID of the newly created object.
+   *
+   * @todo This function is a problem in Fedora < 3.5 where ownerId does not
+   *   properly get set. https://jira.duraspace.org/browse/FCREPO-963. We should
+   *   deal with this.
    */
   public function ingest($params = array()) {
     $request = "/objects/";
@@ -1025,14 +1029,17 @@ class FedoraApiM {
     if (isset($params['string'])) {
       $type = 'string';
       $data = $params['string'];
+      $content_type = 'text/xml';
     }
     elseif (isset($params['file'])) {
       $type = 'file';
       $data = $params['file'];
+      $content_type = 'text/xml';
     }
     else {
       $type = 'none';
       $data = NULL;
+      $content_type = NULL;
     }
 
     $this->connection->addParamArray($request, $seperator, $params, 'label');
@@ -1042,7 +1049,7 @@ class FedoraApiM {
     $this->connection->addParamArray($request, $seperator, $params, 'ownerId');
     $this->connection->addParamArray($request, $seperator, $params, 'logMessage');
 
-    $response = $this->connection->postRequest($request, $type, $data);
+    $response = $this->connection->postRequest($request, $type, $data, $content_type);
     $response = $this->serializer->ingest($response);
     return $response;
   }

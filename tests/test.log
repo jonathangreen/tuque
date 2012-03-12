@@ -1,0 +1,37 @@
+== Info: About to connect() to vm0 port 8080 (#0)
+== Info:   Trying 192.168.56.101... == Info: connected
+== Info: Connected to vm0 (192.168.56.101) port 8080 (#0)
+== Info: Server auth using Basic with user 'fedoraAdmin'
+=> Send header, 249 bytes (0xf9)
+0000: POST /fedora/objects/test:1?label=testlabel&ownerId=testOwner HT
+0040: TP/1.1
+0048: Authorization: Basic ZmVkb3JhQWRtaW46cGFzc3dvcmQ=
+007b: User-Agent: curl/7.21.4 (universal-apple-darwin11.0) libcurl/7.2
+00bb: 1.4 OpenSSL/0.9.8r zlib/1.2.5
+00da: Host: vm0:8080
+00ea: Accept: */*
+00f7: 
+<= Recv header, 22 bytes (0x16)
+0000: HTTP/1.1 201 Created
+<= Recv header, 27 bytes (0x1b)
+0000: Server: Apache-Coyote/1.1
+<= Recv header, 71 bytes (0x47)
+0000: Set-Cookie: JSESSIONID=D3762B881897637D54DD87C7FA4AF57C; Path=/f
+0040: edora
+<= Recv header, 51 bytes (0x33)
+0000: Location: http://vm0:8080/fedora/objects/test%3A1
+<= Recv header, 26 bytes (0x1a)
+0000: Content-Type: text/plain
+<= Recv header, 28 bytes (0x1c)
+0000: Transfer-Encoding: chunked
+<= Recv header, 37 bytes (0x25)
+0000: Date: Mon, 12 Mar 2012 15:31:01 GMT
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 16 bytes (0x10)
+0000: 6
+0003: test:1
+000b: 0
+000e: 
+== Info: Connection #0 to host vm0 left intact
+== Info: Closing connection #0

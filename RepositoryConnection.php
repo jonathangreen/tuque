@@ -72,9 +72,9 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
     }
   }
   
-  public function postRequest($url, $type = 'none', $data = NULL) {
+  public function postRequest($url, $type = 'none', $data = NULL, $content_type = NULL) {
     try {
-      return parent::postRequest($this->buildUrl($url), $type, $data);
+      return parent::postRequest($this->buildUrl($url), $type, $data, $content_type);
     }
     catch (HttpConnectionException $e) {
       throw new RepositoryException($e->getMessage(), $e->getCode(), $e);

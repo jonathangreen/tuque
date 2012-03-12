@@ -324,20 +324,30 @@ class CurlConnection extends HttpConnection {
    *   * $return['headers'] = The HTTP headers of the reply
    *   * $return['content'] = The body of the HTTP reply
    */
-  public function postRequest($url, $type = 'none', $data = NULL) {
+  public function postRequest($url, $type = 'none', $data = NULL, $content_type = NULL) {
     $this->setupCurlContext($url);
     curl_setopt($this->curlContext, CURLOPT_CUSTOMREQUEST, 'POST');
     curl_setopt($this->curlContext, CURLOPT_POST, TRUE);
 
     switch (strtolower($type)) {
       case 'string':
-        $headers = array("Content-Type: text/xml");
+        if ($content_type) {
+          $headers = array("Content-Type: $content_type");
+        }
+        else {
+          $headers = array("Content-Type: text/plain");
+        }
         curl_setopt($this->curlContext, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($this->curlContext, CURLOPT_POSTFIELDS, $data);
         break;
 
       case 'file':
-        curl_setopt($this->curlContext, CURLOPT_POSTFIELDS, array('file' => "@$data"));
+        if ($content_type) {
+          curl_setopt($this->curlContext, CURLOPT_POSTFIELDS, array('file' => "@$data;type=$content_type"));
+        }
+        else {
+          curl_setopt($this->curlContext, CURLOPT_POSTFIELDS, array('file' => "@$data"));
+        }
         break;
 
       case 'none':
