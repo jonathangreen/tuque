@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<foxml:digitalObject VERSION="1.1"
+<foxml:digitalObject VERSION="1.1" PID="%PID%"
 xmlns:foxml="info:fedora/fedora-system:def/foxml#"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/definitions/1/0/foxml1-1.xsd">
@@ -8,10 +8,10 @@ xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/
 <foxml:property NAME="info:fedora/fedora-system:def/model#label" VALUE="label1"/>
 <foxml:property NAME="info:fedora/fedora-system:def/model#ownerId" VALUE="owner1"/>
 <foxml:property NAME="info:fedora/fedora-system:def/model#createdDate" VALUE="2012-03-12T15:22:37.847Z"/>
-<foxml:property NAME="info:fedora/fedora-system:def/view#lastModifiedDate" VALUE="2012-03-13T18:09:25.425Z"/>
+<foxml:property NAME="info:fedora/fedora-system:def/view#lastModifiedDate" VALUE="2012-03-13T19:15:07.529Z"/>
 </foxml:objectProperties>
 <foxml:datastream ID="DC" STATE="A" CONTROL_GROUP="X" VERSIONABLE="true">
-<foxml:datastreamVersion ID="DC.1" LABEL="Dublin Core Record for this object" CREATED="2012-03-13T14:12:59.272Z" MIMETYPE="text/xml" FORMAT_URI="http://www.openarchives.org/OAI/2.0/oai_dc/" SIZE="896">
+<foxml:datastreamVersion ID="DC.1" LABEL="Dublin Core Record for this object" CREATED="2012-03-13T14:12:59.272Z" MIMETYPE="text/xml" FORMAT_URI="http://www.openarchives.org/OAI/2.0/oai_dc/" SIZE="942">
 <foxml:xmlContent>
 <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
   <dc:title>title1</dc:title>
@@ -23,8 +23,6 @@ xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/
   <dc:date>date1</dc:date>
   <dc:type>type1</dc:type>
   <dc:format>format1</dc:format>
-  <dc:identifier>identifier1</dc:identifier>
-  <dc:identifier>changeme:145</dc:identifier>
   <dc:source>source1</dc:source>
   <dc:language>language1</dc:language>
   <dc:relation>relation1</dc:relation>
@@ -1383,6 +1381,17 @@ xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/
               ENcaCAQCgUAgUBoCtBYtVRmkP9KKXbWwSjtPdBQIBAKBQCCwESCAUaiq/x80Qb5E4P06EQAAAABJRU5E
               rkJggg==
 </foxml:binaryContent> 
+</foxml:datastreamVersion>
+</foxml:datastream>
+<foxml:datastream ID="RELS-EXT" STATE="A" CONTROL_GROUP="X" VERSIONABLE="true">
+<foxml:datastreamVersion ID="RELS-EXT.0" LABEL="Fedora Relationships Metadata" CREATED="2012-03-13T19:15:07.529Z" MIMETYPE="text/xml" SIZE="531">
+<foxml:xmlContent>
+<rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:fedora="info:fedora/fedora-system:def/relations-external#" xmlns:fedora-model="info:fedora/fedora-system:def/model#" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+  <rdf:Description rdf:about="info:fedora/%PID%">
+    <fedora-model:hasModel rdf:resource="info:fedora/testnamespace:test"></fedora-model:hasModel>
+  </rdf:Description>
+</rdf:RDF>
+</foxml:xmlContent>
 </foxml:datastreamVersion>
 </foxml:datastream>
 </foxml:digitalObject>

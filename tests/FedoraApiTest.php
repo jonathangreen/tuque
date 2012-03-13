@@ -18,41 +18,10 @@ class FedoraTestHelpers {
     $string ='';
 
     for ($p = 0; $p < $length; $p++) {
-
         $string .= $characters[mt_rand(0, (strlen($characters)-1))];
     }
 
     return $string;
-  }
-}
-
-class FedoraApiDescribeRespositoryTest extends PHPUnit_Framework_TestCase {
-
-  protected function setUp() {
-    $this->connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
-    $this->serializer = new FedoraApiSerializer();
-
-    $this->apim = new FedoraApiM($this->connection, $this->serializer);
-    $this->apia = new FedoraApiA($this->connection, $this->serializer);
-  }
-  
-  public function testDescribeRepository() {
-    $describe = $this->apia->describeRepository();
-    $this->assertArrayHasKey('repositoryName', $describe);
-    $this->assertArrayHasKey('repositoryBaseURL', $describe);
-    $this->assertArrayHasKey('repositoryPID', $describe);
-    $this->assertArrayHasKey('PID-namespaceIdentifier', $describe['repositoryPID']);
-    $this->assertArrayHasKey('PID-delimiter', $describe['repositoryPID']);
-    $this->assertArrayHasKey('PID-sample', $describe['repositoryPID']);
-    $this->assertArrayHasKey('retainPID', $describe['repositoryPID']);
-    $this->assertArrayHasKey('repositoryOAI-identifier', $describe);
-    $this->assertArrayHasKey('OAI-namespaceIdentifier', $describe['repositoryOAI-identifier']);
-    $this->assertArrayHasKey('OAI-delimiter', $describe['repositoryOAI-identifier']);
-    $this->assertArrayHasKey('OAI-sample', $describe['repositoryOAI-identifier']);
-    $this->assertArrayHasKey('sampleSearch-URL', $describe);
-    $this->assertArrayHasKey('sampleAccess-URL', $describe);
-    $this->assertArrayHasKey('sampleOAI-URL', $describe);
-    $this->assertArrayHasKey('adminEmail', $describe);
   }
 }
 
@@ -278,6 +247,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
   static $namespace;
   static $fixtures;
   static $display;
+  static $pids;
 
   static function setUpBeforeClass() {
     $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
@@ -291,8 +261,13 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     $pid2 = self::$namespace . ":" . FedoraTestHelpers::randomString(10);
 
     self::$fixtures = array();
+    self::$pids = array();
+    self::$pids[] = $pid1;
+    self::$pids[] = $pid2;
 
-    $pid = self::$apim->ingest(array('pid' => $pid1, 'string' => file_get_contents('tests/test_data/fixture1.xml')));
+    $string = file_get_contents('tests/test_data/fixture1.xml');
+    $string = preg_replace('/\%PID\%/', $pid1, $string);
+    $pid = self::$apim->ingest(array('string' => $string));
     self::$fixtures[$pid] = array(
       'pid' => $pid1,
       'label' => 'label1',
@@ -355,6 +330,25 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
       }
       catch (RepositoryException $e) {}
     }
+  }
+
+  public function testDescribeRepository() {
+    $describe = self::$apia->describeRepository();
+    $this->assertArrayHasKey('repositoryName', $describe);
+    $this->assertArrayHasKey('repositoryBaseURL', $describe);
+    $this->assertArrayHasKey('repositoryPID', $describe);
+    $this->assertArrayHasKey('PID-namespaceIdentifier', $describe['repositoryPID']);
+    $this->assertArrayHasKey('PID-delimiter', $describe['repositoryPID']);
+    $this->assertArrayHasKey('PID-sample', $describe['repositoryPID']);
+    $this->assertArrayHasKey('retainPID', $describe['repositoryPID']);
+    $this->assertArrayHasKey('repositoryOAI-identifier', $describe);
+    $this->assertArrayHasKey('OAI-namespaceIdentifier', $describe['repositoryOAI-identifier']);
+    $this->assertArrayHasKey('OAI-delimiter', $describe['repositoryOAI-identifier']);
+    $this->assertArrayHasKey('OAI-sample', $describe['repositoryOAI-identifier']);
+    $this->assertArrayHasKey('sampleSearch-URL', $describe);
+    $this->assertArrayHasKey('sampleAccess-URL', $describe);
+    $this->assertArrayHasKey('sampleOAI-URL', $describe);
+    $this->assertArrayHasKey('adminEmail', $describe);
   }
 
   function testFindObjectsTerms() {
@@ -420,40 +414,16 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
       }
     }
   }
-}
-
-class FedoraApiGetDisseminationTest extends PHPUnit_Framework_TestCase {
-
-  static $apim;
-  static $apia;
-  static $fixtures;
-
-  static function setUpBeforeClass() {
-    $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
-    $serializer = new FedoraApiSerializer();
-    self::$apim = new FedoraApiM($connection, $serializer);
-    self::$apia = new FedoraApiA($connection, $serializer);
-    $pid = FedoraTestHelpers::randomString(10) . ":" . FedoraTestHelpers::randomString(10);
-    self::$fixtures = self::$apim->ingest(array('pid' => $pid, 'string' => file_get_contents('tests/test_data/fixture1.xml')));
-  }
-
-  static public function tearDownAfterClass()
-  {
-    try {
-      self::$apim->purgeObject(self::$fixtures);
-    }
-    catch (RepositoryException $e) {}
-  }
 
   function testGetDatastreamDissemination() {
     $expected = file_get_contents('tests/test_data/fixture1_fixture_newest.png');
-    $actual = self::$apia->getDatastreamDissemination(self::$fixtures, 'fixture');
+    $actual = self::$apia->getDatastreamDissemination(self::$pids[0], 'fixture');
     $this->assertEquals($expected, $actual);
   }
 
   function testGetDatastreamDisseminationAsOfDate() {
     $expected = file_get_contents('tests/test_data/fixture1_fixture_oldest.png');
-    $actual = self::$apia->getDatastreamDissemination(self::$fixtures, 'fixture', '2012-03-13T17:40:29.057Z');
+    $actual = self::$apia->getDatastreamDissemination(self::$pids[0], 'fixture', '2012-03-13T17:40:29.057Z');
     $this->assertEquals($expected, $actual);
   }
 
@@ -463,13 +433,26 @@ class FedoraApiGetDisseminationTest extends PHPUnit_Framework_TestCase {
 
   function testGetObjectHistory() {
     $expected = array('2012-03-13T14:12:59.272Z', '2012-03-13T17:40:29.057Z',
-      '2012-03-13T18:09:25.425Z');
-    $actual = self::$apia->getObjectHistory(self::$fixtures);
+      '2012-03-13T18:09:25.425Z', '2012-03-13T19:15:07.529Z');
+    $actual = self::$apia->getObjectHistory(self::$pids[0]);
+    $this->assertEquals($expected, $actual);
+
+    $expected = array('2010-03-13T14:12:59.272Z');
+    $actual = self::$apia->getObjectHistory(self::$pids[1]);
     $this->assertEquals($expected, $actual);
   }
 
+  // This one is interesting because the flattendocument function doesn't
+  // work on it. So we have to handparse it. So we test to make sure its okay.
   function testGetObjectProfile() {
-    $actual = self::$apia->getObjectProfile(self::$fixtures);
-    print_r($actual);
+    foreach ( self::$pids as $pid) {
+      $data = self::$fixtures[$pid];
+      $actual = self::$apia->getObjectProfile($pid);
+      $this->assertArrayHasKey('objCreateDate', $actual);
+      $this->assertEquals($data['label'], $actual['objLabel']);
+      $this->assertEquals($data['ownerId'], $actual['objOwnerId']);
+      $this->assertEquals($data['state'], $actual['objState']);
+      $this->assertEquals($data['cDate'], $actual['objCreateDate']);
+    }
   }
 }

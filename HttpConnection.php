@@ -300,7 +300,9 @@ class CurlConnection extends HttpConnection {
 
     // We do some ugly stuff here to strip the error string out
     // of the HTTP headers, since curl doesn't provide any helper.
-    $http_error_string = explode("\n", $response['headers'], 2);
+    $http_error_string = explode("\r\n\r\n", $response['headers']);
+    $http_error_string = $http_error_string[count($http_error_string)-1];
+    $http_error_string = explode("\r\n", $http_error_string);
     $http_error_string = substr($http_error_string[0], 13);
     $http_error_string = trim($http_error_string);
 

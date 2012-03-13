@@ -101,13 +101,15 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
 
   private function parseFedoraExceptions($e) {
     $code = $e->getCode();
-
     switch($code) {
       case '400':
         // When setting an error 400 often Fedora puts useful error messages
         // in the message body, we might as well expose them.
         $response = $e->getResponse();
         $message = $response['content'];
+        if(!$message || strpos($message,'Exception') !== FALSE) {
+          $message = $e->getMessage();
+        }
         break;
 
       case '500':
@@ -118,6 +120,9 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
         $message = preg_split('/$\R?^/m', $response['content']);
         $message = explode(':', $message[0]);
         $message = $message[count($message) - 1];
+        if(strpos($message,'Exception') !== FALSE) {
+          $message = $e->getMessage();
+        }
         break;
       
       default:

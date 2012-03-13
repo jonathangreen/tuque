@@ -178,9 +178,12 @@ class FedoraApiSerializer {
 
   public function getObjectHistory($request) {
     $objectHistory = $this->loadSimpleXml($request['content']);
-    $data = $this->flattenDocument($objectHistory);
-    if (isset($data['objectChangeDate'])) {
-      $data = $data['objectChangeDate'];
+    $data = array();
+    
+    if(isset($objectHistory->objectChangeDate)) {
+      foreach($objectHistory->objectChangeDate as $date) {
+        $data[] = (string) $date;
+      }
     }
     return $data;
   }
@@ -188,7 +191,12 @@ class FedoraApiSerializer {
   public function getObjectProfile($request) {
     $result = $this->loadSimpleXml($request['content']);
     $data = $this->flattenDocument($result);
-    $data['objModels'] = $data['objModels']['model'];
+    $data['objModels'] = array();
+    if(isset($result->objModels->model)) {
+      foreach($result->objModels->model as $model) {
+        $data['objModels'][] = (string) $model;
+      }
+    }
     return $data;
   }
 
