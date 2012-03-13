@@ -148,8 +148,6 @@ class FedoraApiSerializer {
     $data = array();
 
     if(isset($results->listSession)) {
-      //$data['session'] = array();
-      //$data['session']['token'] = (string) $results->listSession->token;
       $data['session'] = $this->flattenDocument($results->listSession);
     }
 

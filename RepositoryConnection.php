@@ -17,7 +17,7 @@ interface RepositoryConfigInterface {
 /**
  * Specific RepositoryConfig implementation to be used with the cURL RepositoryConnection Object.
  */
-class RepositoryConnection extends CurlConnection implements RepositoryConfigInterface{
+class RepositoryConnection extends CurlConnection implements RepositoryConfigInterface {
 
   public $url;
   public $username;
@@ -68,7 +68,7 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
       return parent::getRequest($this->buildUrl($url));
     }
     catch (HttpConnectionException $e) {
-      throw new RepositoryException($e->getMessage(), $e->getCode(), $e);
+      $this->parseFedoraExceptions($e);
     }
   }
   
@@ -77,7 +77,7 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
       return parent::postRequest($this->buildUrl($url), $type, $data, $content_type);
     }
     catch (HttpConnectionException $e) {
-      throw new RepositoryException($e->getMessage(), $e->getCode(), $e);
+      $this->parseFedoraExceptions($e);
     }
   }
   
@@ -86,7 +86,7 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
       return parent::putRequest($this->buildUrl($url), $type, $file);
     }
     catch (HttpConnectionException $e) {
-      throw new RepositoryException($e->getMessage(), $e->getCode(), $e);
+      $this->parseFedoraExceptions($e);
     }
   }
   
@@ -95,7 +95,35 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
       return parent::deleteRequest($this->buildUrl($url));
     }
     catch (HttpConnectionException $e) {
-      throw new RepositoryException($e->getMessage(), $e->getCode(), $e);
+      $this->parseFedoraExceptions($e);
     }
+  }
+
+  private function parseFedoraExceptions($e) {
+    $code = $e->getCode();
+
+    switch($code) {
+      case '400':
+        // When setting an error 400 often Fedora puts useful error messages
+        // in the message body, we might as well expose them.
+        $response = $e->getResponse();
+        $message = $response['content'];
+        break;
+
+      case '500':
+        // When setting an error 500 Fedora is usually returning a java stack
+        // trace. This isn't great, but we can give a better message by return
+        // the message set in that exception .
+        $response = $e->getResponse();
+        $message = preg_split('/$\R?^/m', $response['content']);
+        $message = explode(':', $message[0]);
+        $message = $message[count($message) - 1];
+        break;
+      
+      default:
+        $message = $e->getMessage();
+        break;
+    }
+    throw new RepositoryException($message, $code, $e);
   }
 }

@@ -270,33 +270,206 @@ FOXML;
   }
 }
 
-/*
+
 class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
 
-  protected function setUp() {
-    $this->connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
-    $this->serializer = new FedoraApiSerializer();
+  static $apim;
+  static $apia;
+  static $namespace;
+  static $fixtures;
+  static $display;
 
-    $this->apim = new FedoraApiM($this->connection, $this->serializer);
-    $this->apia = new FedoraApiA($this->connection, $this->serializer);
+  static function setUpBeforeClass() {
+    $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+    $serializer = new FedoraApiSerializer();
+
+    self::$apim = new FedoraApiM($connection, $serializer);
+    self::$apia = new FedoraApiA($connection, $serializer);
+
+    self::$namespace = FedoraTestHelpers::randomString(10);
+    $pid1 = self::$namespace . ":" . FedoraTestHelpers::randomString(10);
+    $pid2 = self::$namespace . ":" . FedoraTestHelpers::randomString(10);
+
+    self::$fixtures = array();
+
+    $pid = self::$apim->ingest(array('pid' => $pid1, 'string' => file_get_contents('tests/test_data/fixture1.xml')));
+    self::$fixtures[$pid] = array(
+      'pid' => $pid1,
+      'label' => 'label1',
+      'state' => 'I',
+      'ownerId' => 'owner1',
+      'cDate' => '2012-03-12T15:22:37.847Z',
+      'dcmDate' => '2012-03-13T14:12:59.272Z',
+      'title' => 'title1',
+      'creator' => 'creator1',
+      'subject' => 'subject1',
+      'description' => 'description1',
+      'publisher' => 'publisher1',
+      'contributor' => 'contributor1',
+      'date' => 'date1',
+      'type' => 'type1',
+      'format' => 'format1',
+      'identifier' => $pid,
+      'source' => 'source1',
+      'language' => 'language1',
+      'relation' => 'relation1',
+      'coverage' => 'coverage1',
+      'rights' => 'rights1',
+    );
+    $pid = self::$apim->ingest(array('pid' => $pid2, 'string' => file_get_contents('tests/test_data/fixture2.xml')));
+    self::$fixtures[$pid] = array(
+      'pid' => $pid,
+      'label' => 'label2',
+      'state' => 'A',
+      'ownerId' => 'owner2',
+      'cDate' => '2000-03-12T15:22:37.847Z',
+      'dcmDate' => '2010-03-13T14:12:59.272Z',
+      'title' => 'title2',
+      'creator' => 'creator2',
+      'subject' => 'subject2',
+      'description' => 'description2',
+      'publisher' => 'publisher2',
+      'contributor' => 'contributor2',
+      'date' => 'date2',
+      'type' => 'type2',
+      'format' => 'format2',
+      'identifier' => $pid,
+      'source' => 'source2',
+      'language' => 'language2',
+      'relation' => 'relation2',
+      'coverage' => 'coverage2',
+      'rights' => 'rights2',
+    );
+    self::$display = array( 'pid', 'label', 'state', 'ownerId', 'cDate', 'mDate',
+      'dcmDate', 'title', 'creator', 'subject', 'description', 'publisher',
+      'contributor', 'date', 'type', 'format', 'identifier', 'source',
+      'language', 'relation', 'coverage', 'rights'
+    );
   }
 
-  protected function tearDown() {
-    if (isset($this->pids) && is_array($this->pids)) {
-      while ($pid = array_pop($this->pids)) {
-        try {
-          $this->apim->purgeObject($pid);
-        }
-        catch (RepositoryException $e) {}
+  static public function tearDownAfterClass()
+  {
+    foreach (self::$fixtures as $key => $value) {
+      try {
+        self::$apim->purgeObject($key);
       }
+      catch (RepositoryException $e) {}
     }
+  }
 
-    if (isset($this->files) && is_array($this->files)) {
-      while ($file = array_pop($this->files)) {
-        unlink($file);
+  function testFindObjectsTerms() {
+    // Test all of the possible values.
+    $namespace = self::$namespace;
+    $result = self::$apia->findObjects('terms', "{$namespace}:*", 1, self::$display);
+    $this->assertEquals(1,count($result['results']));
+    $pid = $result['results'][0]['pid'];
+    // Make sure we have the modified date key. But we unset it because we can't
+    // test it, since it changes every time.
+    $this->assertArrayHasKey('mDate', $result['results'][0]);
+    unset($result['results'][0]['mDate']);
+    $this->assertEquals(self::$fixtures[$pid],$result['results'][0]);
+
+    // Test that we have a session key
+    $this->assertArrayHasKey('session', $result);
+    $this->assertArrayHasKey('token', $result['session']);
+    return $result['session']['token'];
+  }
+
+  /**
+   * @depends testFindObjectsTerms
+   */
+  function testFindObjectsTermsResume($token) {
+    $result = self::$apia->resumeFindObjects($token);
+    $this->assertEquals(1,count($result['results']));
+    $this->assertArrayNotHasKey('session', $result);
+    $pid = $result['results'][0]['pid'];
+    // Make sure we have the modified date key. But we unset it because we can't
+    // test it, since it changes every time.
+    $this->assertArrayHasKey('mDate', $result['results'][0]);
+    unset($result['results'][0]['mDate']);
+    $this->assertEquals(self::$fixtures[$pid],$result['results'][0]);
+  }
+
+  function testFindObjectsQueryWildcard() {
+    $namespace = self::$namespace;
+    $result = self::$apia->findObjects('query', "pid~{$namespace}:*", NULL, self::$display);
+    $this->assertEquals(2,count($result['results']));
+    foreach($result['results'] as $results) {
+      $this->assertArrayHasKey('mDate', $results);
+      unset($results['mDate']);
+      $this->assertEquals(self::$fixtures[$results['pid']], $results);
+    }
+  }
+
+  function testFindObjectsQueryEquals() {
+    $display = array_diff(self::$display, array('mDate'));
+    foreach(self::$fixtures as $pid => $data) {
+      foreach($data as $key => $value) {
+        switch($key) {
+          case 'cDate':
+          case 'mDate':
+          case 'dcmDate':
+            $query = "pid=$pid ${key}=$value";
+            break;
+          default:
+            $query = "pid=$pid ${key}~$value";
+        }
+        $result = self::$apia->findObjects('query', $query, NULL, $display);
+        $this->assertEquals(1,count($result['results']));
+        $this->assertEquals(self::$fixtures[$pid], $result['results'][0]);
       }
     }
   }
 }
- * 
- */
+
+class FedoraApiGetDisseminationTest extends PHPUnit_Framework_TestCase {
+
+  static $apim;
+  static $apia;
+  static $fixtures;
+
+  static function setUpBeforeClass() {
+    $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+    $serializer = new FedoraApiSerializer();
+    self::$apim = new FedoraApiM($connection, $serializer);
+    self::$apia = new FedoraApiA($connection, $serializer);
+    $pid = FedoraTestHelpers::randomString(10) . ":" . FedoraTestHelpers::randomString(10);
+    self::$fixtures = self::$apim->ingest(array('pid' => $pid, 'string' => file_get_contents('tests/test_data/fixture1.xml')));
+  }
+
+  static public function tearDownAfterClass()
+  {
+    try {
+      self::$apim->purgeObject(self::$fixtures);
+    }
+    catch (RepositoryException $e) {}
+  }
+
+  function testGetDatastreamDissemination() {
+    $expected = file_get_contents('tests/test_data/fixture1_fixture_newest.png');
+    $actual = self::$apia->getDatastreamDissemination(self::$fixtures, 'fixture');
+    $this->assertEquals($expected, $actual);
+  }
+
+  function testGetDatastreamDisseminationAsOfDate() {
+    $expected = file_get_contents('tests/test_data/fixture1_fixture_oldest.png');
+    $actual = self::$apia->getDatastreamDissemination(self::$fixtures, 'fixture', '2012-03-13T17:40:29.057Z');
+    $this->assertEquals($expected, $actual);
+  }
+
+  function testGetDissemination() {
+    $this->markTestIncomplete();
+  }
+
+  function testGetObjectHistory() {
+    $expected = array('2012-03-13T14:12:59.272Z', '2012-03-13T17:40:29.057Z',
+      '2012-03-13T18:09:25.425Z');
+    $actual = self::$apia->getObjectHistory(self::$fixtures);
+    $this->assertEquals($expected, $actual);
+  }
+
+  function testGetObjectProfile() {
+    $actual = self::$apia->getObjectProfile(self::$fixtures);
+    print_r($actual);
+  }
+}

@@ -19,7 +19,7 @@
  */
 class HttpConnectionException extends Exception {
 
-  public $response;
+  protected $response;
 
   /**
    * The constructor for the exception. Adds a response field.
@@ -38,6 +38,16 @@ class HttpConnectionException extends Exception {
     $this->response = $response;
   }
 
+  /**
+   * Get the HTTP response that caused the exception.
+   *
+   * @return array
+   *   Array containing the HTTP response. It has three keys: status, headers
+   *   and content.
+   */
+  function getResponse() {
+    return $this->response;
+  }
 }
 
 /**
