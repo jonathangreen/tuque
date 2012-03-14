@@ -138,7 +138,11 @@ class FedoraApiA {
    * @return array()
    *   The results are returned in an array key called 'results'. If there
    *   are more results that aren't returned then the search session information
-   *   is contained in a key called 'session'.
+   *   is contained in a key called 'session'. Note that it is possible for
+   *   some display fields to be multivalued, such as identifier (DC allows
+   *   multiple DC identifier results) in the case there are multiple results
+   *   an array is returned instread of a string, this indexed array contains
+   *   all of the values.
    *   @code
    *   Array
    *   (
@@ -155,12 +159,19 @@ class FedoraApiA {
    *                  (
    *                      [pid] => islandora:collectionCModel
    *                      [title] => Islandora Collection Content Model
+   *                      [identifier] => Contents of DC:Identifier
    *                  )
    *
    *              [1] => Array
    *                  (
    *                      [pid] => islandora:testCModel
    *                      [title] => Test content model for Ari
+   *                      [identifier] => Array
+   *                          (
+   *                              [0] => Contents of first DC:Identifier
+   *                              [1] => Contents of seconds DC:Identifier
+   *                          )
+   *
    *                  )
    *
    *          )

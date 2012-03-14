@@ -102,7 +102,7 @@ class FedoraApiSerializer {
    * @return array
    *   An array representation of the XML.
    */
-  private function flattenDocument($xml) {
+  private function flattenDocument($xml, $make_array = array()) {
     if (!$xml) {
       return '';
     }
@@ -115,9 +115,12 @@ class FedoraApiSerializer {
     $return = array();
 
     foreach ($xml->children() as $name => $child) {
-      $value = $this->flattenDocument($child);
+      $value = $this->flattenDocument($child, $make_array);
 
-      if (isset($return[$name])) {
+      if (in_array($name, $make_array)) {
+        $return[] = $value;
+      }
+      elseif (isset($return[$name])) {
         if (isset($initialized[$name])) {
           $return[$name][] = $value;
         }
@@ -150,15 +153,8 @@ class FedoraApiSerializer {
     if(isset($results->listSession)) {
       $data['session'] = $this->flattenDocument($results->listSession);
     }
-
-    $data['results'] = array();
-
-    foreach($results->resultList->objectFields as $object) {
-      $result = array();
-      foreach($object as $key => $value) {
-        $result[(string)$key] = (string)$value;
-      }
-      $data['results'][] = $result;
+    if(isset($results->resultList)) {
+      $data['results'] = $this->flattenDocument($results->resultList, array('objectFields'));
     }
 
     return $data;
@@ -178,25 +174,13 @@ class FedoraApiSerializer {
 
   public function getObjectHistory($request) {
     $objectHistory = $this->loadSimpleXml($request['content']);
-    $data = array();
-    
-    if(isset($objectHistory->objectChangeDate)) {
-      foreach($objectHistory->objectChangeDate as $date) {
-        $data[] = (string) $date;
-      }
-    }
+    $data = $this->flattenDocument($objectHistory, array('objectChangeDate'));
     return $data;
   }
 
   public function getObjectProfile($request) {
     $result = $this->loadSimpleXml($request['content']);
-    $data = $this->flattenDocument($result);
-    $data['objModels'] = array();
-    if(isset($result->objModels->model)) {
-      foreach($result->objModels->model as $model) {
-        $data['objModels'][] = (string) $model;
-      }
-    }
+    $data = $this->flattenDocument($result, array('model'));
     return $data;
   }
 
@@ -251,22 +235,14 @@ class FedoraApiSerializer {
 
   public function getDatastreamHistory($request) {
     $result = $this->loadSimpleXml($request['content']);
-    $result = $this->flattenDocument($result);
-
-    if (isset($result['datastreamProfile'])) {
-      $result = $result['datastreamProfile'];
-    }
+    $result = $this->flattenDocument($result, 'dataStreamProfile');
 
     return $result;
   }
 
   public function getNextPid($request) {
     $result = $this->loadSimpleXml($request['content']);
-    $result = $this->flattenDocument($result);
-
-    if (isset($result['pid'])) {
-      $result = $result['pid'];
-    }
+    $result = $this->flattenDocument($result, 'pid');
 
     return $result;
   }

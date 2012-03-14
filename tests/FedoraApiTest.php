@@ -15,7 +15,7 @@ class FedoraTestHelpers {
   static function randomString($length) {
     $length = 10;
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $string ='';
+    $string = '';
 
     for ($p = 0; $p < $length; $p++) {
         $string .= $characters[mt_rand(0, (strlen($characters)-1))];
@@ -265,34 +265,86 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     self::$pids[] = $pid1;
     self::$pids[] = $pid2;
 
+    // Set up some arrays of data for the fixtures.
     $string = file_get_contents('tests/test_data/fixture1.xml');
     $string = preg_replace('/\%PID\%/', $pid1, $string);
     $pid = self::$apim->ingest(array('string' => $string));
-    self::$fixtures[$pid] = array(
-      'pid' => $pid1,
-      'label' => 'label1',
-      'state' => 'I',
-      'ownerId' => 'owner1',
-      'cDate' => '2012-03-12T15:22:37.847Z',
-      'dcmDate' => '2012-03-13T14:12:59.272Z',
-      'title' => 'title1',
-      'creator' => 'creator1',
-      'subject' => 'subject1',
-      'description' => 'description1',
-      'publisher' => 'publisher1',
-      'contributor' => 'contributor1',
-      'date' => 'date1',
-      'type' => 'type1',
-      'format' => 'format1',
-      'identifier' => $pid,
-      'source' => 'source1',
-      'language' => 'language1',
-      'relation' => 'relation1',
-      'coverage' => 'coverage1',
+    $urlpid = urlencode($pid);
+    self::$fixtures[$pid] = array();
+    self::$fixtures[$pid]['xml'] = $string;
+    self::$fixtures[$pid]['findObjects'] = array( 'pid' => $pid1,
+      'label' => 'label1', 'state' => 'I', 'ownerId' => 'owner1',
+      'cDate' => '2012-03-12T15:22:37.847Z', 'dcmDate' => '2012-03-13T14:12:59.272Z',
+      'title' => 'title1', 'creator' => 'creator1', 'subject' => 'subject1',
+      'description' => 'description1', 'publisher' => 'publisher1',
+      'contributor' => 'contributor1', 'date' => 'date1', 'type' => 'type1',
+      'format' => 'format1', 'identifier' => $pid, 'source' => 'source1',
+      'language' => 'language1', 'relation' => 'relation1', 'coverage' => 'coverage1',
       'rights' => 'rights1',
     );
-    $pid = self::$apim->ingest(array('pid' => $pid2, 'string' => file_get_contents('tests/test_data/fixture2.xml')));
-    self::$fixtures[$pid] = array(
+    self::$fixtures[$pid]['getObjectHistory'] = array('2012-03-13T14:12:59.272Z',
+      '2012-03-13T17:40:29.057Z', '2012-03-13T18:09:25.425Z',
+      '2012-03-13T19:15:07.529Z');
+    self::$fixtures[$pid]['getObjectProfile'] = array(
+      'objLabel' => self::$fixtures[$pid]['findObjects']['label'],
+      'objOwnerId' => self::$fixtures[$pid]['findObjects']['ownerId'],
+      'objModels' => array('info:fedora/fedora-system:FedoraObject-3.0',
+        'info:fedora/testnamespace:test'),
+      'objCreateDate' => self::$fixtures[$pid]['findObjects']['cDate'],
+      'objDissIndexViewURL' => "http://localhost:8080/fedora/objects/$urlpid/methods/fedora-system%3A3/viewMethodIndex",
+      'objItemIndexViewURL' => "http://localhost:8080/fedora/objects/$urlpid/methods/fedora-system%3A3/viewItemIndex",
+      'objState' => self::$fixtures[$pid]['findObjects']['state'],
+    );
+    self::$fixtures[$pid]['listDatastreams'] = array(
+      '2012-03-13T14:12:59.272Z' => array (
+        'DC' => Array (
+            'label' => 'Dublin Core Record for this object',
+            'mimetype' => 'text/xml',
+        ),
+      ),
+      '2012-03-13T17:40:29.057Z' => array (
+        'DC' => Array(
+                'label' => 'Dublin Core Record for this object',
+                'mimetype' => 'text/xml',
+            ),
+        'fixture' => Array(
+                'label' => 'label',
+                'mimetype' => 'image/png',
+            ),
+      ),
+      '2012-03-13T18:09:25.425Z' => Array(
+        'DC' => Array(
+                'label' => 'Dublin Core Record for this object',
+                'mimetype' => 'text/xml',
+            ),
+        'fixture' => Array(
+                'label' => 'label',
+                'mimetype' => 'image/png',
+            ),
+      ),
+      '2012-03-13T19:15:07.529Z' => Array(
+        'DC' => Array(
+                'label' => 'Dublin Core Record for this object',
+                'mimetype' => 'text/xml',
+            ),
+        'fixture' => Array(
+                'label' => 'label',
+                'mimetype' => 'image/png',
+            ),
+        'RELS-EXT' => Array(
+                'label' => 'Fedora Relationships Metadata',
+                'mimetype' => 'text/xml',
+            ),
+      ),
+    );
+
+    // second fixture
+    $string = file_get_contents('tests/test_data/fixture2.xml');
+    $pid = self::$apim->ingest(array('pid' => $pid2, 'string' => $string));
+    $urlpid = urlencode($pid);
+    self::$fixtures[$pid] = array();
+    self::$fixtures[$pid]['xml'] = $string;
+    self::$fixtures[$pid]['findObjects'] = array(
       'pid' => $pid,
       'label' => 'label2',
       'state' => 'A',
@@ -308,13 +360,32 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
       'date' => 'date2',
       'type' => 'type2',
       'format' => 'format2',
-      'identifier' => $pid,
+      'identifier' => array('identifier2', $pid),
       'source' => 'source2',
       'language' => 'language2',
       'relation' => 'relation2',
       'coverage' => 'coverage2',
       'rights' => 'rights2',
     );
+    self::$fixtures[$pid]['getObjectHistory'] = array('2010-03-13T14:12:59.272Z');
+    self::$fixtures[$pid]['getObjectProfile'] = array(
+      'objLabel' => self::$fixtures[$pid]['findObjects']['label'],
+      'objOwnerId' => self::$fixtures[$pid]['findObjects']['ownerId'],
+      'objModels' => array('info:fedora/fedora-system:FedoraObject-3.0'),
+      'objCreateDate' => self::$fixtures[$pid]['findObjects']['cDate'],
+      'objDissIndexViewURL' => "http://localhost:8080/fedora/objects/$urlpid/methods/fedora-system%3A3/viewMethodIndex",
+      'objItemIndexViewURL' => "http://localhost:8080/fedora/objects/$urlpid/methods/fedora-system%3A3/viewItemIndex",
+      'objState' => self::$fixtures[$pid]['findObjects']['state'],
+    );
+    self::$fixtures[$pid]['listDatastreams'] = array(
+      '2010-03-13T14:12:59.272Z' => array (
+        'DC' => Array (
+            'label' => 'Dublin Core Record for this object',
+            'mimetype' => 'text/xml',
+        ),
+      ),
+    );
+
     self::$display = array( 'pid', 'label', 'state', 'ownerId', 'cDate', 'mDate',
       'dcmDate', 'title', 'creator', 'subject', 'description', 'publisher',
       'contributor', 'date', 'type', 'format', 'identifier', 'source',
@@ -361,7 +432,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     // test it, since it changes every time.
     $this->assertArrayHasKey('mDate', $result['results'][0]);
     unset($result['results'][0]['mDate']);
-    $this->assertEquals(self::$fixtures[$pid],$result['results'][0]);
+    $this->assertEquals(self::$fixtures[$pid]['findObjects'],$result['results'][0]);
 
     // Test that we have a session key
     $this->assertArrayHasKey('session', $result);
@@ -381,7 +452,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     // test it, since it changes every time.
     $this->assertArrayHasKey('mDate', $result['results'][0]);
     unset($result['results'][0]['mDate']);
-    $this->assertEquals(self::$fixtures[$pid],$result['results'][0]);
+    $this->assertEquals(self::$fixtures[$pid]['findObjects'],$result['results'][0]);
   }
 
   function testFindObjectsQueryWildcard() {
@@ -391,26 +462,32 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     foreach($result['results'] as $results) {
       $this->assertArrayHasKey('mDate', $results);
       unset($results['mDate']);
-      $this->assertEquals(self::$fixtures[$results['pid']], $results);
+      $this->assertEquals(self::$fixtures[$results['pid']]['findObjects'], $results);
     }
   }
 
   function testFindObjectsQueryEquals() {
     $display = array_diff(self::$display, array('mDate'));
-    foreach(self::$fixtures as $pid => $data) {
-      foreach($data as $key => $value) {
-        switch($key) {
-          case 'cDate':
-          case 'mDate':
-          case 'dcmDate':
-            $query = "pid=$pid ${key}=$value";
-            break;
-          default:
-            $query = "pid=$pid ${key}~$value";
+    foreach(self::$fixtures as $pid => $fixtures) {
+      $data = $fixtures['findObjects'];
+      foreach($data as $key => $array) {
+        if(!is_array($array)) {
+          $array = array($array);
         }
-        $result = self::$apia->findObjects('query', $query, NULL, $display);
-        $this->assertEquals(1,count($result['results']));
-        $this->assertEquals(self::$fixtures[$pid], $result['results'][0]);
+        foreach($array as $value) {
+          switch($key) {
+            case 'cDate':
+            case 'mDate':
+            case 'dcmDate':
+              $query = "pid=$pid ${key}=$value";
+              break;
+            default:
+              $query = "pid=$pid ${key}~$value";
+          }
+          $result = self::$apia->findObjects('query', $query, NULL, $display);
+          $this->assertEquals(1,count($result['results']));
+          $this->assertEquals(self::$fixtures[$pid]['findObjects'], $result['results'][0]);
+        }
       }
     }
   }
@@ -432,27 +509,48 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testGetObjectHistory() {
-    $expected = array('2012-03-13T14:12:59.272Z', '2012-03-13T17:40:29.057Z',
-      '2012-03-13T18:09:25.425Z', '2012-03-13T19:15:07.529Z');
-    $actual = self::$apia->getObjectHistory(self::$pids[0]);
-    $this->assertEquals($expected, $actual);
-
-    $expected = array('2010-03-13T14:12:59.272Z');
-    $actual = self::$apia->getObjectHistory(self::$pids[1]);
-    $this->assertEquals($expected, $actual);
+    foreach (self::$fixtures as $pid => $fixture) {
+      $actual = self::$apia->getObjectHistory($pid);
+      $this->assertEquals($fixture['getObjectHistory'], $actual);
+    }
   }
 
   // This one is interesting because the flattendocument function doesn't
   // work on it. So we have to handparse it. So we test to make sure its okay.
+  // @todo Test the second arguement to this
   function testGetObjectProfile() {
-    foreach ( self::$pids as $pid) {
-      $data = self::$fixtures[$pid];
+    foreach (self::$fixtures as $pid => $fixture) {
+      $expected = $fixture['getObjectProfile'];
       $actual = self::$apia->getObjectProfile($pid);
-      $this->assertArrayHasKey('objCreateDate', $actual);
-      $this->assertEquals($data['label'], $actual['objLabel']);
-      $this->assertEquals($data['ownerId'], $actual['objOwnerId']);
-      $this->assertEquals($data['state'], $actual['objState']);
-      $this->assertEquals($data['cDate'], $actual['objCreateDate']);
+      $this->assertArrayHasKey('objLastModDate', $actual);
+      unset($actual['objLastModDate']);
+      // The content models come back in an undefined order, so we need
+      // to test them individually.
+      $this->assertArrayHasKey('objModels', $actual);
+      $this->assertEquals(count($expected['objModels']), count($actual['objModels']));
+      foreach($actual['objModels'] as $model) {
+        $this->assertTrue(in_array($model, $actual['objModels']));
+      }
+      unset($actual['objModels']);
+      unset($expected['objModels']);
+      $this->assertEquals($expected, $actual);
     }
+  }
+
+  function testListDatastreams() {
+    foreach (self::$fixtures as $pid => $fixture) {
+      foreach($fixture['getObjectHistory'] as $datetime) {
+        $actual = self::$apia->listDatastreams($pid, $datetime);
+        $this->assertEquals($fixture['listDatastreams'][$datetime], $actual);
+      }
+      $revisions = count($fixture['getObjectHistory']);
+      $date = $fixture['getObjectHistory'][$revisions-1];
+      $acutal = self::$apia->listDatastreams($pid);
+      $this->assertEquals($fixture['listDatastreams'][$date], $actual);
+    }
+  }
+
+  function testListMethods() {
+    $this->markTestIncomplete();
   }
 }
