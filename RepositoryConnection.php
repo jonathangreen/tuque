@@ -1,21 +1,28 @@
 <?php
-require_once('HttpConnection.php');
-require_once('RepositoryException.php');
-
 /**
- * @file 
- * This file contains both the Abstract version of a configuration file and an implementation.
+ * @file
+ * This file contains the implementation of a connection to Fedora. And the
+ * interface for a repository configuration.
  */
+
+require_once 'HttpConnection.php';
+require_once 'RepositoryException.php';
 
 /**
  * The general interface for a RepositoryConfig object.
  */
 interface RepositoryConfigInterface {
+  /**
+   * Simple constructor defintion for the repository
+   */
   function __construct($url, $username, $password);
 }
 
 /**
- * Specific RepositoryConfig implementation to be used with the cURL RepositoryConnection Object.
+ * Specific RepositoryConfig implementation that extends the CurlConnection
+ * class so that we can do specific processing on Curl requests for Fedora.
+ * This also wraps the exceptions thrown by Curl, so that we keep our exception
+ * encapsulation.
  */
 class RepositoryConnection extends CurlConnection implements RepositoryConfigInterface {
 
@@ -24,7 +31,7 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
   public $password;
 
   function __construct($url = 'http://localhost:8080/fedora', $username = NULL, $password = NULL) {
-    // make sure the url doesn't have a trailing slash 
+    // Make sure the url doesn't have a trailing slash.
     $this->url = rtrim($url,"/");
     $this->username = $username;
     $this->password = $password;

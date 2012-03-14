@@ -15,7 +15,11 @@ class RepositoryException extends Exception {}
  */
 class RepositoryXmlError extends RepositoryException {
   public $errors;
-  
+
+  /**
+   * Same as the default exception constructor except it takes another
+   * parameter errors, this is the error returned by the xml parser.
+   */
   function __construct($message, $code, $errors, $previous = NULL) {
     parent::__construct($message, $code, $previous);
     $this->errors = $errors;

@@ -553,4 +553,41 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
   function testListMethods() {
     $this->markTestIncomplete();
   }
+
+  function testExport() {
+    $this->markTestIncomplete();
+    // One would think this would work, but there are a few problems
+    // a number of tags change on ingest, so we need to do a more in
+    // depth comparison.
+    foreach (self::$fixtures as $pid => $fixture) {
+      $actual = self::$apim->export($pid, array('context' => 'archive'));
+      $this->assertEquals($fixture['xml'], $actual);
+    }
+  }
+
+  function testGetDatastream() {
+    foreach (self::$fixtures as $pid => $fixture) {
+      $fixture = $fixture['listDatastreams'];
+      foreach($fixture as $time => $datastreams) {
+        foreach($datastreams as $dsid => $data) {
+          $actual = self::$apim->getDatastream($pid, $dsid, array('asOfDateTime' => $time));
+          $this->assertEquals($data['label'], $actual['dsLabel']);
+          $this->assertEquals($data['mimetype'], $actual['dsMIME']);
+          $this->assertArrayHasKey('dsVersionID', $actual);
+          $this->assertArrayHasKey('dsCreateDate', $actual);
+          $this->assertArrayHasKey('dsState', $actual);
+          $this->assertArrayHasKey('dsMIME', $actual);
+          $this->assertArrayHasKey('dsFormatURI', $actual);
+          $this->assertArrayHasKey('dsControlGroup', $actual);
+          $this->assertArrayHasKey('dsSize', $actual);
+          $this->assertArrayHasKey('dsVersionable', $actual);
+          $this->assertArrayHasKey('dsInfoType', $actual);
+          $this->assertArrayHasKey('dsLocation', $actual);
+          $this->assertArrayHasKey('dsLocationType', $actual);
+          $this->assertArrayHasKey('dsChecksumType', $actual);
+          $this->assertArrayHasKey('dsChecksum', $actual);
+        }
+      }
+    }
+  }
 }
