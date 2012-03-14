@@ -2,7 +2,9 @@
 
 require_once 'FedoraApi.php';
 require_once 'FedoraApiSerializer.php';
+require_once 'FedoraDate.php';
 
+/*
 $connection = new RepositoryConnection('http://vm0:8080/fedora', 'fedoraAdmin', 'password');
 //$connection = new RepositoryConnection('http://colorado:8080/fedora', 'fedoraAdmin', 'fedoraAdmin');
 $serializer = new FedoraApiSerializer();
@@ -41,3 +43,8 @@ try{
     print_r($e->getPrevious()->response);
   }
 }
+ *
+ */
+
+$woot = new FedoraDate('2012-03-12');
+print($woot->format("Y-m-d\TH:i:s.u\Z"));
