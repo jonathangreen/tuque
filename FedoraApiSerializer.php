@@ -229,6 +229,7 @@ class FedoraApiSerializer {
    * Serializes the data returned in FedoraApiA::listMethods()
    */
   public function listMethods($request) {
+    print_r($request['content']);
     $result = array();
     $object_methods = $this->loadSimpleXml($request['content']);
     // We can't use flattenDocument here because of the atrtibutes.
@@ -281,7 +282,7 @@ class FedoraApiSerializer {
    */
   public function getDatastreamHistory($request) {
     $result = $this->loadSimpleXml($request['content']);
-    $result = $this->flattenDocument($result, 'dataStreamProfile');
+    $result = $this->flattenDocument($result, array('datastreamProfile'));
 
     return $result;
   }
@@ -291,7 +292,8 @@ class FedoraApiSerializer {
    */
   public function getNextPid($request) {
     $result = $this->loadSimpleXml($request['content']);
-    $result = $this->flattenDocument($result, 'pid');
+    $result = $this->flattenDocument($result);
+    $result = $result['pid'];
 
     return $result;
   }

@@ -3,7 +3,6 @@
 abstract class AbstractDatastream extends MagicProperty {
   
   /* functions */
-  abstract public function purge();
   abstract public function delete();
   abstract public function setContentFromFile($file);
   abstract public function setContentFromUrl($url);
@@ -23,6 +22,25 @@ abstract class AbstractDatastream extends MagicProperty {
   abstract protected function locationTypeMagicProperty($function, $value);
   abstract protected function checksumMagicProperty($function, $value);
   abstract protected function checksumTypeMagicProperty($function, $value);
+}
+
+class FedoraDatastream extends AbstractDatastream {
+  public function __construct(FedoraObject $object) {
+    $this->apim = $apim;
+    $this->apia = $apia;
+  }
+
+  public function delete() {
+    $this->state = 'd';
+  }
+
+  public function setContent($type, $data) {
+
+  }
+
+  public function setContentFromFile() {
+
+  }
 }
 
 class TestDatastream extends AbstractDatastream {

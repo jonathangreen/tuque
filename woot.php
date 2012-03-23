@@ -4,7 +4,6 @@ require_once 'FedoraApi.php';
 require_once 'FedoraApiSerializer.php';
 require_once 'FedoraDate.php';
 
-/*
 $connection = new RepositoryConnection('http://vm0:8080/fedora', 'fedoraAdmin', 'password');
 //$connection = new RepositoryConnection('http://colorado:8080/fedora', 'fedoraAdmin', 'fedoraAdmin');
 $serializer = new FedoraApiSerializer();
@@ -19,8 +18,8 @@ $m = new FedoraApiM($connection, $serializer);
 //print_r($a->findObjects('terms', 'islandora:*', 2));
 
 try{
-  //print_r($a->listMethods('codearl:9065', 'codearl:9055'));
-  print_r($a->describeRepository());
+  print_r($a->listMethods('carsonlegal:62'));
+  //print_r($a->describeRepository());
   //print_r($m->addDatastream('islandora:strict_pdf', 'url', 'url', "http://www.albionresearch.com/images/albionwb75x75.png", array('controlGroup' => 'X', 'mimeType' => 'image/png')));
   //print_r($m->addDatastream('islandora:strict_pdf', 'test', 'string', "<woot><a><b><c></woot>", array('controlGroup' => 'M', 'mimeType' => 'text/xml')));
   //print_r($m->addDatastream('islandora:strict_pdf', 'file', 'file', '/home/jgreen/jon.jpg', array('controlGroup' => 'M', 'mimeType' => 'image/jpeg')));
@@ -43,8 +42,3 @@ try{
     print_r($e->getPrevious()->response);
   }
 }
- *
- */
-
-$woot = new FedoraDate('2012-03-12');
-print($woot->format("Y-m-d\TH:i:s.u\Z"));

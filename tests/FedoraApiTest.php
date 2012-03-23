@@ -6,24 +6,7 @@
 
 require_once 'FedoraApi.php';
 require_once 'FedoraApiSerializer.php';
-
-define('FEDORAURL', 'http://vm0:8080/fedora');
-define('FEDORAUSER', 'fedoraAdmin');
-define('FEDORAPASS', 'password');
-
-class FedoraTestHelpers {
-  static function randomString($length) {
-    $length = 10;
-    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $string = '';
-
-    for ($p = 0; $p < $length; $p++) {
-        $string .= $characters[mt_rand(0, (strlen($characters)-1))];
-    }
-
-    return $string;
-  }
-}
+require_once 'TestHelpers.php';
 
 class FedoraApiIngestTest extends PHPUnit_Framework_TestCase {
   protected $pids = array();
@@ -337,6 +320,65 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
             ),
       ),
     );
+    self::$fixtures[$pid]['dsids'] = array(
+      'DC' => array (
+        'data' => array(
+          'dsLabel' => 'Dublin Core Record for this object',
+          'dsVersionID' => 'DC.1',
+          'dsCreateDate' => '2012-03-13T14:12:59.272Z',
+          'dsState' => 'A',
+          'dsMIME' => 'text/xml',
+          'dsFormatURI' => 'http://www.openarchives.org/OAI/2.0/oai_dc/',
+          'dsControlGroup' => 'X',
+          'dsSize' => '860',
+          'dsVersionable' => 'true',
+          'dsInfoType' => '',
+          'dsLocation' => "$pid+DC+DC.1",
+          'dsLocationType' => '',
+          'dsChecksumType' => 'DISABLED',
+          'dsChecksum' => 'none',
+        ),
+        'count' => 1,
+      ),
+      'fixture' => array(
+        'data' => array(
+          'dsLabel' => 'label',
+          'dsVersionID' => 'fixture.4',
+          'dsCreateDate' => '2012-03-13T18:09:25.425Z',
+          'dsState' => 'A',
+          'dsMIME' => 'image/png',
+          'dsFormatURI' => 'format',
+          'dsControlGroup' => 'M',
+          'dsSize' => '68524',
+          'dsVersionable' => 'true',
+          'dsInfoType' => '',
+          'dsLocation' => "$pid+fixture+fixture.4",
+          'dsLocationType' => 'INTERNAL_ID',
+          'dsChecksumType' => 'DISABLED',
+          'dsChecksum' => 'none',
+        ),
+        'count' => 2,
+      ),
+      'RELS-EXT' => array(
+        'data' => array(
+          'dsLabel' => 'Fedora Relationships Metadata',
+          'dsVersionID' => 'RELS-EXT.0',
+          'dsCreateDate' => '2012-03-13T19:15:07.529Z',
+          'dsState' => 'A',
+          'dsMIME' => 'text/xml',
+          'dsFormatURI' => '',
+          'dsControlGroup' => 'X',
+          'dsSize' => '540',
+          'dsVersionable' => 'true',
+          'dsInfoType' => '',
+          'dsLocation' => "$pid+RELS-EXT+RELS-EXT.0",
+          'dsLocationType' => 'INTERNAL_ID',
+          'dsChecksumType' => 'DISABLED',
+          'dsChecksum' => 'none',
+        ),
+        'count' => 1,
+      ),
+    );
 
     // second fixture
     $string = file_get_contents('tests/test_data/fixture2.xml');
@@ -383,6 +425,27 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
             'label' => 'Dublin Core Record for this object',
             'mimetype' => 'text/xml',
         ),
+      ),
+    );
+    self::$fixtures[$pid]['dsids'] = array(
+      'DC' => array(
+        'data' => array(
+          'dsLabel' => 'Dublin Core Record for this object',
+          'dsVersionID' => 'DC.1',
+          'dsCreateDate' => '2010-03-13T14:12:59.272Z',
+          'dsState' => 'A',
+          'dsMIME' => 'text/xml',
+          'dsFormatURI' => 'http://www.openarchives.org/OAI/2.0/oai_dc/',
+          'dsControlGroup' => 'X',
+          'dsSize' => '905',
+          'dsVersionable' => 'true',
+          'dsInfoType' => '',
+          'dsLocation' => "$pid+DC+DC.1",
+          'dsLocationType' => '',
+          'dsChecksumType' => 'DISABLED',
+          'dsChecksum' => 'none',
+        ),
+        'count' => 1,
       ),
     );
 
@@ -561,14 +624,22 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     // depth comparison.
     foreach (self::$fixtures as $pid => $fixture) {
       $actual = self::$apim->export($pid, array('context' => 'archive'));
-      $this->assertEquals($fixture['xml'], $actual);
+      $dom = array();
+      $dom[] = new DOMDocument();
+      $dom[] = new DOMDocument();
+      $dom[0]->loadXML($actual);
+      $dom[1]->loadXML($fixture['xml']);
+
+      $this->assertEquals($dom[1], $dom[0]);
     }
   }
 
   function testGetDatastream() {
     foreach (self::$fixtures as $pid => $fixture) {
-      $fixture = $fixture['listDatastreams'];
-      foreach($fixture as $time => $datastreams) {
+      $listDatastreams = $fixture['listDatastreams'];
+
+      // Do a test with the data we have.
+      foreach($listDatastreams as $time => $datastreams) {
         foreach($datastreams as $dsid => $data) {
           $actual = self::$apim->getDatastream($pid, $dsid, array('asOfDateTime' => $time));
           $this->assertEquals($data['label'], $actual['dsLabel']);
@@ -588,6 +659,38 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
           $this->assertArrayHasKey('dsChecksum', $actual);
         }
       }
+
+      // Test with the more detailed current data.
+      foreach($fixture['dsids'] as $dsid => $data) {
+        $actual = self::$apim->getDatastream($pid, $dsid);
+        $this->assertEquals($data['data'], $actual);
+      }
+    }
+  }
+
+  function testGetDatastreamHistory() {
+    foreach (self::$fixtures as $pid => $fixture) {
+      foreach ($fixture['dsids'] as $dsid => $data) {
+        $actual = self::$apim->getDatastreamHistory($pid, $dsid);
+        // we should at least make sure we get the right count here
+        $this->assertEquals($data['count'],count($actual));
+        $this->assertEquals($data['data'], $actual[0]);
+      }
+    }
+  }
+
+  function testGetNextPid() {
+    $pid = self::$apim->getNextPid();
+    $this->assertInternalType('string', $pid);
+
+    $namespace = FedoraTestHelpers::randomString(10);
+    $pids = self::$apim->getNextPid($namespace, 5);
+    $this->assertInternalType('array', $pids);
+    $this->assertEquals(5, count($pids));
+
+    foreach ($pids as $pid) {
+      $pid = explode(':', $pid);
+      $this->assertEquals($namespace, $pid[0]);
     }
   }
 }

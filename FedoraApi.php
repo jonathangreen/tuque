@@ -13,6 +13,45 @@ require_once 'RepositoryException.php';
 require_once 'RepositoryConnection.php';
 
 /**
+ * This is a simple class that brings FedoraApiM and FedoraApiA together.
+ */
+class FedoraApi {
+
+  /**
+   * Fedora APIA Class
+   * @var FedoraApiA
+   */
+  public $a;
+
+  /**
+   * Fedora APIM Class
+   * @var FedoraApiM
+   */
+  public $m;
+
+  /**
+   * Constructor for the FedoraApi object.
+   *
+   * @param RepositoryConnection $connection
+   *   (Optional) If one isn't provided a default one will be used.
+   * @param FedoraApiSerializer $serializer
+   *   (Optional) If one isn't provided a default will be used.
+   */
+  public function  __construct(RepositoryConnection $connection = NULL, FedoraApiSerializer $serializer = NULL) {
+    if (!$connection) {
+      $connection = new RepositoryConnection();
+    }
+
+    if (!$serializer) {
+      $serializer = new FedoraApiSerializer();
+    }
+
+    $this->a = new FedoraApiA($connection, $serializer);
+    $this->m = new FedoraApiM($connection, $serializer);
+  }
+}
+
+/**
  * This class implements the Fedora API-A interface. This is a light wrapper
  * around the Fedora interface. Very little attempt is put into putting things
  * into native PHP datastructures.
@@ -35,9 +74,7 @@ class FedoraApiA {
    *   Takes the serializer object to that will be used to serialze the XML
    *   Fedora returns.
    */
-  public function __construct(RepositoryConnection $connection,
-    FedoraApiSerializer $serializer
-  ) {
+  public function __construct(RepositoryConnection $connection, FedoraApiSerializer $serializer) {
     $this->connection = $connection;
     $this->serializer = $serializer;
   }
@@ -853,8 +890,9 @@ class FedoraApiM {
    *
    * @throws RepositoryException
    *
-   * @return array
-   *   An array containg the requested PIDs
+   * @return array/string
+   *   If one pid is requested it is returned as a string. If multiple pids are
+   *   requested they they are returned in an array containg strings.
    *   @code
    *   Array
    *   (
