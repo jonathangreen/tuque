@@ -1,13 +1,5 @@
 <?php
 
-// $Id$
-
-/**
- * @file
- *
- */
-module_load_include('inc', 'islandora_form_builder', 'Utilities');
-
 class FoxmlDocument extends DOMDocument {
   const foxml = 'info:fedora/fedora-system:def/foxml#';
   const xlink = 'http://www.w3.org/1999/xlink';
@@ -20,48 +12,14 @@ class FoxmlDocument extends DOMDocument {
   const oai_dc = 'http://www.openarchives.org/OAI/2.0/oai_dc/';
   const fedora_model = 'info:fedora/fedora-system:def/model#';
 
-  /**
-   *
-   * @var <type>
-   */
   protected $root;
-  protected $pid;
-  protected $dsid;
-  protected $collectionPid;
-  protected $contentModelPid;
-  protected $ingestFileLocation;
-  protected $label;
-  protected $user;
-  protected $document;
-  protected $transform;
+  protected $object;
 
-  /**
-   *
-   * @global <type> $user
-   * @param <type> $label
-   * @param <type> $pid
-   * @param <type> $dsid
-   * @param <type> $content_model_pid
-   * @param <type> $collection_pid
-   * @param <type> $relationship
-   * @param <type> $ingest_file_location
-   * @param <type> $document 
-   */
-  public function __construct($label, $pid, $dsid, $content_model_pid, $collection_pid, $relationship, $ingest_file_location, $document, $transform) {
-    global $user;
+  public function __construct(NewFedoraObject $object) {
     parent::__construct("1.0", "UTF-8"); // DomDocument
     $this->formatOutput = TRUE;
     $this->preserveWhiteSpace = FALSE;
-    $this->label = $label;
-    $this->user = $user->name;
-    $this->pid = $pid;
-    $this->dsid = $dsid;
-    $this->contentModelPid = $content_model_pid;
-    $this->collectionPid = $collection_pid;
-    $this->relationship = isset($relationship) ? $relationship : 'isMemberOfCollection';
-    $this->ingestFileLocation = $ingest_file_location;
-    $this->document = $document;
-    $this->transform = $transform;
+    $this->object = $object;
     $this->root = $this->createRootElement();
     $this->createDocument();
   }
@@ -69,7 +27,7 @@ class FoxmlDocument extends DOMDocument {
   private function createRootElement() {
     $root = $this->createElementNS(self::foxml, 'foxml:digitalObject');
     $root->setAttribute('VERSION', '1.1');
-    $root->setAttribute('PID', "{$this->pid}");
+    $root->setAttribute('PID', "{$this->object->id}");
     $root->setAttributeNS(self::xmlns, 'xmlns', self::foxml);
     $root->setAttributeNS(self::xmlns, 'xmlns:foxml', self::foxml);
     $root->setAttributeNS(self::xmlns, 'xmlns:xsi', self::xsi);
@@ -84,13 +42,13 @@ class FoxmlDocument extends DOMDocument {
      * So be be cautious, add DOMNode's to thier parent element before adding child elements to them.
      */
     $this->createObjectProperties();
-    $this->createRelationships();
-    $this->createIngestFileDatastreams();
-    $this->createPolicy();
-    $this->createDocumentDatastream();
-    $this->createDublinCoreDatastream();
-    $this->createCollectionPolicy();
-    $this->createWorkflowStream();
+    //$this->createRelationships();
+    //$this->createIngestFileDatastreams();
+    //$this->createPolicy();
+    //$this->createDocumentDatastream();
+    //$this->createDublinCoreDatastream();
+    //$this->createCollectionPolicy();
+    //$this->createWorkflowStream();
   }
 
   /**
@@ -99,31 +57,31 @@ class FoxmlDocument extends DOMDocument {
    * @return DOMElement
    */
   private function createObjectProperties() {
-    global $user;
     $object_properties = $this->createElementNS(self::foxml, 'foxml:objectProperties');
     $this->root->appendChild($object_properties);
 
     $property = $this->createElementNS(self::foxml, 'foxml:property');
     $property->setAttribute('NAME', 'info:fedora/fedora-system:def/model#state');
-    $property->setAttribute('VALUE', 'A');
+    $property->setAttribute('VALUE', $this->object->state);
     $object_properties->appendChild($property);
 
     $property = $this->createElementNS(self::foxml, 'foxml:property');
     $property->setAttribute('NAME', 'info:fedora/fedora-system:def/model#label');
-    $property->setAttribute('VALUE', $this->label);
+    $property->setAttribute('VALUE', $this->object->label);
     $object_properties->appendChild($property);
 
-    $property = $this->createElementNS(self::foxml, 'foxml:property');
-    $property->setAttribute('NAME', 'info:fedora/fedora-system:def/model#ownerId');
-    $property->setAttribute('VALUE', $user->name);
-    $object_properties->appendChild($property);
+    if(isset($this->object->owner)) {
+      $property = $this->createElementNS(self::foxml, 'foxml:property');
+      $property->setAttribute('NAME', 'info:fedora/fedora-system:def/model#ownerId');
+      $property->setAttribute('VALUE', $this->object->owner);
+      $object_properties->appendChild($property);
+    }
+
     return $object_properties;
   }
 
-  /**
-   *
-   * @return DOMElement
-   */
+  /*
+   * @todo clean this up. we need relationships, but not yet.
   private function createRelationships() {
     $datastream = $this->createDatastreamElement('RELS-EXT', NULL, 'X');
     $version = $this->createDatastreamVersionElement('RELS-EXT.0', 'RDF Statements about this Object', 'application/rdf+xml', 'info:fedora/fedora-system:FedoraRELSExt-1.0');
@@ -206,10 +164,6 @@ class FoxmlDocument extends DOMDocument {
     }
   }
 
-  /**
-   *
-   * @return DOMElement
-   */
   private function getPolicyStreamElement() {
     module_load_include('inc', 'fedora_repository', 'ObjectHelper');
     $object_helper = new ObjectHelper();
@@ -240,12 +194,6 @@ class FoxmlDocument extends DOMDocument {
     return $policy_element;
   }
 
-  /**
-   * Creates Collection policy data stream from a template stored within the
-   * Content Model.
-   *
-   * @return DOMElement
-   */
   private function createCollectionPolicy() {
     module_load_include('inc', 'fedora_repository', 'api/fedora_item');
     $fedora_item = new fedora_item($this->contentModelPid);
@@ -312,11 +260,6 @@ class FoxmlDocument extends DOMDocument {
     return $location;
   }
 
-  /**
-   * Creates WorkFlow datastream from a template stored within the Content Model.
-   *
-   * @return DOMElement
-   */
   private function createWorkflowStream() {
     module_load_include('inc', 'fedora_repository', 'api/fedora_item');
     $fedora_item = new fedora_item($this->contentModelPid);
@@ -336,9 +279,6 @@ class FoxmlDocument extends DOMDocument {
     }
   }
 
-  /**
-   * Creates an xml based datastream by importing the root node from $this->document.
-   */
   public function createDocumentDatastream() {
     $datastream = $this->createDatastreamElement($this->dsid, 'A', 'X');
     $version = $this->createDatastreamVersionElement("{$this->dsid}.0", "{$this->dsid} Record", 'text/xml');
@@ -353,9 +293,6 @@ class FoxmlDocument extends DOMDocument {
     }
   }
 
-  /**
-   * Creates a Dublin Core document by transforming $this->document.
-   */
   private function createDublinCoreDatastream() {
     $datastream = $this->createDatastreamElement('DC', 'A', 'X');
     $version = $this->createDatastreamVersionElement('DC.0', 'Dublic Core Record', 'text/xml');
@@ -365,13 +302,7 @@ class FoxmlDocument extends DOMDocument {
     $dublin_core->setAttributeNS(self::xmlns, 'xmlns:xsi', self::xsi); // GOD Damn you libxml!
   }
 
-  /**
-   * Transforms a document via an XSL.
-   *
-   * @return DOMElement
-   *   A DOMDocumentFragment that contains the transformed Dublin Core
-   *   Document.
-   */
+
   private function applyTransformation() {
     $xsl = new DOMDocument();
     $xsl->load($this->transform);
@@ -383,28 +314,6 @@ class FoxmlDocument extends DOMDocument {
     return $this->importNode($document->documentElement, TRUE);
   }
 
-  /**
-   * Ingests this Foxml document into fedora.
-   */
-  public function ingest() {
-    $ret = FALSE;
-    try {
-      $object = Fedora_Item::ingest_from_FOXML($this);
-      if (!empty($object->pid)) {
-        drupal_set_message(t("Item !pid created successfully.", array('!pid' => l($object->pid, 'fedora/repository/' . $object->pid))), "status");
-        $ret = TRUE;
-      }
-      if (!empty($_SESSION['fedora_ingest_files'])) {
-        foreach ($_SESSION['fedora_ingest_files'] as $dsid => $created_file) {
-          file_delete($created_file);
-        }
-      }
-      file_delete($this->ingestFileLocation);
-    } catch (exception $exception) {
-      drupal_set_message(t('Error ingesting object: !e', array('!e' => $exception->getMessage())), 'error');
-      watchdog(t("Fedora_Repository"), t("Error ingesting object: !e", array('!e' => $exception->getMessage())), NULL, WATCHDOG_ERROR);
-    }
-    return $ret;
-  }
+ */
 
 }

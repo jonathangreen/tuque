@@ -1,10 +1,13 @@
 <?php
 
+require_once "FoxmlDocument.php";
+require_once "Object.php";
+
 abstract class AbstractRepository extends MagicProperty implements ArrayAccess {
   public $available;
-  abstract public function newObject($pid);
-  abstract public function getObject($pid);
-  abstract public function findObjects(array $search);
+  //abstract public function newObject($pid);
+  //abstract public function getObject($pid);
+  //abstract public function findObjects(array $search);
 }
 
 class FedoraRepository extends AbstractRepository {
@@ -19,14 +22,37 @@ class FedoraRepository extends AbstractRepository {
   public function findObjects(array $search) {
   }
 
-  public function newObject($id = NULL) {
+  /**
+   * @todo validate the ID
+   * @todo catch the getNextPid errors
+   */
+  public function getNewObject($id = NULL) {
     if($this->cache->get($id) !== FALSE) {
       return FALSE;
     }
+
+    $exploded = explode(':', $id);
+
+    if(!$id) {
+      $id = $this->api->m->getNextPid();
+    }
+    elseif (count($exploded) == 1) {
+      $id = $this->api->m->getNextPid($exploded[0]);
+    }
+
+    return new NewFedoraObject($id, $this);
   }
 
-  public function ingestObject() {
-
+  /*
+   * @todo error handling
+   */
+  public function ingestNewObject(NewFedoraObject &$object) {
+    $dom = new FoxmlDocument($object);
+    $xml = $dom->saveXml();
+    $id = $this->api->m->ingest(array('string' => $xml));
+    $object = new FedoraObject($id, $this);
+    $this->cache->set($id, $object);
+    return $object;
   }
 
   public function getObject($id) {

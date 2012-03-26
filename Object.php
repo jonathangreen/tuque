@@ -130,8 +130,10 @@ class NewFedoraObject extends AbstractFedoraObject {
 
   public function  __construct($id, FedoraRepository $repository) {
     parent::__construct($id, $repository);
-    $this->objProfile = array();
-    $this->objProfile['objState'] = 'A';
+    $this->objectProfile = array();
+    $this->objectProfile['objState'] = 'A';
+    $this->objectProfile['objOwnerId'] = '';
+    $this->objectProfile['objLabel'] = '';
   }
 
   public function delete() {

@@ -1,10 +1,65 @@
 <?php
 
-include_once 'Repository.php';
+require_once 'FedoraApiSerializer.php';
+require_once 'Object.php';
+require_once 'Repository.php';
+require_once 'Cache.php';
+require_once 'TestHelpers.php';
+require_once 'RepositoryConnection.php';
+require_once 'FedoraApi.php';
 
-$repository = new FedoraRepository();
+class RepositoryTest extends PHPUnit_Framework_TestCase {
 
-$object = $repository->getNewObject($pid);
-$object->addDatastream();
-$object->label = 'foo';
-$repository->ingestNewObject($object);
+  protected function setUp() {
+    $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+    $this->api = new FedoraApi($connection);
+    $cache = new SimpleCache();
+    $this->repository = new FedoraRepository($this->api, $cache);
+  }
+
+  public function testIngestNamespace() {
+    $namespace = FedoraTestHelpers::randomString(10);
+    $object = $this->repository->getNewObject($namespace);
+    $object->label = 'foo';
+    $object->state = 'd';
+    $object->owner = 'woot';
+    $this->repository->ingestNewObject($object);
+    $this->assertTrue($object instanceof FedoraObject);
+    $this->assertEquals('foo', $object->label);
+    $this->assertEquals('D', $object->state);
+    $this->assertEquals('woot', $object->owner);
+    $this->repository->purgeObject($object->id);
+  }
+
+  public function testIngestNoParams() {
+    $object = $this->repository->getNewObject();
+    $id = $object->id;
+    $object->label = 'foo';
+    $object->state = 'd';
+    $object->owner = 'woot';
+    $this->repository->ingestNewObject($object);
+    $this->assertTrue($object instanceof FedoraObject);
+    $this->assertEquals($id, $object->id);
+    $this->assertEquals('foo', $object->label);
+    $this->assertEquals('D', $object->state);
+    $this->assertEquals('woot', $object->owner);
+    $this->repository->purgeObject($object->id);
+  }
+
+  public function testIngestFullPid() {
+    $namespace = FedoraTestHelpers::randomString(10);
+    $localid = FedoraTestHelpers::randomString(10);
+    $id = "$namespace:$localid";
+    $object = $this->repository->getNewObject($id);
+    $object->label = 'foo';
+    $object->state = 'd';
+    $object->owner = 'woot';
+    $this->repository->ingestNewObject($object);
+    $this->assertTrue($object instanceof FedoraObject);
+    $this->assertEquals('foo', $object->label);
+    $this->assertEquals('D', $object->state);
+    $this->assertEquals('woot', $object->owner);
+    $this->repository->purgeObject($object->id);
+  }
+
+}
