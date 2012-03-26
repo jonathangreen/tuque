@@ -36,7 +36,7 @@ class FedoraRepository extends AbstractRepository {
     }
 
     try {
-      $object = new FedoraObject($id);
+      $object = new FedoraObject($id, $this);
       $this->cache->set($id, $object);
       return $object;
     }

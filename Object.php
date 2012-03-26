@@ -16,32 +16,21 @@ abstract class AbstractObject extends MagicProperty {
   abstract public function newDatastream();
 }
 
-class FedoraObject extends AbstractObject {
+abstract class AbstractFedoraObject extends AbstractObject {
   protected $repository;
-  protected $objectProfile;
   protected $objectId;
+  protected $objectProfile;
 
   public function  __construct($id, FedoraRepository $repository) {
     $this->repository = $repository;
+    $this->objectId = $id;
     unset($this->id);
     unset($this->state);
     unset($this->createdDate);
     unset($this->lastModifiedDate);
     unset($this->label);
     unset($this->owner);
-
-    $this->objectId = $id;
-    $this->objectProfile = $this->repository->api->a->getObjectProfile($id);
-    $this->objectProfile['objCreateDate'] = new FedoraDate($this->objectProfile['objCreateDate']);
-    $this->objectProfile['objLastModDate'] = new FedoraDate($this->objectProfile['objLastModDate']);
   }
-
-  public function delete() {
-    $this->state = 'd';
-  }
-
-  public function getDatastream() {}
-  public function newDatastream() {}
 
   protected function idMagicProperty($function, $value) {
     switch($function) {
@@ -71,23 +60,19 @@ class FedoraObject extends AbstractObject {
         switch(strtolower($value)) {
           case 'd':
           case 'deleted':
-            $state = 'D';
+            $this->objectProfile['objState'] = 'D';
             break;
           case 'a':
           case 'active':
-            $state = 'A';
+            $this->objectProfile['objState'] = 'A';
             break;
           case 'i':
           case 'inactive':
-            $state = 'I';
+            $this->objectProfile['objState'] = 'I';
             break;
           default:
           // @todo exception?
-            $state = $this->objectProfile['objState'];
-        }
-        if ($this->objectProfile['objState'] != $state) {
-          $this->repository->api->m->modifyObject($this->objectId, array('state' => $state));
-          $this->objectProfile['objState'] = $state;
+            break;
         }
         break;
       case 'unset':
@@ -97,7 +82,6 @@ class FedoraObject extends AbstractObject {
   }
 
   protected function labelMagicProperty($function, $value) {
-    $label = '';
     switch($function) {
       case 'get':
         return $this->objectProfile['objLabel'];
@@ -111,18 +95,15 @@ class FedoraObject extends AbstractObject {
         }
         break;
       case 'set':
-        $label = $value;
+        $this->objectProfile['objLabel'] = $value;
+        break;
       case 'unset':
-        if ($this->objectProfile['objLabel'] != $label) {
-          $this->repository->api->m->modifyObject($this->objectId, array('label' => $label));
-          $this->objectProfile['objLabel'] = $label;
-        }
+        $this->objectProfile['objLabel'] = '';
         break;
     }
   }
 
   protected function ownerMagicProperty($function, $value) {
-    $owner = '';
     switch($function) {
       case 'get':
         return $this->objectProfile['objOwnerId'];
@@ -136,14 +117,76 @@ class FedoraObject extends AbstractObject {
         }
         break;
       case 'set':
-        $owner = $value;
+        $this->objectProfile['objOwnerId'] = $value;
+        break;
       case 'unset':
-        if ($this->objectProfile['objOwnerId'] != $owner) {
-          $this->repository->api->m->modifyObject($this->objectId, array('ownerId' => $owner));
-          $this->objectProfile['objOwnerId'] = $owner;
-        }
+        $this->objectProfile['objOwnerId'] = '';
         break;
     }
+  }
+}
+
+class NewFedoraObject extends AbstractFedoraObject {
+
+  public function  __construct($id, FedoraRepository $repository) {
+    parent::__construct($id, $repository);
+    $this->objProfile = array();
+    $this->objProfile['objState'] = 'A';
+  }
+
+  public function delete() {
+    $this->state = 'D';
+  }
+
+  public function getDatastream() {}
+  public function newDatastream() {}
+}
+
+class FedoraObject extends AbstractFedoraObject {
+
+  public function  __construct($id, FedoraRepository $repository) {
+    parent::__construct($id, $repository);
+    
+    $this->objectProfile = $this->repository->api->a->getObjectProfile($id);
+    $this->objectProfile['objCreateDate'] = new FedoraDate($this->objectProfile['objCreateDate']);
+    $this->objectProfile['objLastModDate'] = new FedoraDate($this->objectProfile['objLastModDate']);
+  }
+
+  public function delete() {
+    $this->state = 'd';
+  }
+
+  public function getDatastream() {}
+  public function newDatastream() {}
+
+  protected function stateMagicProperty($function, $value) {
+    $state = $this->objectProfile['objState'];
+    $return = parent::stateMagicProperty($function, $value);
+
+    if ($function == 'set' && $state != $this->objectProfile['objState']) {
+      $this->repository->api->m->modifyObject($this->objectId, array('state' => $state));
+    }
+    return $return;
+  }
+
+  protected function labelMagicProperty($function, $value) {
+    $label = $this->objectProfile['objLabel'];
+    $return = parent::labelMagicProperty($function, $value);
+
+    if ($function == 'set' && $label != $this->objectProfile['objLabel']) {
+        $this->repository->api->m->modifyObject($this->objectId, array('label' => $label));
+    }
+    return $return;
+  }
+
+  protected function ownerMagicProperty($function, $value) {
+    $owner = $this->objectProfile['objOwnerId'];
+    $return = parent::ownerMagicProperty($function, $value);
+
+    if ($function == 'set' && $owner != $this->objectProfile['objOwnerId']) {
+        $this->repository->api->m->modifyObject($this->objectId, array('ownerId' => $owner));
+    }
+    return $return;
   }
 
   protected function createdDateMagicProperty($function, $value) {
