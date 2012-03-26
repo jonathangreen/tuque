@@ -225,37 +225,37 @@ FOXML;
 
 class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
 
-  static $apim;
-  static $apia;
-  static $namespace;
-  static $fixtures;
-  static $display;
-  static $pids;
+  public $apim;
+  public $apia;
+  public $namespace;
+  public $fixtures;
+  public $display;
+  public $pids;
 
-  static function setUpBeforeClass() {
+  protected function setUp() {
     $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
     $serializer = new FedoraApiSerializer();
 
-    self::$apim = new FedoraApiM($connection, $serializer);
-    self::$apia = new FedoraApiA($connection, $serializer);
+    $this->apim = new FedoraApiM($connection, $serializer);
+    $this->apia = new FedoraApiA($connection, $serializer);
 
-    self::$namespace = FedoraTestHelpers::randomString(10);
-    $pid1 = self::$namespace . ":" . FedoraTestHelpers::randomString(10);
-    $pid2 = self::$namespace . ":" . FedoraTestHelpers::randomString(10);
+    $this->namespace = FedoraTestHelpers::randomString(10);
+    $pid1 = $this->namespace . ":" . FedoraTestHelpers::randomString(10);
+    $pid2 = $this->namespace . ":" . FedoraTestHelpers::randomString(10);
 
-    self::$fixtures = array();
-    self::$pids = array();
-    self::$pids[] = $pid1;
-    self::$pids[] = $pid2;
+    $this->fixtures = array();
+    $this->pids = array();
+    $this->pids[] = $pid1;
+    $this->pids[] = $pid2;
 
     // Set up some arrays of data for the fixtures.
     $string = file_get_contents('tests/test_data/fixture1.xml');
     $string = preg_replace('/\%PID\%/', $pid1, $string);
-    $pid = self::$apim->ingest(array('string' => $string));
+    $pid = $this->apim->ingest(array('string' => $string));
     $urlpid = urlencode($pid);
-    self::$fixtures[$pid] = array();
-    self::$fixtures[$pid]['xml'] = $string;
-    self::$fixtures[$pid]['findObjects'] = array( 'pid' => $pid1,
+    $this->fixtures[$pid] = array();
+    $this->fixtures[$pid]['xml'] = $string;
+    $this->fixtures[$pid]['findObjects'] = array( 'pid' => $pid1,
       'label' => 'label1', 'state' => 'I', 'ownerId' => 'owner1',
       'cDate' => '2012-03-12T15:22:37.847Z', 'dcmDate' => '2012-03-13T14:12:59.272Z',
       'title' => 'title1', 'creator' => 'creator1', 'subject' => 'subject1',
@@ -265,20 +265,20 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
       'language' => 'language1', 'relation' => 'relation1', 'coverage' => 'coverage1',
       'rights' => 'rights1',
     );
-    self::$fixtures[$pid]['getObjectHistory'] = array('2012-03-13T14:12:59.272Z',
+    $this->fixtures[$pid]['getObjectHistory'] = array('2012-03-13T14:12:59.272Z',
       '2012-03-13T17:40:29.057Z', '2012-03-13T18:09:25.425Z',
       '2012-03-13T19:15:07.529Z');
-    self::$fixtures[$pid]['getObjectProfile'] = array(
-      'objLabel' => self::$fixtures[$pid]['findObjects']['label'],
-      'objOwnerId' => self::$fixtures[$pid]['findObjects']['ownerId'],
+    $this->fixtures[$pid]['getObjectProfile'] = array(
+      'objLabel' => $this->fixtures[$pid]['findObjects']['label'],
+      'objOwnerId' => $this->fixtures[$pid]['findObjects']['ownerId'],
       'objModels' => array('info:fedora/fedora-system:FedoraObject-3.0',
         'info:fedora/testnamespace:test'),
-      'objCreateDate' => self::$fixtures[$pid]['findObjects']['cDate'],
+      'objCreateDate' => $this->fixtures[$pid]['findObjects']['cDate'],
       'objDissIndexViewURL' => "http://localhost:8080/fedora/objects/$urlpid/methods/fedora-system%3A3/viewMethodIndex",
       'objItemIndexViewURL' => "http://localhost:8080/fedora/objects/$urlpid/methods/fedora-system%3A3/viewItemIndex",
-      'objState' => self::$fixtures[$pid]['findObjects']['state'],
+      'objState' => $this->fixtures[$pid]['findObjects']['state'],
     );
-    self::$fixtures[$pid]['listDatastreams'] = array(
+    $this->fixtures[$pid]['listDatastreams'] = array(
       '2012-03-13T14:12:59.272Z' => array (
         'DC' => Array (
             'label' => 'Dublin Core Record for this object',
@@ -320,7 +320,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
             ),
       ),
     );
-    self::$fixtures[$pid]['dsids'] = array(
+    $this->fixtures[$pid]['dsids'] = array(
       'DC' => array (
         'data' => array(
           'dsLabel' => 'Dublin Core Record for this object',
@@ -382,11 +382,11 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
 
     // second fixture
     $string = file_get_contents('tests/test_data/fixture2.xml');
-    $pid = self::$apim->ingest(array('pid' => $pid2, 'string' => $string));
+    $pid = $this->apim->ingest(array('pid' => $pid2, 'string' => $string));
     $urlpid = urlencode($pid);
-    self::$fixtures[$pid] = array();
-    self::$fixtures[$pid]['xml'] = $string;
-    self::$fixtures[$pid]['findObjects'] = array(
+    $this->fixtures[$pid] = array();
+    $this->fixtures[$pid]['xml'] = $string;
+    $this->fixtures[$pid]['findObjects'] = array(
       'pid' => $pid,
       'label' => 'label2',
       'state' => 'A',
@@ -409,17 +409,17 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
       'coverage' => 'coverage2',
       'rights' => 'rights2',
     );
-    self::$fixtures[$pid]['getObjectHistory'] = array('2010-03-13T14:12:59.272Z');
-    self::$fixtures[$pid]['getObjectProfile'] = array(
-      'objLabel' => self::$fixtures[$pid]['findObjects']['label'],
-      'objOwnerId' => self::$fixtures[$pid]['findObjects']['ownerId'],
+    $this->fixtures[$pid]['getObjectHistory'] = array('2010-03-13T14:12:59.272Z');
+    $this->fixtures[$pid]['getObjectProfile'] = array(
+      'objLabel' => $this->fixtures[$pid]['findObjects']['label'],
+      'objOwnerId' => $this->fixtures[$pid]['findObjects']['ownerId'],
       'objModels' => array('info:fedora/fedora-system:FedoraObject-3.0'),
-      'objCreateDate' => self::$fixtures[$pid]['findObjects']['cDate'],
+      'objCreateDate' => $this->fixtures[$pid]['findObjects']['cDate'],
       'objDissIndexViewURL' => "http://localhost:8080/fedora/objects/$urlpid/methods/fedora-system%3A3/viewMethodIndex",
       'objItemIndexViewURL' => "http://localhost:8080/fedora/objects/$urlpid/methods/fedora-system%3A3/viewItemIndex",
-      'objState' => self::$fixtures[$pid]['findObjects']['state'],
+      'objState' => $this->fixtures[$pid]['findObjects']['state'],
     );
-    self::$fixtures[$pid]['listDatastreams'] = array(
+    $this->fixtures[$pid]['listDatastreams'] = array(
       '2010-03-13T14:12:59.272Z' => array (
         'DC' => Array (
             'label' => 'Dublin Core Record for this object',
@@ -427,7 +427,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
         ),
       ),
     );
-    self::$fixtures[$pid]['dsids'] = array(
+    $this->fixtures[$pid]['dsids'] = array(
       'DC' => array(
         'data' => array(
           'dsLabel' => 'Dublin Core Record for this object',
@@ -449,25 +449,25 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
       ),
     );
 
-    self::$display = array( 'pid', 'label', 'state', 'ownerId', 'cDate', 'mDate',
+    $this->display = array( 'pid', 'label', 'state', 'ownerId', 'cDate', 'mDate',
       'dcmDate', 'title', 'creator', 'subject', 'description', 'publisher',
       'contributor', 'date', 'type', 'format', 'identifier', 'source',
       'language', 'relation', 'coverage', 'rights'
     );
   }
 
-  static public function tearDownAfterClass()
+  protected function tearDown()
   {
-    foreach (self::$fixtures as $key => $value) {
+    foreach ($this->fixtures as $key => $value) {
       try {
-        self::$apim->purgeObject($key);
+        $this->apim->purgeObject($key);
       }
       catch (RepositoryException $e) {}
     }
   }
 
   public function testDescribeRepository() {
-    $describe = self::$apia->describeRepository();
+    $describe = $this->apia->describeRepository();
     $this->assertArrayHasKey('repositoryName', $describe);
     $this->assertArrayHasKey('repositoryBaseURL', $describe);
     $this->assertArrayHasKey('repositoryPID', $describe);
@@ -487,15 +487,15 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
 
   function testFindObjectsTerms() {
     // Test all of the possible values.
-    $namespace = self::$namespace;
-    $result = self::$apia->findObjects('terms', "{$namespace}:*", 1, self::$display);
+    $namespace = $this->namespace;
+    $result = $this->apia->findObjects('terms', "{$namespace}:*", 1, $this->display);
     $this->assertEquals(1,count($result['results']));
     $pid = $result['results'][0]['pid'];
     // Make sure we have the modified date key. But we unset it because we can't
     // test it, since it changes every time.
     $this->assertArrayHasKey('mDate', $result['results'][0]);
     unset($result['results'][0]['mDate']);
-    $this->assertEquals(self::$fixtures[$pid]['findObjects'],$result['results'][0]);
+    $this->assertEquals($this->fixtures[$pid]['findObjects'],$result['results'][0]);
 
     // Test that we have a session key
     $this->assertArrayHasKey('session', $result);
@@ -507,7 +507,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
    * @depends testFindObjectsTerms
    */
   function testFindObjectsTermsResume($token) {
-    $result = self::$apia->resumeFindObjects($token);
+    $result = $this->apia->resumeFindObjects($token);
     $this->assertEquals(1,count($result['results']));
     $this->assertArrayNotHasKey('session', $result);
     $pid = $result['results'][0]['pid'];
@@ -515,23 +515,23 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     // test it, since it changes every time.
     $this->assertArrayHasKey('mDate', $result['results'][0]);
     unset($result['results'][0]['mDate']);
-    $this->assertEquals(self::$fixtures[$pid]['findObjects'],$result['results'][0]);
+    $this->assertEquals($this->fixtures[$pid]['findObjects'],$result['results'][0]);
   }
 
   function testFindObjectsQueryWildcard() {
-    $namespace = self::$namespace;
-    $result = self::$apia->findObjects('query', "pid~{$namespace}:*", NULL, self::$display);
+    $namespace = $this->namespace;
+    $result = $this->apia->findObjects('query', "pid~{$namespace}:*", NULL, $this->display);
     $this->assertEquals(2,count($result['results']));
     foreach($result['results'] as $results) {
       $this->assertArrayHasKey('mDate', $results);
       unset($results['mDate']);
-      $this->assertEquals(self::$fixtures[$results['pid']]['findObjects'], $results);
+      $this->assertEquals($this->fixtures[$results['pid']]['findObjects'], $results);
     }
   }
 
   function testFindObjectsQueryEquals() {
-    $display = array_diff(self::$display, array('mDate'));
-    foreach(self::$fixtures as $pid => $fixtures) {
+    $display = array_diff($this->display, array('mDate'));
+    foreach($this->fixtures as $pid => $fixtures) {
       $data = $fixtures['findObjects'];
       foreach($data as $key => $array) {
         if(!is_array($array)) {
@@ -547,9 +547,9 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
             default:
               $query = "pid=$pid ${key}~$value";
           }
-          $result = self::$apia->findObjects('query', $query, NULL, $display);
+          $result = $this->apia->findObjects('query', $query, NULL, $display);
           $this->assertEquals(1,count($result['results']));
-          $this->assertEquals(self::$fixtures[$pid]['findObjects'], $result['results'][0]);
+          $this->assertEquals($this->fixtures[$pid]['findObjects'], $result['results'][0]);
         }
       }
     }
@@ -557,13 +557,13 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
 
   function testGetDatastreamDissemination() {
     $expected = file_get_contents('tests/test_data/fixture1_fixture_newest.png');
-    $actual = self::$apia->getDatastreamDissemination(self::$pids[0], 'fixture');
+    $actual = $this->apia->getDatastreamDissemination($this->pids[0], 'fixture');
     $this->assertEquals($expected, $actual);
   }
 
   function testGetDatastreamDisseminationAsOfDate() {
     $expected = file_get_contents('tests/test_data/fixture1_fixture_oldest.png');
-    $actual = self::$apia->getDatastreamDissemination(self::$pids[0], 'fixture', '2012-03-13T17:40:29.057Z');
+    $actual = $this->apia->getDatastreamDissemination($this->pids[0], 'fixture', '2012-03-13T17:40:29.057Z');
     $this->assertEquals($expected, $actual);
   }
 
@@ -572,8 +572,8 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testGetObjectHistory() {
-    foreach (self::$fixtures as $pid => $fixture) {
-      $actual = self::$apia->getObjectHistory($pid);
+    foreach ($this->fixtures as $pid => $fixture) {
+      $actual = $this->apia->getObjectHistory($pid);
       $this->assertEquals($fixture['getObjectHistory'], $actual);
     }
   }
@@ -582,9 +582,9 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
   // work on it. So we have to handparse it. So we test to make sure its okay.
   // @todo Test the second arguement to this
   function testGetObjectProfile() {
-    foreach (self::$fixtures as $pid => $fixture) {
+    foreach ($this->fixtures as $pid => $fixture) {
       $expected = $fixture['getObjectProfile'];
-      $actual = self::$apia->getObjectProfile($pid);
+      $actual = $this->apia->getObjectProfile($pid);
       $this->assertArrayHasKey('objLastModDate', $actual);
       unset($actual['objLastModDate']);
       // The content models come back in an undefined order, so we need
@@ -601,14 +601,14 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testListDatastreams() {
-    foreach (self::$fixtures as $pid => $fixture) {
+    foreach ($this->fixtures as $pid => $fixture) {
       foreach($fixture['getObjectHistory'] as $datetime) {
-        $actual = self::$apia->listDatastreams($pid, $datetime);
+        $actual = $this->apia->listDatastreams($pid, $datetime);
         $this->assertEquals($fixture['listDatastreams'][$datetime], $actual);
       }
       $revisions = count($fixture['getObjectHistory']);
       $date = $fixture['getObjectHistory'][$revisions-1];
-      $acutal = self::$apia->listDatastreams($pid);
+      $acutal = $this->apia->listDatastreams($pid);
       $this->assertEquals($fixture['listDatastreams'][$date], $actual);
     }
   }
@@ -622,8 +622,8 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     // One would think this would work, but there are a few problems
     // a number of tags change on ingest, so we need to do a more in
     // depth comparison.
-    foreach (self::$fixtures as $pid => $fixture) {
-      $actual = self::$apim->export($pid, array('context' => 'archive'));
+    foreach ($this->fixtures as $pid => $fixture) {
+      $actual = $this->apim->export($pid, array('context' => 'archive'));
       $dom = array();
       $dom[] = new DOMDocument();
       $dom[] = new DOMDocument();
@@ -635,13 +635,13 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testGetDatastream() {
-    foreach (self::$fixtures as $pid => $fixture) {
+    foreach ($this->fixtures as $pid => $fixture) {
       $listDatastreams = $fixture['listDatastreams'];
 
       // Do a test with the data we have.
       foreach($listDatastreams as $time => $datastreams) {
         foreach($datastreams as $dsid => $data) {
-          $actual = self::$apim->getDatastream($pid, $dsid, array('asOfDateTime' => $time));
+          $actual = $this->apim->getDatastream($pid, $dsid, array('asOfDateTime' => $time));
           $this->assertEquals($data['label'], $actual['dsLabel']);
           $this->assertEquals($data['mimetype'], $actual['dsMIME']);
           $this->assertArrayHasKey('dsVersionID', $actual);
@@ -662,16 +662,16 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
 
       // Test with the more detailed current data.
       foreach($fixture['dsids'] as $dsid => $data) {
-        $actual = self::$apim->getDatastream($pid, $dsid);
+        $actual = $this->apim->getDatastream($pid, $dsid);
         $this->assertEquals($data['data'], $actual);
       }
     }
   }
 
   function testGetDatastreamHistory() {
-    foreach (self::$fixtures as $pid => $fixture) {
+    foreach ($this->fixtures as $pid => $fixture) {
       foreach ($fixture['dsids'] as $dsid => $data) {
-        $actual = self::$apim->getDatastreamHistory($pid, $dsid);
+        $actual = $this->apim->getDatastreamHistory($pid, $dsid);
         // we should at least make sure we get the right count here
         $this->assertEquals($data['count'],count($actual));
         $this->assertEquals($data['data'], $actual[0]);
@@ -680,11 +680,11 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testGetNextPid() {
-    $pid = self::$apim->getNextPid();
+    $pid = $this->apim->getNextPid();
     $this->assertInternalType('string', $pid);
 
     $namespace = FedoraTestHelpers::randomString(10);
-    $pids = self::$apim->getNextPid($namespace, 5);
+    $pids = $this->apim->getNextPid($namespace, 5);
     $this->assertInternalType('array', $pids);
     $this->assertEquals(5, count($pids));
 
