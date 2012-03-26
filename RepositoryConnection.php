@@ -51,14 +51,14 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
   
   public function addParamArray(&$request, &$seperator, $params, $name) {
     if(is_array($params)) {
-      if(isset($params[$name])) {
+      if(array_key_exists($name, $params)) {
         $this->addParam($request, $seperator, $name, $params[$name]);
       }
     }
   }
   
   public function addParam(&$request, &$seperator, $name, $value) {
-    if($value) {
+    if($value !== NULL) {
       if(is_bool($value)) {
         $parameter = $value ? 'true' : 'false';
       }

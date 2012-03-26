@@ -1169,6 +1169,7 @@ class FedoraApiM {
 
     $response = $this->connection->putRequest($request, $type, $data);
     $response = $this->serializer->modifyDatastream($response);
+
     return $response;
   }
 

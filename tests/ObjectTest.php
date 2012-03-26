@@ -27,30 +27,53 @@ class ObjectTest extends PHPUnit_Framework_TestCase {
     $this->api->m->purgeObject($this->testPid);
   }
 
+  protected function getValue($data) {
+    $values = $this->api->a->getObjectProfile($this->testPid);
+    return $values[$data];
+  }
+
   public function testObjectLabel() {
-    $this->assertEquals($this->object->label, '');
+    $this->assertEquals('', $this->object->label);
+    $this->assertEquals('', $this->getValue('objLabel'));
+
     $this->object->label = 'foo';
-    $this->assertEquals($this->object->label, 'foo');
+    $this->assertEquals('foo', $this->object->label);
+    $this->assertEquals('foo', $this->getValue('objLabel'));
     $this->assertTrue(isset($this->object->label));
+
     unset($this->object->label);
+    $this->assertEquals('', $this->getValue('objLabel'));
     $this->assertFalse(isset($this->object->label));
+
+
     $this->object->label = 'woot';
-    $this->assertEquals($this->object->label, 'woot');
+    $this->assertEquals('woot', $this->object->label);
+    $this->assertEquals('woot', $this->getValue('objLabel'));
+
     $this->object->label = 'aboot';
-    $this->assertEquals($this->object->label, 'aboot');
+    $this->assertEquals('aboot', $this->object->label);
+    $this->assertEquals('aboot', $this->getValue('objLabel'));
   }
 
   public function testObjectOwner() {
-    $this->assertEquals($this->object->owner, FEDORAUSER);
+    $this->assertEquals(FEDORAUSER, $this->object->owner);
     $this->object->owner = 'foo';
-    $this->assertEquals($this->object->owner, 'foo');
+    $this->assertEquals('foo', $this->object->owner);
+    $this->assertEquals('foo', $this->getValue('objOwnerId'));
     $this->assertTrue(isset($this->object->owner));
+    
     unset($this->object->owner);
+    $this->assertEquals('', $this->object->owner);
+    $this->assertEquals('', $this->getValue('objOwnerId'));
     $this->assertFalse(isset($this->object->owner));
+
     $this->object->owner = 'woot';
-    $this->assertEquals($this->object->owner, 'woot');
+    $this->assertEquals('woot', $this->object->owner);
+    $this->assertEquals('woot', $this->getValue('objOwnerId'));
+
     $this->object->owner = 'aboot';
-    $this->assertEquals($this->object->owner, 'aboot');
+    $this->assertEquals('aboot', $this->object->owner);
+    $this->assertEquals('aboot', $this->getValue('objOwnerId'));
   }
 
   public function testObjectId() {
@@ -78,37 +101,49 @@ class ObjectTest extends PHPUnit_Framework_TestCase {
   }
 
   public function testObjectState() {
-    $this->assertEquals($this->object->state, 'A');
+    $this->assertEquals('A', $this->object->state);
 
     $this->object->state = 'I';
-    $this->assertEquals($this->object->state, 'I');
+    $this->assertEquals('I', $this->object->state);
+    $this->assertEquals('I', $this->getValue('objState'));
     $this->object->state = 'A';
-    $this->assertEquals($this->object->state, 'A');
+    $this->assertEquals('A', $this->object->state);
+    $this->assertEquals('A', $this->getValue('objState'));
     $this->object->state = 'D';
-    $this->assertEquals($this->object->state, 'D');
+    $this->assertEquals('D', $this->object->state);
+    $this->assertEquals('D', $this->getValue('objState'));
 
     $this->object->state = 'i';
-    $this->assertEquals($this->object->state, 'I');
+    $this->assertEquals('I', $this->object->state);
+    $this->assertEquals('I', $this->getValue('objState'));
     $this->object->state = 'a';
-    $this->assertEquals($this->object->state, 'A');
+    $this->assertEquals('A', $this->object->state);
+    $this->assertEquals('A', $this->getValue('objState'));
     $this->object->state = 'd';
-    $this->assertEquals($this->object->state, 'D');
+    $this->assertEquals('D', $this->object->state);
+    $this->assertEquals('D', $this->getValue('objState'));
 
     $this->object->state = 'inactive';
-    $this->assertEquals($this->object->state, 'I');
+    $this->assertEquals('I', $this->object->state);
+    $this->assertEquals('I', $this->getValue('objState'));
     $this->object->state = 'active';
-    $this->assertEquals($this->object->state, 'A');
+    $this->assertEquals('A', $this->object->state);
+    $this->assertEquals('A', $this->getValue('objState'));
     $this->object->state = 'deleted';
-    $this->assertEquals($this->object->state, 'D');
+    $this->assertEquals('D', $this->object->state);
+    $this->assertEquals('D', $this->getValue('objState'));
 
     $this->object->state = 'foo';
-    $this->assertEquals($this->object->state, 'D');
+    $this->assertEquals('D', $this->object->state);
+    $this->assertEquals('D', $this->getValue('objState'));
   }
 
   public function testObjectDelete() {
-    $this->assertEquals($this->object->state, 'A');
+    $this->assertEquals('A', $this->object->state);
+    $this->assertEquals('A', $this->getValue('objState'));
     $this->object->delete();
-    $this->assertEquals($this->object->state, 'D');
+    $this->assertEquals('D', $this->object->state);
+    $this->assertEquals('D', $this->getValue('objState'));
   }
 
 }

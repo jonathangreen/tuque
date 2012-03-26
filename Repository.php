@@ -26,7 +26,7 @@ class FedoraRepository extends AbstractRepository {
    * @todo validate the ID
    * @todo catch the getNextPid errors
    */
-  public function getNewObject($id = NULL) {
+  public function constructNewObject($id = NULL) {
     if($this->cache->get($id) !== FALSE) {
       return FALSE;
     }

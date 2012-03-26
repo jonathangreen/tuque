@@ -19,7 +19,7 @@ class RepositoryTest extends PHPUnit_Framework_TestCase {
 
   public function testIngestNamespace() {
     $namespace = FedoraTestHelpers::randomString(10);
-    $object = $this->repository->getNewObject($namespace);
+    $object = $this->repository->constructNewObject($namespace);
     $object->label = 'foo';
     $object->state = 'd';
     $object->owner = 'woot';
@@ -32,7 +32,7 @@ class RepositoryTest extends PHPUnit_Framework_TestCase {
   }
 
   public function testIngestNoParams() {
-    $object = $this->repository->getNewObject();
+    $object = $this->repository->constructNewObject();
     $id = $object->id;
     $object->label = 'foo';
     $object->state = 'd';
@@ -50,7 +50,7 @@ class RepositoryTest extends PHPUnit_Framework_TestCase {
     $namespace = FedoraTestHelpers::randomString(10);
     $localid = FedoraTestHelpers::randomString(10);
     $id = "$namespace:$localid";
-    $object = $this->repository->getNewObject($id);
+    $object = $this->repository->constructNewObject($id);
     $object->label = 'foo';
     $object->state = 'd';
     $object->owner = 'woot';
