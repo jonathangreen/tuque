@@ -145,6 +145,9 @@ class NewFedoraObject extends AbstractFedoraObject {
   public function newDatastream() {}
 }
 
+/**
+ * @todo we need to support opportunistic locking here
+ */
 class FedoraObject extends AbstractFedoraObject {
 
   protected $datastreams = NULL;
@@ -183,31 +186,31 @@ class FedoraObject extends AbstractFedoraObject {
   }
 
   protected function stateMagicProperty($function, $value) {
-    $state = $this->objectProfile['objState'];
+    $previous_state = $this->objectProfile['objState'];
     $return = parent::stateMagicProperty($function, $value);
 
-    if ($function == 'set' && $state != $this->objectProfile['objState']) {
-      $this->repository->api->m->modifyObject($this->id, array('state' => $state));
+    if ($previous_state != $this->objectProfile['objState']) {
+      $this->repository->api->m->modifyObject($this->id, array('state' => $this->objectProfile['objState']));
     }
     return $return;
   }
 
   protected function labelMagicProperty($function, $value) {
-    $label = $this->objectProfile['objLabel'];
+    $previous_label = $this->objectProfile['objLabel'];
     $return = parent::labelMagicProperty($function, $value);
 
-    if ($function == 'set' && $label != $this->objectProfile['objLabel']) {
-        $this->repository->api->m->modifyObject($this->id, array('label' => $label));
+    if ($previous_label != $this->objectProfile['objLabel']) {
+      $this->repository->api->m->modifyObject($this->id, array('label' => $this->objectProfile['objLabel']));
     }
     return $return;
   }
 
   protected function ownerMagicProperty($function, $value) {
-    $owner = $this->objectProfile['objOwnerId'];
+    $previous_owner = $this->objectProfile['objOwnerId'];
     $return = parent::ownerMagicProperty($function, $value);
 
-    if ($function == 'set' && $owner != $this->objectProfile['objOwnerId']) {
-        $this->repository->api->m->modifyObject($this->id, array('ownerId' => $owner));
+    if ($previous_owner != $this->objectProfile['objOwnerId']) {
+        $this->repository->api->m->modifyObject($this->id, array('ownerId' => $this->objectProfile['objOwnerId']));
     }
     return $return;
   }
@@ -236,12 +239,6 @@ class FedoraObject extends AbstractFedoraObject {
         return TRUE;
         break;
       case 'set':
-        if (!($value instanceof FedoraDate)) {
-          $value = new FedoraDate($value);
-        }
-        $this->api->m->modifyObject($this->id, array('lastModifiedDate' => (string)$value));
-        $this->objectProfile['objLastModDate'] = $value;
-        break;
       case 'unset':
         throw new InvalidArgumentException();
         break;

@@ -26,6 +26,11 @@ abstract class AbstractDatastream extends MagicProperty {
   public $url;
 }
 
+/**
+ * @todo versioning
+ * @todo altids
+ * @todo opportunistic locking
+ */
 class FedoraDatastream extends AbstractDatastream {
   protected $repository;
   protected $object;
@@ -118,6 +123,7 @@ class FedoraDatastream extends AbstractDatastream {
             break;
           default:
           // @todo exception?
+            return;
             break;
         }
         $this->datastream = $this->repository->api->m->modifyDatastream($this->object->id, $this->id, array('dsState' => $this->datastream['dsState']));

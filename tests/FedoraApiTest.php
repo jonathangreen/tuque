@@ -7,6 +7,7 @@
 require_once 'FedoraApi.php';
 require_once 'FedoraApiSerializer.php';
 require_once 'TestHelpers.php';
+require_once 'FedoraDate.php';
 
 class FedoraApiIngestTest extends PHPUnit_Framework_TestCase {
   protected $pids = array();
@@ -231,6 +232,9 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
   public $fixtures;
   public $display;
   public $pids;
+  
+  static $purge = TRUE;
+  static $saved;
 
   protected function setUp() {
     $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
@@ -238,6 +242,11 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
 
     $this->apim = new FedoraApiM($connection, $serializer);
     $this->apia = new FedoraApiA($connection, $serializer);
+
+    if(self::$purge == FALSE) {
+      $this->fixtures = self::$saved;
+      return;
+    }
 
     $this->namespace = FedoraTestHelpers::randomString(10);
     $pid1 = $this->namespace . ":" . FedoraTestHelpers::randomString(10);
@@ -458,11 +467,16 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
 
   protected function tearDown()
   {
-    foreach ($this->fixtures as $key => $value) {
-      try {
-        $this->apim->purgeObject($key);
+    if(self::$purge) {
+      foreach ($this->fixtures as $key => $value) {
+        try {
+          $this->apim->purgeObject($key);
+        }
+        catch (RepositoryException $e) {}
       }
-      catch (RepositoryException $e) {}
+    }
+    else {
+      self::$saved = $this->fixtures;
     }
   }
 
@@ -500,6 +514,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     // Test that we have a session key
     $this->assertArrayHasKey('session', $result);
     $this->assertArrayHasKey('token', $result['session']);
+    self::$purge = FALSE;
     return $result['session']['token'];
   }
 
@@ -507,6 +522,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
    * @depends testFindObjectsTerms
    */
   function testFindObjectsTermsResume($token) {
+    self::$purge = TRUE;
     $result = $this->apia->resumeFindObjects($token);
     $this->assertEquals(1,count($result['results']));
     $this->assertArrayNotHasKey('session', $result);
@@ -691,6 +707,231 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     foreach ($pids as $pid) {
       $pid = explode(':', $pid);
       $this->assertEquals($namespace, $pid[0]);
+    }
+  }
+
+  /**
+   * @depends testGetObjectProfile
+   */
+  function testModifyObjectLabel() {
+    foreach ($this->fixtures as $pid => $fixture) {
+      $this->apim->modifyObject($pid, array('label' => 'wallawalla'));
+      $expected = $fixture['getObjectProfile'];
+      $actual = $this->apia->getObjectProfile($pid);
+      $this->assertEquals('wallawalla', $actual['objLabel']);
+      unset($actual['objLabel']);
+      unset($actual['objLastModDate']);
+      unset($actual['objModels']);
+      unset($expected['objModels']);
+      unset($expected['objLabel']);
+      $this->assertEquals($expected, $actual);
+    }
+  }
+
+  /**
+   * @depends testGetObjectProfile
+   */
+  function testModifyObjectOwnerId() {
+    foreach ($this->fixtures as $pid => $fixture) {
+      $this->apim->modifyObject($pid, array('ownerId' => 'wallawalla'));
+      $expected = $fixture['getObjectProfile'];
+      $actual = $this->apia->getObjectProfile($pid);
+      $this->assertEquals('wallawalla', $actual['objOwnerId']);
+      unset($actual['objOwnerId']);
+      unset($actual['objLastModDate']);
+      unset($actual['objModels']);
+      unset($expected['objModels']);
+      unset($expected['objOwnerId']);
+      $this->assertEquals($expected, $actual);
+    }
+  }
+
+  /**
+   * @depends testGetObjectProfile
+   */
+  function testModifyObjectState() {
+    foreach ($this->fixtures as $pid => $fixture) {
+      foreach (array('D', 'I', 'A') as $state) {
+        $this->apim->modifyObject($pid, array('state' => $state));
+        $expected = $fixture['getObjectProfile'];
+        $actual = $this->apia->getObjectProfile($pid);
+        $this->assertEquals($state, $actual['objState']);
+        unset($actual['objState']);
+        unset($actual['objLastModDate']);
+        unset($actual['objModels']);
+        unset($expected['objModels']);
+        unset($expected['objState']);
+        $this->assertEquals($expected, $actual);
+      }
+    }
+  }
+
+  /**
+   * @depends testGetDatastream
+   */
+  function testModifyDatastreamLabel() {
+    foreach ($this->fixtures as $pid => $fixture) {
+      foreach($fixture['dsids'] as $dsid => $data) {
+        $this->apim->modifyDatastream($pid, $dsid, array('dsLabel' => 'testtesttest'));
+        $actual = $this->apim->getDatastream($pid, $dsid);
+        $expected = $data['data'];
+        $this->assertEquals('testtesttest', $actual['dsLabel']);
+        foreach(array('dsLabel', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+          unset($actual[$unset]);
+          unset($expected[$unset]);
+        }
+        $this->assertEquals($expected, $actual);
+      }
+    }
+  }
+
+  /**
+   * @depends testGetDatastream
+   */
+  function testModifyDatastreamVersionable() {
+    foreach ($this->fixtures as $pid => $fixture) {
+      foreach($fixture['dsids'] as $dsid => $data) {
+        foreach(array(FALSE, TRUE) as $versionable) {
+          $this->apim->modifyDatastream($pid, $dsid, array('versionable' => $versionable));
+          $actual = $this->apim->getDatastream($pid, $dsid);
+          $expected = $data['data'];
+          $this->assertEquals($versionable ? 'true' : 'false', $actual['dsVersionable']);
+          foreach(array('dsVersionable', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+            unset($actual[$unset]);
+            unset($expected[$unset]);
+          }
+          $this->assertEquals($expected, $actual);
+        }
+      }
+    }
+  }
+
+  /**
+   * @depends testGetDatastream
+   */
+  function testModifyDatastreamState() {
+    foreach ($this->fixtures as $pid => $fixture) {
+      foreach($fixture['dsids'] as $dsid => $data) {
+        foreach(array('I', 'D', 'A') as $state) {
+          $this->apim->modifyDatastream($pid, $dsid, array('dsState' => $state));
+          $actual = $this->apim->getDatastream($pid, $dsid);
+          $expected = $data['data'];
+          $this->assertEquals($state, $actual['dsState']);
+          foreach(array('dsState', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+            unset($actual[$unset]);
+            unset($expected[$unset]);
+          }
+          $this->assertEquals($expected, $actual);
+        }
+      }
+    }
+  }
+
+  /**
+   * @depends testGetDatastream
+   */
+  function testModifyDatastreamChecksum() {
+    foreach ($this->fixtures as $pid => $fixture) {
+      foreach($fixture['dsids'] as $dsid => $data) {
+        foreach(array('MD5', 'SHA-1', 'SHA-256', 'SHA-384', 'SHA-512', 'DISABLED') as $type) {
+          $this->apim->modifyDatastream($pid, $dsid, array('checksumType' => $type));
+          $actual = $this->apim->getDatastream($pid, $dsid);
+          $expected = $data['data'];
+          $this->assertEquals($type, $actual['dsChecksumType']);
+          foreach(array('dsChecksumType', 'dsChecksum', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+            unset($actual[$unset]);
+            unset($expected[$unset]);
+          }
+          $this->assertEquals($expected, $actual);
+
+          if($actual['dsControlGroup'] == "M") {
+            $dscontent = $this->apia->getDatastreamDissemination($pid, $dsid);
+            switch($type) {
+              case 'MD5':
+                $hash = hash('md5', $dscontent);
+                break;
+              case 'SHA-1':
+                $hash = hash('sha1', $dscontent);
+                break;
+              case 'SHA-256':
+                $hash = hash('sha256', $dscontent);
+                break;
+              case 'SHA-384':
+                $hash = hash('sha384', $dscontent);
+                break;
+              case 'SHA-512':
+                $hash = hash('sha512', $dscontent);
+                break;
+              case 'DISABLED':
+                $hash = 'none';
+                break;
+            }
+
+            $this->apim->modifyDatastream($pid, $dsid, array('checksumType' => $type, 'checksum' => $hash));
+            $actual = $this->apim->getDatastream($pid, $dsid);
+            $this->assertEquals($hash, $actual['dsChecksum']);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * @depends testGetDatastream
+   */
+  function testModifyDatastreamFormatURI() {
+    foreach ($this->fixtures as $pid => $fixture) {
+      foreach($fixture['dsids'] as $dsid => $data) {
+        $this->apim->modifyDatastream($pid, $dsid, array('formatURI' => 'testtesttest'));
+        $actual = $this->apim->getDatastream($pid, $dsid);
+        $expected = $data['data'];
+        $this->assertEquals('testtesttest', $actual['dsFormatURI']);
+        foreach(array('dsFormatURI', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+          unset($actual[$unset]);
+          unset($expected[$unset]);
+        }
+        $this->assertEquals($expected, $actual);
+      }
+    }
+  }
+
+  /**
+   * @depends testGetDatastream
+   */
+  function testModifyDatastreamMimeType() {
+    foreach ($this->fixtures as $pid => $fixture) {
+      foreach($fixture['dsids'] as $dsid => $data) {
+        $this->apim->modifyDatastream($pid, $dsid, array('mimeType' => 'application/super-fucking-cool'));
+        $actual = $this->apim->getDatastream($pid, $dsid);
+        $expected = $data['data'];
+        $this->assertEquals('application/super-fucking-cool', $actual['dsMIME']);
+        foreach(array('dsMIME', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+          unset($actual[$unset]);
+          unset($expected[$unset]);
+        }
+        $this->assertEquals($expected, $actual);
+      }
+    }
+  }
+
+  /**
+   * @depends testGetDatastream
+   */
+  function testModifyDatastreamAltIds() {
+    foreach ($this->fixtures as $pid => $fixture) {
+      foreach($fixture['dsids'] as $dsid => $data) {
+        $this->apim->modifyDatastream($pid, $dsid, array('altIDs' => "one two three"));
+        $actual = $this->apim->getDatastream($pid, $dsid);
+        $expected = $data['data'];
+        $this->assertArrayHasKey('dsAltID', $actual);
+        $this->assertEquals(array('one', 'two', 'three'), $actual['dsAltID']);
+        unset($actual['dsAltID']);
+        foreach(array('dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+          unset($actual[$unset]);
+          unset($expected[$unset]);
+        }
+        $this->assertEquals($expected, $actual);
+      }
     }
   }
 }

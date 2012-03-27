@@ -592,7 +592,8 @@ class FedoraApiM {
    *   (optional) An array that can have one or more of the following elements:
    *   - controlGroup: one of "X", "M", "R", or "E" (Inline *X*ML, *M*anaged
    *     Content, *R*edirect, or *E*xternal Referenced). Default: X.
-   *   - altIDs: alternate identifiers for the datastream.
+   *   - altIDs: alternate identifiers for the datastream. A space seperated
+   *     list of alternate identifiers for the datastream.
    *   - dsLabel: the label for the datastream.
    *   - versionable: enable versioning of the datastream (boolean).
    *   - dsState: one of "A", "I", "D" (*A*ctive, *I*nactive, *D*eleted).
@@ -609,7 +610,8 @@ class FedoraApiM {
    *
    * @return array()
    *   Returns an array describing the new datastream. This is the same array
-   *   returned by getDatastream.
+   *   returned by getDatastream. This may also contain an dsAltID key, that
+   *   contains any alternate ids if any are specified.
    *   @code
    *   Array
    *   (
@@ -769,7 +771,8 @@ class FedoraApiM {
    * @throws RepositoryException
    *
    * @return array()
-   *   An array containing information about the datastream.
+   *   An array containing information about the datastream. This may also
+   *   contains a key dsAltID which contains alternate ids if any are specified.
    *   @code
    *   Array
    *   (
@@ -1108,20 +1111,24 @@ class FedoraApiM {
    *   - dsString: String containing the new contents of the datastream.
    *   - dsLocation: String containing a URL to fetch the new datastream from.
    *     Only ONE of dsFile, dsString or dsLocation should be used.
-   *   - altIDs: 	alternate identifiers for the datastream.
+   *   - altIDs: 	alternate identifiers for the datastream. This is a space
+   *     seperated string of alternate identifiers for the datastream.
    *   - dsLabel: 	the label for the datastream.
    *   - versionable: enable versioning of the datastream.
    *   - dsState: one of "A", "I", "D" (*A*ctive, *I*nactive, *D*eleted)
    *   - formatURI: the format URI of the datastream
-   *   - checksumType: the algorithm used to compute the checksum
+   *   - checksumType: the algorithm used to compute the checksum. This has to
+   *     be one of: DEFAULT, DISABLED, MD5, SHA-1, SHA-256, SHA-384, SHA-512.
+   *     If this parameter is given and no checksum is given the checksum will
+   *     be computed.
    *   - checksum: 	the value of the checksum represented as a hexadecimal
-   *     string.
+   *     string. This checksum must be computed by the algorithm defined above.
    *   - mimeType: 	the MIME type of the content being added, this overrides
    *     the Content-Type request header.
    *   - logMessage: a message describing the activity being performed
    *   - lastModifiedDate: 	date/time of the last (known) modification to the
    *     datastream, if the actual last modified date is later, a 409 response
-   *     is returned
+   *     is returned. This can be used for opportunistic object locking.
    *
    * @throws RepositoryException
    *
@@ -1186,7 +1193,7 @@ class FedoraApiM {
    *   - logMessage: a message describing the activity being performed.
    *   - lastModifiedDate: date/time of the last (known) modification to the
    *     datastream, if the actual last modified date is later, a 409 response
-   *     is returned.
+   *     is returned. This can be used for opportunistic object locking.
    *
    * @throws RepositoryException
    *

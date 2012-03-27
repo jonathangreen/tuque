@@ -42,7 +42,7 @@ class DatastreamTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals('M', $this->ds->controlGroup);
   }
 
-  public function testObjectLabel() {
+  public function testLabel() {
     $this->assertEquals('', $this->ds->label);
     $this->assertFalse(isset($this->ds->label));
     $this->ds->label = 'foo';
@@ -57,4 +57,54 @@ class DatastreamTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals('aboot', $this->ds->label);
   }
 
+  public function testState() {
+    $this->assertEquals('A', $this->ds->state);
+
+    $this->ds->state = 'I';
+    $this->assertEquals('I', $this->ds->state);
+    $this->ds->state = 'A';
+    $this->assertEquals('A', $this->ds->state);
+    $this->ds->state = 'D';
+    $this->assertEquals('D', $this->ds->state);
+
+    $this->ds->state = 'i';
+    $this->assertEquals('I', $this->ds->state);
+    $this->ds->state = 'a';
+    $this->assertEquals('A', $this->ds->state);
+    $this->ds->state = 'd';
+    $this->assertEquals('D', $this->ds->state);
+
+    $this->ds->state = 'inactive';
+    $this->assertEquals('I', $this->ds->state);
+    $this->ds->state = 'active';
+    $this->assertEquals('A', $this->ds->state);
+    $this->ds->state = 'deleted';
+    $this->assertEquals('D', $this->ds->state);
+
+    $this->ds->state = 'foo';
+    $this->assertEquals('D', $this->ds->state);
+  }
+
+  public function testVersionable() {
+    $this->assertTrue($this->ds->versionable);
+    
+    $this->ds->versionable = FALSE;
+    $this->assertFalse($this->ds->versionable);
+
+    $this->ds->versionable = TRUE;
+    $this->assertTrue($this->ds->versionable);
+
+    $this->ds->versionable = 'goo';
+    $this->assertTrue($this->ds->versionable);
+    $this->ds->versionable = FALSE;
+    $this->ds->versionable = 'goo';
+    $this->assertFalse($this->ds->versionable);
+  }
+
+  public function testMimetype() {
+    $this->ds->mimetype = 'amazing/sauce';
+    $this->assertEquals('amazing/sauce', $this->ds->mimetype);
+    $this->ds->mimetype = 'text/xml';
+    $this->assertEquals('text/xml', $this->ds->mimetype);
+  }
 }
