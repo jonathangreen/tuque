@@ -450,8 +450,12 @@ class CurlConnection extends HttpConnection {
     }
 
     if ($this->reuseConnection) {
-      curl_setopt($this->curlContext, CURLOPT_PUT, FALSE);
-      curl_setopt($this->curlContext, CURLOPT_CUSTOMREQUEST, FALSE);
+      //curl_setopt($this->curlContext, CURLOPT_PUT, FALSE);
+      //curl_setopt($this->curlContext, CURLOPT_INFILE, 'default');
+      //curl_setopt($this->curlContext, CURLOPT_CUSTOMREQUEST, FALSE);
+      // We can't unallocate put requests becuase CURLOPT_INFILE can't be undone
+      // this is ugly, but it gets the job done for now.
+      $this->unallocateCurlContext();
     }
     else {
       $this->unallocateCurlContext();

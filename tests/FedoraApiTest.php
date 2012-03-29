@@ -809,6 +809,24 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
   /**
    * @depends testGetDatastream
    */
+  function testModifyDatastreamVersionableOldVersions() {
+    $this->markTestIncomplete();
+    $pid = $this->pids[0];
+    $dsid = 'fixture';
+
+    $before_history = $this->apim->getDatastreamHistory($pid, $dsid);
+    print_r($before_history);
+    $this->apim->modifyDatastream($pid, $dsid, array('versionable' => FALSE));
+    $after_history = $this->apim->getDatastreamHistory($pid, $dsid);
+    print_r($after_history);
+    $this->apim->modifyDatastream($pid, $dsid, array('dsLabel' => 'goo'));
+    $after_history = $this->apim->getDatastreamHistory($pid, $dsid);
+    print_r($after_history);
+  }
+
+  /**
+   * @depends testGetDatastream
+   */
   function testModifyDatastreamState() {
     foreach ($this->fixtures as $pid => $fixture) {
       foreach($fixture['dsids'] as $dsid => $data) {

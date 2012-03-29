@@ -125,11 +125,7 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
         // the message set in that exception .
         $response = $e->getResponse();
         $message = preg_split('/$\R?^/m', $response['content']);
-        $message = explode(':', $message[0]);
-        $message = $message[count($message) - 1];
-        if(strpos($message,'Exception') !== FALSE) {
-          $message = $e->getMessage();
-        }
+        $message = $message[0];
         break;
       
       default:

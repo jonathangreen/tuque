@@ -74,7 +74,7 @@ abstract class MagicProperty {
       trigger_error(
         'Undefined property: ' . $class . '::$' . $name .
         ' in ' . $trace[0]['file'] .
-        ' on line ' . $trace[0]['line'] . 'triggered via __get',
+        ' on line ' . $trace[0]['line'] . ' triggered via __get',
         E_USER_NOTICE);
       return NULL;
     }

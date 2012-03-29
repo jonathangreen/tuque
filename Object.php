@@ -43,7 +43,7 @@ abstract class AbstractFedoraObject extends AbstractObject {
         break;
       case 'set':
       case 'unset':
-        // @todo fix this shiznat
+        trigger_error("Cannot $function the readonly object->id property.", E_USER_WARNING);
         throw new Exception();
         break;
     }
@@ -72,12 +72,12 @@ abstract class AbstractFedoraObject extends AbstractObject {
             $this->objectProfile['objState'] = 'I';
             break;
           default:
-          // @todo exception?
+            trigger_error("$value is not a valid value for the object->state property.", E_USER_WARNING);
             break;
         }
         break;
       case 'unset':
-        // @todo php warning? exception?
+        trigger_error("Cannot unset the required object->state property.", E_USER_WARNING);
         break;
     }
   }
@@ -225,7 +225,7 @@ class FedoraObject extends AbstractFedoraObject {
         break;
       case 'set':
       case 'unset':
-        throw new Exception();
+        trigger_error("Cannot $function the readonly object->createdDate property.", E_USER_WARNING);
         break;
     }
   }
@@ -240,7 +240,7 @@ class FedoraObject extends AbstractFedoraObject {
         break;
       case 'set':
       case 'unset':
-        throw new InvalidArgumentException();
+        trigger_error("Cannot $function the readonly object->lastModifiedDate property.", E_USER_WARNING);
         break;
     }
   }

@@ -581,6 +581,7 @@ class FedoraApiM {
    *   - string: The datastream is passed as a string.
    *   - file: The datastream is contained in a file.
    *   - url: The datastream is located at a URL, which is passed as a string.
+   *     this is the only option that can be used for R and E type datastreams.
    * @param string $file
    *   This parameter depends on what is selected for $type.
    *   - string: A string containing the datastream.
@@ -1157,7 +1158,7 @@ class FedoraApiM {
     elseif (isset($params['dsLocation'])) {
       $type = 'none';
       $data = NULL;
-      $this->addRequestParam($request, $seperator, $params, 'dsLocation');
+      $this->connection->addParamArray($request, $seperator, $params, 'dsLocation');
     }
     else {
       $type = 'none';
