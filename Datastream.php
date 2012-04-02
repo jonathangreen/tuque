@@ -92,7 +92,7 @@ abstract class AbstractFedoraDatastream extends AbstractDatastream {
   }
 
   protected function purgeDatastream($version) {
-    return $this->repository->api->m->purgeDatastream($this->object-id, $this->id, array('startDT' => $version, 'endDT' => $version));
+    return $this->repository->api->m->purgeDatastream($this->object->id, $this->id, array('startDT' => $version, 'endDT' => $version));
   }
 }
 
@@ -101,8 +101,8 @@ class FedoraDatastreamVersion extends AbstractFedoraDatastream {
   protected $repository;
   public $parent;
 
-  public function  __construct($id, array $datastreamInfo, FedoraRepository $repository, FedoraObject $object, FedoraDatastream $datastream) {
-    parent::__construct($id, $repository, $object);
+  public function  __construct($id, array $datastreamInfo, FedoraDatastream $datastream, FedoraObject $object, FedoraRepository $repository) {
+    parent::__construct($id, $object, $repository);
     $this->datastreamInfo = $datastreamInfo;
     $this->parent = $datastream;
   }
@@ -208,11 +208,16 @@ class FedoraDatastreamVersion extends AbstractFedoraDatastream {
  */
 class FedoraDatastream extends AbstractFedoraDatastream implements Countable, ArrayAccess, IteratorAggregate{
   protected $datastreamInfo = NULL;
-  protected $cachedContent = NULL;
   protected $datastreamHistory = NULL;
+  public $forceUpdate = FALSE;
 
   public function __construct($id, FedoraObject $object, FedoraRepository $repository) {
     parent::__construct($id, $object, $repository);
+  }
+  
+  public function refresh() {
+    $this->datastreamInfo = NULL;
+    $this->datastreamHistory = NULL;
   }
 
   protected function populateDatastreamHistory() {
@@ -229,10 +234,24 @@ class FedoraDatastream extends AbstractFedoraDatastream implements Countable, Ar
   }
 
   protected function modifyDatastream(array $args) {
-    $this->datastreamInfo = parent::modifyDatastream($args);
-    if($this->datastreamHistory !== NULL) {
-      array_unshift($this->datastreamHistory, $this->datastreamInfo);
+    if(!$this->forceUpdate) {
+      $args = array_merge($args, array('lastModifiedDate' => (string)$this->createdDate));
     }
+    $this->datastreamInfo = parent::modifyDatastream($args);
+    $this->datastreamHistory = NULL;
+    //if($this->datastreamHistory !== NULL) {
+    //  if($this->versionable) {
+    //    array_unshift($this->datastreamHistory, $this->datastreamInfo);
+    //  }
+    //  else {
+    //    $this->datastreamHistory[0] = $this->datastreamInfo;
+    //  }
+    //}
+  }
+
+  protected function getDatastreamContent($version = NULL) {
+    $this->populateDatastreamInfo();
+    return parent::getDatastreamContent($version);
   }
 
   protected function controlGroupMagicProperty($function, $value) {
@@ -557,7 +576,7 @@ class FedoraDatastream extends AbstractFedoraDatastream implements Countable, Ar
 
   public function offsetGet ( $offset ) {
     $this->populateDatastreamHistory();
-    return new FedoraDatastreamVersion($this->id, $this->datastreamHistory[$offset], $this->repository, $this->object, $this);
+    return new FedoraDatastreamVersion($this->id, $this->datastreamHistory[$offset], $this, $this->object, $this->repository);
   }
 
   public function offsetSet ( $offset, $value ) {
@@ -571,6 +590,9 @@ class FedoraDatastream extends AbstractFedoraDatastream implements Countable, Ar
       return;
     }
     $this->purgeDatastream($this->datastreamHistory[$offset]['dsCreateDate']);
+    unset($this->datastreamHistory[$offset]);
+    $this->datastreamHistory = array_values($this->datastreamHistory);
+    $this->datastreamInfo = $this->datastreamHistory[0];
   }
 
   public function getIterator() {

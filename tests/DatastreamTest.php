@@ -242,13 +242,80 @@ foo;
   }
 
   public function testVersions() {
-    $this->assertEquals(count($this->ds), 1);
+    $this->assertEquals(1, count($this->ds));
     $this->ds->label = 'foot';
-    $this->assertEquals(count($this->ds), 2);
-    $this->assertEquals($this->ds[1]->label, '');
+    $this->assertEquals(2, count($this->ds));
+    $this->assertEquals('', $this->ds[1]->label);
 
     $newds = new FedoraDatastream($this->testDsid, $this->object, $this->repository);
-    $this->assertEquals(count($newds), 2);
-    $this->assertEquals($newds[1]->label, '');
+    $this->assertEquals(2, count($newds));
+    $this->assertEquals('', $newds[1]->label);
+
+    unset($newds[0]);
+    $this->assertEquals('', $newds->label);
+    $this->assertEquals(1, count($newds));
+
+    $newds = new FedoraDatastream($this->testDsid, $this->object, $this->repository);
+    $this->assertEquals(1, count($newds));
+    $this->assertEquals('', $newds->label);
+  }
+
+  public function testVersionsVersionable() {
+    $this->assertEquals('', $this->ds->label);
+    $this->assertEquals(1, count($this->ds));
+    $this->ds->label = 'foot';
+    $this->assertEquals(2, count($this->ds));
+    $this->assertEquals('foot', $this->ds->label);
+    $this->assertEquals('', $this->ds[1]->label);
+    $this->ds->versionable = FALSE;
+    //$this->label = 'crook';
+    //$this->assertEquals('crook', $this->ds->label);
+    //$this->assertEquals(2, count($this->ds));
+    //$this->assertEquals('', $this->ds[1]->label);
+    //$this->ds->refresh();
+    //$this->assertEquals('crook', $this->ds->label);
+    //$this->assertEquals(2, count($this->ds));
+    //$this->assertEquals('', $this->ds[1]->label);
+  }
+
+  /**
+   * @expectedException        RepositoryException
+   * @expectedExceptionMessage Conflict
+   * @expectedExceptionCode 409
+   */
+  public function testLocking() {
+    $ds1 = new FedoraDatastream($this->testDsid, $this->object, $this->repository);
+    $ds2 = new FedoraDatastream($this->testDsid, $this->object, $this->repository);
+
+    $this->assertEquals($this->testDsContents, $ds1->content);
+    $ds2->content = 'foo';
+    $ds1->content = 'bar';
+  }
+
+  public function testLockingForceUpdate() {
+    $ds1 = new FedoraDatastream($this->testDsid, $this->object, $this->repository);
+    $ds2 = new FedoraDatastream($this->testDsid, $this->object, $this->repository);
+
+    $this->assertEquals($this->testDsContents, $ds1->content);
+    $ds2->content = 'foo';
+    $ds1->forceUpdate = TRUE;
+    $ds1->content = 'bar';
+  }
+  
+  public function testLockingRefresh() {
+    $ds1 = new FedoraDatastream($this->testDsid, $this->object, $this->repository);
+    $ds2 = new FedoraDatastream($this->testDsid, $this->object, $this->repository);
+
+    $this->assertEquals($this->testDsContents, $ds1->content);
+    $ds2->content = 'foo';
+    try {
+      $ds1->content = 'bar';
+    }
+    catch(RepositoryException $e) {
+      $ds1->refresh();
+      $ds1->content = 'bar';
+      return;
+    }
+    $this->fail();
   }
 }

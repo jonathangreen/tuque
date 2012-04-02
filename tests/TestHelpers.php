@@ -1,9 +1,5 @@
 <?php
 
-define('FEDORAURL', 'http://vm0:8080/fedora');
-define('FEDORAUSER', 'fedoraAdmin');
-define('FEDORAPASS', 'password');
-
 class FedoraTestHelpers {
   static function randomString($length) {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
