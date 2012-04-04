@@ -268,14 +268,21 @@ foo;
     $this->assertEquals('foot', $this->ds->label);
     $this->assertEquals('', $this->ds[1]->label);
     $this->ds->versionable = FALSE;
-    //$this->label = 'crook';
-    //$this->assertEquals('crook', $this->ds->label);
-    //$this->assertEquals(2, count($this->ds));
-    //$this->assertEquals('', $this->ds[1]->label);
-    //$this->ds->refresh();
-    //$this->assertEquals('crook', $this->ds->label);
-    //$this->assertEquals(2, count($this->ds));
-    //$this->assertEquals('', $this->ds[1]->label);
+    $this->assertEquals(3, count($this->ds));
+    $this->ds->label = 'crook';
+    $this->ds->label = 'book';
+    $this->ds->label = 'crook';
+    $this->assertEquals('crook', $this->ds->label);
+    $this->assertEquals(3, count($this->ds));
+    $this->assertEquals('', $this->ds[1]->label);
+    $this->ds->refresh();
+    $this->assertEquals('crook', $this->ds->label);
+    $this->assertEquals(3, count($this->ds));
+    $this->assertEquals('', $this->ds[1]->label);
+    $this->ds->versionable = TRUE;
+    $this->assertEquals(3, count($this->ds));
+    $this->ds->refresh();
+    $this->assertEquals(3, count($this->ds));
   }
 
   /**

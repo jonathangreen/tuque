@@ -202,10 +202,6 @@ class FedoraDatastreamVersion extends AbstractFedoraDatastream {
   }
 }
 
-/**
- * @todo versioning
- * @todo opportunistic locking
- */
 class FedoraDatastream extends AbstractFedoraDatastream implements Countable, ArrayAccess, IteratorAggregate{
   protected $datastreamInfo = NULL;
   protected $datastreamHistory = NULL;
@@ -234,19 +230,19 @@ class FedoraDatastream extends AbstractFedoraDatastream implements Countable, Ar
   }
 
   protected function modifyDatastream(array $args) {
+    $versionable = $this->versionable;
     if(!$this->forceUpdate) {
       $args = array_merge($args, array('lastModifiedDate' => (string)$this->createdDate));
     }
     $this->datastreamInfo = parent::modifyDatastream($args);
-    $this->datastreamHistory = NULL;
-    //if($this->datastreamHistory !== NULL) {
-    //  if($this->versionable) {
-    //    array_unshift($this->datastreamHistory, $this->datastreamInfo);
-    //  }
-    //  else {
-    //    $this->datastreamHistory[0] = $this->datastreamInfo;
-    //  }
-    //}
+    if($this->datastreamHistory !== NULL) {
+      if($versionable) {
+        array_unshift($this->datastreamHistory, $this->datastreamInfo);
+      }
+      else {
+        $this->datastreamHistory[0] = $this->datastreamInfo;
+      }
+    }
   }
 
   protected function getDatastreamContent($version = NULL) {
