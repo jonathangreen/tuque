@@ -197,12 +197,10 @@ class NewFedoraObject extends AbstractFedoraObject {
   public function addDatastream($id, $params = array()) {}
 }
 
-/**
- * @todo we need to support opportunistic locking here
- */
 class FedoraObject extends AbstractFedoraObject {
 
   protected $datastreams = NULL;
+  public $forceUpdate = FALSE;
 
   public function  __construct($id, FedoraRepository $repository) {
     parent::__construct($id, $repository);
@@ -220,8 +218,12 @@ class FedoraObject extends AbstractFedoraObject {
     $this->datastreams = $this->repository->api->a->listDatastreams($this->id);
   }
 
-  public function getDatastream() {}
-  public function addDatastream($id, $params = array()) {}
+  protected function modifyObject($params) {
+    if(!$this->forceUpdate) {
+      $params['lastModifiedDate'] = (string) $this->lastModifiedDate;
+    }
+    $this->repository->api->m->modifyObject($this->id, $params);
+  }
 
   public function purgeDatastream($id) {
     if(!isset($this->datastreams)) {
@@ -235,13 +237,16 @@ class FedoraObject extends AbstractFedoraObject {
     $this->repository->api->m->purgeDatastream($this->id, $id);
     return TRUE;
   }
+  
+  public function getDatastream($id) {}
+  public function addDatastream($id, $params = array()) {}
 
   protected function stateMagicProperty($function, $value) {
     $previous_state = $this->objectProfile['objState'];
     $return = parent::stateMagicProperty($function, $value);
 
     if ($previous_state != $this->objectProfile['objState']) {
-      $this->repository->api->m->modifyObject($this->id, array('state' => $this->objectProfile['objState']));
+      $this->modifyObject(array('state' => $this->objectProfile['objState']));
     }
     return $return;
   }
@@ -251,7 +256,7 @@ class FedoraObject extends AbstractFedoraObject {
     $return = parent::labelMagicProperty($function, $value);
 
     if ($previous_label != $this->objectProfile['objLabel']) {
-      $this->repository->api->m->modifyObject($this->id, array('label' => $this->objectProfile['objLabel']));
+      $this->modifyObject(array('label' => $this->objectProfile['objLabel']));
     }
     return $return;
   }
@@ -261,7 +266,7 @@ class FedoraObject extends AbstractFedoraObject {
     $return = parent::ownerMagicProperty($function, $value);
 
     if ($previous_owner != $this->objectProfile['objOwnerId']) {
-        $this->repository->api->m->modifyObject($this->id, array('ownerId' => $this->objectProfile['objOwnerId']));
+      $this->modifyObject(array('ownerId' => $this->objectProfile['objOwnerId']));
     }
     return $return;
   }

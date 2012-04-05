@@ -94,6 +94,47 @@ abstract class AbstractFedoraDatastream extends AbstractDatastream {
   protected function purgeDatastream($version) {
     return $this->repository->api->m->purgeDatastream($this->object->id, $this->id, array('startDT' => $version, 'endDT' => $version));
   }
+
+  protected function validateState($state) {
+    switch(strtolower($state)) {
+      case 'd':
+      case 'deleted':
+        return 'D';
+        break;
+      case 'a':
+      case 'active':
+        return 'A';
+        break;
+      case 'i':
+      case 'inactive':
+        return 'I';
+        break;
+      default:
+        return FALSE;
+        break;
+    }
+  }
+
+  protected function validateVersionable($versionable) {
+    return is_bool($versionable);
+  }
+
+  protected function validateChecksumType($type) {
+    switch ($type) {
+      case 'DEFAULT':
+      case 'DISABLED':
+      case 'MD5':
+      case 'SHA-1':
+      case 'SHA-256':
+      case 'SHA-384':
+      case 'SHA-512':
+        return $type;
+        break;
+      default:
+        return FALSE;
+        break;
+    }
+  }
 }
 
 class FedoraDatastreamVersion extends AbstractFedoraDatastream {
@@ -207,8 +248,16 @@ class FedoraDatastream extends AbstractFedoraDatastream implements Countable, Ar
   protected $datastreamHistory = NULL;
   public $forceUpdate = FALSE;
 
-  public function __construct($id, FedoraObject $object, FedoraRepository $repository) {
+  public function __construct($id, FedoraObject $object, FedoraRepository $repository, array $datastreamInfo = NULL) {
     parent::__construct($id, $object, $repository);
+    $this->datastreamInfo = $datastreamInfo;
+  }
+
+  /*
+   * @todo finish this
+   */
+  public static function createAndConstruct($id, $params, FedoraObject $object, FedoraRepository $repository) {
+    
   }
   
   public function refresh() {
@@ -276,25 +325,13 @@ class FedoraDatastream extends AbstractFedoraDatastream implements Countable, Ar
         return TRUE;
         break;
       case 'set':
-        switch(strtolower($value)) {
-          case 'd':
-          case 'deleted':
-            $this->datastreamInfo['dsState'] = 'D';
-            break;
-          case 'a':
-          case 'active':
-            $this->datastreamInfo['dsState'] = 'A';
-            break;
-          case 'i':
-          case 'inactive':
-            $this->datastreamInfo['dsState'] = 'I';
-            break;
-          default:
-            trigger_error("$value is not a valid value for the datastream->state property.", E_USER_WARNING);
-            return;
-            break;
+        $state = $this->validateState($value);
+        if($state) {
+          $this->modifyDatastream(array('dsState' => $state));
         }
-        $this->modifyDatastream(array('dsState' => $this->datastreamInfo['dsState']));
+        else {
+          trigger_error("$value is not a valid value for the datastream->state property.", E_USER_WARNING);
+        }
         break;
       case 'unset':
         trigger_error("Cannot unset the required datastream->state property.", E_USER_WARNING);
@@ -333,11 +370,11 @@ class FedoraDatastream extends AbstractFedoraDatastream implements Countable, Ar
         return TRUE;
         break;
       case 'set':
-        if(!is_bool($value)) {
-          trigger_error("Datastream->versionable must be a boolean.", E_USER_WARNING);
+        if($this->validateVersionable($value)) {
+          $this->modifyDatastream(array('versionable' => $value));
         }
         else {
-          $this->modifyDatastream(array('versionable' => $value));
+          trigger_error("Datastream->versionable must be a boolean.", E_USER_WARNING);
         }
         break;
       case 'unset':
@@ -435,20 +472,13 @@ class FedoraDatastream extends AbstractFedoraDatastream implements Countable, Ar
         return $this->isDatastreamProperySet($this->datastreamInfo['dsChecksumType'], 'DISABLED');
         break;
       case 'set':
-        switch ($value) {
-          case 'DEFAULT':
-          case 'DISABLED':
-          case 'MD5':
-          case 'SHA-1':
-          case 'SHA-256':
-          case 'SHA-384':
-          case 'SHA-512':
-            break;
-          default:
-            trigger_error("$value is not a valid value for the datastream->checksumType property.", E_USER_WARNING);
-            return;
+        $type = $this->validateChecksumType($value);
+        if($type) {
+          $this->modifyDatastream(array('checksumType' => $type));
         }
-        $this->modifyDatastream(array('checksumType' => $value));
+        else {
+          trigger_error("$value is not a valid value for the datastream->checksumType property.", E_USER_WARNING);
+        }
         break;
       case 'unset':
         $this->modifyDatastream(array('checksumType' => 'DISABLED'));
