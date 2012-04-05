@@ -133,45 +133,45 @@ class FedoraDatastreamVersion extends AbstractFedoraDatastream {
   }
 
   protected function controlGroupMagicProperty($function, $value) {
-    $this->generalReadOnly('dsControlGroup', NULL, $function, $value);
+    return $this->generalReadOnly('dsControlGroup', NULL, $function, $value);
   }
 
   protected function stateMagicProperty($function, $value) {
-    $this->generalReadOnly('dsState', NULL, $function, $value);
+    return $this->generalReadOnly('dsState', NULL, $function, $value);
   }
 
   protected function labelMagicProperty($function, $value) {
-    $this->generalReadOnly('dsLabel', '', $function, $value);
+    return $this->generalReadOnly('dsLabel', '', $function, $value);
   }
 
   protected function versionableMagicProperty($function, $value) {
     if(!is_bool($this->datastreamInfo['dsVersionable'])) {
       $this->datastreamInfo['dsVersionable'] = $this->datastreamInfo['dsVersionable'] == 'true' ? TRUE : FALSE;
     }
-    $this->generalReadOnly('dsVersionable', NULL, $function, $value);
+    return $this->generalReadOnly('dsVersionable', NULL, $function, $value);
   }
 
   protected function mimetypeMagicProperty($function, $value) {
-    $this->generalReadOnly('dsMIME', '', $function, $value);
+    return $this->generalReadOnly('dsMIME', '', $function, $value);
   }
 
   protected function formatMagicProperty($function, $value) {
-    $this->generalReadOnly('dsFormatURI', '', $function, $value);
+    return $this->generalReadOnly('dsFormatURI', '', $function, $value);
   }
 
   protected function sizeMagicProperty($function, $value) {
-    $this->generalReadOnly('dsSize', NULL, $function, $value);
+    return $this->generalReadOnly('dsSize', NULL, $function, $value);
   }
 
   protected function checksumMagicProperty() {
-    $this->generalReadOnly('dsChecksum', 'none', $function, $value);
+    return $this->generalReadOnly('dsChecksum', 'none', $function, $value);
   }
 
   protected function createdDateMagicProperty($function, $value) {
     if (!$this->datastreamInfo['dsCreateDate'] instanceof FedoraDate) {
       $this->datastreamInfo['dsCreateDate'] = new FedoraDate($this->datastreamInfo['dsCreateDate']);
     }
-    $this->generalReadOnly('dsCreateDate', NULL, $function, $value);
+    return $this->generalReadOnly('dsCreateDate', NULL, $function, $value);
   }
 
   protected function contentMagicProperty($function, $value) {

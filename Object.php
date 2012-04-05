@@ -13,8 +13,32 @@ abstract class AbstractObject extends MagicProperty {
 
   abstract public function delete();
   abstract public function getDatastream();
-  //abstract public function constructNewDatastream($id);
-  //abstract public function ingestNewDatastream();
+
+  /**
+   * Add a new datastream to the object.
+   *
+   * @param string $id
+   *   The unique identifier of the datastream.
+   * @param array $params
+   *   (optional) An array that can have one or more of the following elements:
+   *   - label: Label for the datastream.
+   *   - state: State of the datastream. (Active (default), Inactive, Deleted).
+   *   - mimetype: The mimetype of the datastream.
+   *   - versionable: (boolean) Enable/disable versioning of the datastream.
+   *   - controlGroup:  one of "X", "M" (default), "R", or "E". (Inline *X*ML,
+   *     *M*anaged Content, *R*edirect, or *E*xternal Referenced).
+   *   - format: The format URI for the datastream.
+   *   - checksumType: the algorithm used to compute a checksum for the
+   *     datastream. One of DEFAULT, DISABLED (default), MD5, SHA-1, SHA-256,
+   *     SHA-385, SHA-512. If this is specified and no checksum is supplied it
+   *     will be automatically computed.
+   *   - checksum: the value of the checksum represented as a hexadecimal
+   *     string.
+   *   - string: a string containing the datastream contents.
+   *   - url: a url that contains the datastream contents.
+   *   - file: a file containing the datastream contents.
+   */
+  abstract public function addDatastream($id, $params = array());
 }
 
 abstract class AbstractFedoraObject extends AbstractObject {
@@ -142,7 +166,7 @@ class NewFedoraObject extends AbstractFedoraObject {
   }
 
   public function getDatastream() {}
-  public function newDatastream() {}
+  public function addDatastream($id, $params = array()) {}
 }
 
 /**
@@ -168,9 +192,8 @@ class FedoraObject extends AbstractFedoraObject {
     $this->datastreams = $this->repository->api->a->listDatastreams($this->id);
   }
 
-  public function constructNewDatastream() {}
-  public function ingestNewDatastream() {}
   public function getDatastream() {}
+  public function addDatastream($id, $params = array()) {}
 
   public function purgeDatastream($id) {
     if(!isset($this->datastreams)) {
