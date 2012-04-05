@@ -1,18 +1,46 @@
 <?php
+/**
+ * @file
+ * This file contains all of the functionality for objects in the repository.
+ */
 
 require_once 'MagicProperty.php';
 require_once 'FedoraDate.php';
 
+/**
+ * An abstract class defining a Object in the repository. This is the class
+ * that needs to be implemented in order to create new repository backends
+ * that can be accessed using Tuque.
+ */
 abstract class AbstractObject extends MagicProperty {
+
+  /**
+   * The label for this object.
+   *
+   * @var string
+   */
   public $label;
+
+  /**
+   * The user who owns this object.
+   *
+   * @var string
+   */
   public $owner;
+
+  /**
+   * The state of this object. Must be one of: A (Active), I (Inactive) or
+   * D (Deleted). This is a manditory property and cannot be unset.
+   *
+   * @var string
+   */
   public $state;
   public $id;
   public $createdDate;
   public $lastModifiedDate;
 
   abstract public function delete();
-  abstract public function getDatastream();
+  abstract public function getDatastream($id);
 
   /**
    * Add a new datastream to the object.
@@ -165,7 +193,7 @@ class NewFedoraObject extends AbstractFedoraObject {
     $this->state = 'D';
   }
 
-  public function getDatastream() {}
+  public function getDatastream($id) {}
   public function addDatastream($id, $params = array()) {}
 }
 
