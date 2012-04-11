@@ -222,7 +222,8 @@ class FedoraObject extends AbstractFedoraObject {
     if(!$this->forceUpdate) {
       $params['lastModifiedDate'] = (string) $this->lastModifiedDate;
     }
-    $this->repository->api->m->modifyObject($this->id, $params);
+    $moddate = $this->repository->api->m->modifyObject($this->id, $params);
+    $this->objectProfile['objLastModDate'] = new FedoraDate($moddate);
   }
 
   public function purgeDatastream($id) {
