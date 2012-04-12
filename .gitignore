@@ -1,2 +1,4 @@
 nbproject/
 tests/configs
+build/
+cache.properties
