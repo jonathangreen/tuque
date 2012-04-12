@@ -1,3 +1,2 @@
 nbproject/
-phpunit.xml
-*.xml
+tests/configs

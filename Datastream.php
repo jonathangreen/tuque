@@ -29,6 +29,7 @@ abstract class AbstractDatastream extends MagicProperty {
 
 abstract class AbstractFedoraDatastream extends AbstractDatastream {
   protected $datastreamId = NULL;
+  protected $datastreamInfo = NULL;
   protected $repository;
   protected $object;
 
@@ -135,10 +136,24 @@ abstract class AbstractFedoraDatastream extends AbstractDatastream {
         break;
     }
   }
+
+  protected function controlGroupMagicProperty($function, $value) {
+    switch($function) {
+      case 'get':
+        return $this->datastreamInfo['dsControlGroup'];
+        break;
+      case 'isset':
+        return TRUE;
+        break;
+      case 'set':
+      case 'unset':
+        trigger_error("Cannot $function the readonly datastream->controlGroup property.", E_USER_WARNING);
+        break;
+    }
+  }
 }
 
 class FedoraDatastreamVersion extends AbstractFedoraDatastream {
-  protected $datastreamInfo = NULL;
   protected $repository;
   public $parent;
 
@@ -171,10 +186,6 @@ class FedoraDatastreamVersion extends AbstractFedoraDatastream {
         $this->error();
         break;
     }
-  }
-
-  protected function controlGroupMagicProperty($function, $value) {
-    return $this->generalReadOnly('dsControlGroup', NULL, $function, $value);
   }
 
   protected function stateMagicProperty($function, $value) {
@@ -244,20 +255,12 @@ class FedoraDatastreamVersion extends AbstractFedoraDatastream {
 }
 
 class FedoraDatastream extends AbstractFedoraDatastream implements Countable, ArrayAccess, IteratorAggregate{
-  protected $datastreamInfo = NULL;
   protected $datastreamHistory = NULL;
   public $forceUpdate = FALSE;
 
   public function __construct($id, FedoraObject $object, FedoraRepository $repository, array $datastreamInfo = NULL) {
     parent::__construct($id, $object, $repository);
     $this->datastreamInfo = $datastreamInfo;
-  }
-
-  /*
-   * @todo finish this
-   */
-  public static function createAndConstruct($id, $params, FedoraObject $object, FedoraRepository $repository) {
-    
   }
   
   public function refresh() {
@@ -301,18 +304,7 @@ class FedoraDatastream extends AbstractFedoraDatastream implements Countable, Ar
 
   protected function controlGroupMagicProperty($function, $value) {
     $this->populateDatastreamInfo();
-    switch($function) {
-      case 'get':
-        return $this->datastreamInfo['dsControlGroup'];
-        break;
-      case 'isset':
-        return TRUE;
-        break;
-      case 'set':
-      case 'unset':
-        trigger_error("Cannot $function the readonly datastream->controlGroup property.", E_USER_WARNING);
-        break;
-    }
+    parent::controlGroupMagicProperty($function, $value);
   }
 
   protected function stateMagicProperty($function, $value) {
@@ -326,7 +318,7 @@ class FedoraDatastream extends AbstractFedoraDatastream implements Countable, Ar
         break;
       case 'set':
         $state = $this->validateState($value);
-        if($state) {
+        if($state !== FALSE) {
           $this->modifyDatastream(array('dsState' => $state));
         }
         else {

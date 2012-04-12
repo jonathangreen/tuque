@@ -45,7 +45,7 @@ abstract class MagicProperty {
    * Returns the name of the magic property. Makes it easy to change what we
    * use as the name.
    */
-  protected function getMagicPropertyMethodName($name) {
+  protected function getGeneralMagicPropertyMethodName($name) {
     $method = $name . 'MagicProperty';
     return $method;
   }
@@ -63,9 +63,13 @@ abstract class MagicProperty {
    *   The data returned from the property.
    */
   public function __get($name) {
-    $method = $this->getMagicPropertyMethodName($name);
-    if (method_exists($this, $method)) {
-      return $this->$method('get',NULL);
+    $generalmethod = $this->getGeneralMagicPropertyMethodName($name);
+    $specificmethod = $generalmethod . 'Get';
+    if (method_exists($this, $specificmethod)) {
+      return $this->$specificmethod();
+    }
+    elseif (method_exists($this, $generalmethod)) {
+      return $this->$generalmethod('get',NULL);
     }
     else {
       // We trigger an error like php would. This helps with debugging.
@@ -93,9 +97,13 @@ abstract class MagicProperty {
    *   If the variable is set.
    */
   public function __isset($name) {
-    $method = $this->getMagicPropertyMethodName($name);
-    if (method_exists($this, $method)) {
-      return $this->$method('isset',NULL);
+    $generalmethod = $this->getGeneralMagicPropertyMethodName($name);
+    $specificmethod = $generalmethod . 'Isset';
+    if (method_exists($this, $specificmethod)) {
+      return $this->$specificmethod();
+    }
+    elseif (method_exists($this, $generalmethod)) {
+      return $this->$generalmethod('isset',NULL);
     }
     else {
       return FALSE;
@@ -113,9 +121,13 @@ abstract class MagicProperty {
    *   The value it should be set with.
    */
   public function __set($name, $value) {
-    $method = $this->getMagicPropertyMethodName($name);
-    if (method_exists($this, $method)) {
-      $this->$method('set', $value);
+    $generalmethod = $this->getGeneralMagicPropertyMethodName($name);
+    $specificmethod = $generalmethod . 'Set';
+    if (method_exists($this, $specificmethod)) {
+      return $this->$specificmethod($value);
+    }
+    elseif (method_exists($this, $generalmethod)) {
+      $this->$generalmethod('set', $value);
     }
     else {
       // Else we allow it to be set like a normal property.
@@ -132,9 +144,13 @@ abstract class MagicProperty {
    *   The property to unset
    */
   public function __unset($name) {
-    $method = $this->getMagicPropertyMethodName($name);
-    if (method_exists($this, $method)) {
-      $this->$method('unset', NULL);
+    $generalmethod = $this->getGeneralMagicPropertyMethodName($name);
+    $specificmethod = $generalmethod . 'Unset';
+    if (method_exists($this, $specificmethod)) {
+      return $this->$specificmethod();
+    }
+    elseif (method_exists($this, $generalmethod)) {
+      return $this->$generalmethod('unset',NULL);
     }
   }
 }
