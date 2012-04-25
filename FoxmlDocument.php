@@ -1,7 +1,7 @@
 <?php
 
 class FoxmlDocument extends DOMDocument {
-  const foxml = 'info:fedora/fedora-system:def/foxml#';
+  const FOXML = 'info:fedora/fedora-system:def/foxml#';
   const xlink = 'http://www.w3.org/1999/xlink';
   const xsi = 'http://www.w3.org/2001/XMLSchema-instance';
   const xmlns = 'http://www.w3.org/2000/xmlns/';
@@ -25,13 +25,13 @@ class FoxmlDocument extends DOMDocument {
   }
 
   private function createRootElement() {
-    $root = $this->createElementNS(self::foxml, 'foxml:digitalObject');
+    $root = $this->createElementNS(self::FOXML, 'foxml:digitalObject');
     $root->setAttribute('VERSION', '1.1');
     $root->setAttribute('PID', "{$this->object->id}");
-    $root->setAttributeNS(self::xmlns, 'xmlns', self::foxml);
-    $root->setAttributeNS(self::xmlns, 'xmlns:foxml', self::foxml);
+    $root->setAttributeNS(self::xmlns, 'xmlns', self::FOXML);
+    $root->setAttributeNS(self::xmlns, 'xmlns:foxml', self::FOXML);
     $root->setAttributeNS(self::xmlns, 'xmlns:xsi', self::xsi);
-    $root->setAttributeNS(self::xsi, 'xsi:schemaLocation', self::foxml . " http://www.fedora.info/definitions/1/0/foxml1-1.xsd");
+    $root->setAttributeNS(self::xsi, 'xsi:schemaLocation', self::FOXML . " http://www.fedora.info/definitions/1/0/foxml1-1.xsd");
     $this->appendChild($root);
     return $root;
   }
@@ -57,21 +57,21 @@ class FoxmlDocument extends DOMDocument {
    * @return DOMElement
    */
   private function createObjectProperties() {
-    $object_properties = $this->createElementNS(self::foxml, 'foxml:objectProperties');
+    $object_properties = $this->createElementNS(self::FOXML, 'foxml:objectProperties');
     $this->root->appendChild($object_properties);
 
-    $property = $this->createElementNS(self::foxml, 'foxml:property');
+    $property = $this->createElementNS(self::FOXML, 'foxml:property');
     $property->setAttribute('NAME', 'info:fedora/fedora-system:def/model#state');
     $property->setAttribute('VALUE', $this->object->state);
     $object_properties->appendChild($property);
 
-    $property = $this->createElementNS(self::foxml, 'foxml:property');
+    $property = $this->createElementNS(self::FOXML, 'foxml:property');
     $property->setAttribute('NAME', 'info:fedora/fedora-system:def/model#label');
     $property->setAttribute('VALUE', $this->object->label);
     $object_properties->appendChild($property);
 
     if(isset($this->object->owner)) {
-      $property = $this->createElementNS(self::foxml, 'foxml:property');
+      $property = $this->createElementNS(self::FOXML, 'foxml:property');
       $property->setAttribute('NAME', 'info:fedora/fedora-system:def/model#ownerId');
       $property->setAttribute('VALUE', $this->object->owner);
       $object_properties->appendChild($property);
@@ -214,7 +214,7 @@ class FoxmlDocument extends DOMDocument {
   }
 
   private function createDatastreamElement($id = NULL, $state = NULL, $control_group = NULL) {
-    $datastream = $this->createElementNS(self::foxml, 'foxml:datastream');
+    $datastream = $this->createElementNS(self::FOXML, 'foxml:datastream');
     if (isset($id)) {
       $datastream->setAttribute('ID', $id);
     }
@@ -228,7 +228,7 @@ class FoxmlDocument extends DOMDocument {
   }
 
   private function createDatastreamVersionElement($id = NULL, $label = NULL, $mime_type = NULL, $format_uri = NULL) {
-    $version = $this->createElementNS(self::foxml, 'foxml:datastreamVersion');
+    $version = $this->createElementNS(self::FOXML, 'foxml:datastreamVersion');
     if (isset($id)) {
       $version->setAttribute('ID', $id);
     }
@@ -245,12 +245,12 @@ class FoxmlDocument extends DOMDocument {
   }
 
   private function createDatastreamContentElement() {
-    $content = $this->createElementNS(self::foxml, 'foxml:xmlContent');
+    $content = $this->createElementNS(self::FOXML, 'foxml:xmlContent');
     return $content;
   }
 
   private function createDatastreamContentLocationElement($type = NULL, $ref = NULL) {
-    $location = $this->createElementNS(self::foxml, 'foxml:contentLocation');
+    $location = $this->createElementNS(self::FOXML, 'foxml:contentLocation');
     if (isset($type)) {
       $location->setAttribute('TYPE', $type);
     }
