@@ -18,10 +18,14 @@ require_once "Object.php";
  *   $object = $repository['objectid'];
  * @endcode
  *
- * To test if an object exists:
+ * To test if an object exists (returns a BOOLEAN):
  * @code
  *   $exists = isset($repository['objectid']);
  * @endcode
+ *
+ * Assignment and the unset function are not supported. This functionality is
+ * just a helper, and the same functionaluty can be accessed by calling class
+ * member functions.
  */
 abstract class AbstractRepository extends MagicProperty implements ArrayAccess {
 
@@ -56,6 +60,11 @@ abstract class AbstractRepository extends MagicProperty implements ArrayAccess {
    */
   abstract public function ingestNewObject(&$object);
 
+  /**
+   *
+   */
+  abstract public function getObject($id);
+
   //abstract public function getObject($pid);
   //abstract public function newObject($pid);
   abstract public function findObjects(array $search);
@@ -75,6 +84,8 @@ class FedoraRepository extends AbstractRepository {
   /**
    * @todo validate the ID
    * @todo catch the getNextPid errors
+   *
+   * @see AbstractRepository::constructNewObject
    */
   public function constructNewObject($id = NULL) {
     if($this->cache->get($id) !== FALSE) {
