@@ -27,12 +27,6 @@ DOXYFILE_ENCODING      = UTF-8
 
 PROJECT_NAME           = Islandora Fedora API
 
-# The PROJECT_NUMBER tag can be used to enter a project or revision number.
-# This could be handy for archiving the generated documentation or
-# if some version control system is used.
-
-PROJECT_NUMBER         = 0.1
-
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute)
 # base path where the generated documentation will be put.
 # If a relative path is entered, it will be relative to the location
