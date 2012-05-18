@@ -90,7 +90,7 @@ abstract class AbstractFedoraDatastream extends AbstractDatastream {
     return $this->repository->api->m->getDatastreamHistory($this->object->id, $this->id);
   }
 
-  protected function modifyDatastream($args) {
+  protected function modifyDatastream(array $args) {
     return $this->repository->api->m->modifyDatastream($this->object->id, $this->id, $args);
   }
 
