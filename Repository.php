@@ -59,7 +59,7 @@ abstract class AbstractRepository extends MagicProperty implements ArrayAccess {
    * @return AbstractObject
    *   The ingested abstract object.
    */
-  abstract public function ingestNewObject(&$object);
+  abstract public function ingestNewObject(NewFedoraObject &$object);
 
   /**
    * Gets a object from the repository.
