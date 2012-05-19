@@ -189,7 +189,7 @@ abstract class AbstractFedoraObject extends AbstractObject {
 }
 
 class NewFedoraObject extends AbstractFedoraObject {
-  private $datastreams = array();
+  protected $datastreams = array();
 
   public function  __construct($id, FedoraRepository $repository) {
     parent::__construct($id, $repository);
@@ -427,18 +427,23 @@ class FedoraObject extends AbstractFedoraObject {
   }
 
   public function offsetGet ($offset) {
+    $this->populateDatastreams();
     return $this->getDatastream($offset);
   }
 
   public function offsetSet ($offset, $value) {
-    trigger_error("Datastreams must be modified through the datastream object.", E_USER_WARNING);
+    trigger_error("Datastreams must be added using the FedoraObject->ingestDatastream function.", E_USER_WARNING);
   }
 
   public function offsetUnset ($offset) {
-    trigger_error("Datastreams must be removed through the datastream functions.", E_USER_WARNING);
+    $this->populateDatastreams();
+    if(isset($this->datastreams[$offset])) {
+      $this->purgeDatastream($offset);
+    }
   }
 
   public function getIterator() {
+    $this->populateDatastreams();
     return new ArrayIterator($this->datastreams);
   }
 }

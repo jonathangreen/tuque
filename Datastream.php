@@ -241,7 +241,7 @@ abstract class AbstractFedoraDatastream extends AbstractDatastream {
    * @todo test if this covers all cases.
    */
   protected function validateMimetype($mime) {
-    if ($mime === '' || preg_match('#^[-\w]+/[-\w+]+$#', $mime)) {
+    if (preg_match('#^[-\w]+/[-\w+]+$#', $mime)) {
       return TRUE;
     }
     else {
@@ -374,13 +374,12 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
     $this->datastreamInfo['dsState'] = 'A';
     $this->datastreamInfo['dsLabel'] = '';
     $this->datastreamInfo['dsVersionable'] = TRUE;
-    $this->datastreamInfo['dsMIME'] = '';
+    $this->datastreamInfo['dsMIME'] = 'text/xml';
     $this->datastreamInfo['dsFormatURI'] = '';
     $this->datastreamInfo['dsChecksumType'] = 'DISABLED';
     $this->datastreamInfo['dsChecksum'] = 'none';
-    $this->datastreamInfo['dsLocation'] = '';
 
-    $this->datastreamInfo['content'] = array('type' => 'string', 'content' => '');
+    $this->datastreamInfo['content'] = array('type' => 'string', 'content' => ' ');
   }
 
   /**
@@ -549,7 +548,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
         break;
 
       case 'isset':
-        return $this->isDatastreamProperySet($this->datastreamInfo['dsMIME'], '');
+        return TRUE;
         break;
 
       case 'set':
@@ -689,7 +688,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
         break;
 
       case 'isset':
-        return $this->isDatastreamProperySet($this->datastreamInfo['content']['content'], '');
+        return $this->isDatastreamProperySet($this->datastreamInfo['content']['content'], ' ');
         break;
 
       case 'set':
@@ -704,7 +703,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
       case 'unset':
         if ($this->controlGroup == 'M' || $this->controlGroup == 'X') {
           $this->datastreamInfo['content']['type'] = 'string';
-          $this->datastreamInfo['content']['content'] = '';
+          $this->datastreamInfo['content']['content'] = ' ';
         }
         else {
           trigger_error("Cannot unset content of a {$this->controlGroup} datastream, please use datastream->url.", E_USER_WARNING);
@@ -720,7 +719,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
     switch ($function) {
       case 'get':
         if ($this->controlGroup == 'E' || $this->controlGroup == 'R') {
-          return $this->datastreamInfo['dsLocation'];
+          return $this->datastreamInfo['content']['content'];
         }
         else {
           trigger_error("Datastream->url property is undefined for a {$this->controlGroup} datastream.", E_USER_WARNING);
@@ -739,7 +738,8 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
 
       case 'set':
         if ($this->controlGroup == 'E' || $this->controlGroup == 'R') {
-          $this->datastreamInfo['dsLocation'] = $value;
+          $this->datastreamInfo['content']['type'] = 'url';
+          $this->datastreamInfo['content']['content'] = $value;
         }
         else {
           trigger_error("Cannot set url of a {$this->controlGroup} datastream, please use datastream->content.", E_USER_WARNING);
@@ -1235,8 +1235,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
         break;
 
       case 'isset':
-        $this->populateDatastreamInfo();
-        return $this->isDatastreamProperySet($this->datastreamInfo['dsMIME'], '');
+        return TRUE;
         break;
 
       case 'set':
@@ -1244,7 +1243,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
           $this->modifyDatastream(array('mimeType' => $value));
         }
         else {
-          trigger_error("Cannot unset the required datastream->mimetype property.", E_USER_WARNING);
+          trigger_error("Invalid mimetype.", E_USER_WARNING);
         }
         break;
 
