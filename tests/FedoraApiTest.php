@@ -236,6 +236,12 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
   static $purge = TRUE;
   static $saved;
 
+  protected function sanitizeObjectProfile($profile) {
+    $profile['objDissIndexViewURL'] = parse_url($profile['objDissIndexViewURL'], PHP_URL_PATH);
+    $profile['objItemIndexViewURL'] = parse_url($profile['objItemIndexViewURL'], PHP_URL_PATH);
+    return $profile;
+  }
+
   protected function setUp() {
     $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
     $serializer = new FedoraApiSerializer();
@@ -612,12 +618,8 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
       }
       unset($actual['objModels']);
       unset($expected['objModels']);
-      $this->assertArrayHasKey('objDissIndexViewURL', $actual);
-      $this->assertArrayHasKey('objItemIndexViewURL', $actual);
-      unset($actual['objDissIndexViewURL']);
-      unset($expected['objDissIndexViewURL']);
-      unset($actual['objItemIndexViewURL']);
-      unset($expected['objItemIndexViewURL']);
+      $expected = $this->sanitizeObjectProfile($expected);
+      $actual = $this->sanitizeObjectProfile($actual);
       $this->assertEquals($expected, $actual);
     }
   }
@@ -730,6 +732,8 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
       unset($actual['objModels']);
       unset($expected['objModels']);
       unset($expected['objLabel']);
+      $expected = $this->sanitizeObjectProfile($expected);
+      $actual = $this->sanitizeObjectProfile($actual);
       $this->assertEquals($expected, $actual);
     }
   }
@@ -748,6 +752,8 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
       unset($actual['objModels']);
       unset($expected['objModels']);
       unset($expected['objOwnerId']);
+      $expected = $this->sanitizeObjectProfile($expected);
+      $actual = $this->sanitizeObjectProfile($actual);
       $this->assertEquals($expected, $actual);
     }
   }
@@ -767,6 +773,8 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
         unset($actual['objModels']);
         unset($expected['objModels']);
         unset($expected['objState']);
+        $expected = $this->sanitizeObjectProfile($expected);
+        $actual = $this->sanitizeObjectProfile($actual);
         $this->assertEquals($expected, $actual);
       }
     }
