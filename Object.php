@@ -13,7 +13,7 @@ require_once 'Datastream.php';
  * that needs to be implemented in order to create new repository backends
  * that can be accessed using Tuque.
  */
-abstract class AbstractObject extends MagicProperty {
+abstract class AbstractObject extends MagicProperty implements Countable, ArrayAccess, IteratorAggregate {
 
   /**
    * The label for this object.
@@ -67,7 +67,7 @@ abstract class AbstractObject extends MagicProperty {
    *   - url: a url that contains the datastream contents.
    *   - file: a file containing the datastream contents.
    */
-  abstract public function addDatastream($id, $params = array());
+  //abstract public function addDatastream($id, $params = array());
 }
 
 abstract class AbstractFedoraObject extends AbstractObject {
@@ -84,6 +84,10 @@ abstract class AbstractFedoraObject extends AbstractObject {
     unset($this->lastModifiedDate);
     unset($this->label);
     unset($this->owner);
+  }
+
+  public function delete() {
+    $this->state = 'D';
   }
 
   protected function idMagicProperty($function, $value) {
@@ -178,9 +182,14 @@ abstract class AbstractFedoraObject extends AbstractObject {
         break;
     }
   }
+
+  public function constructDatastream($id, $control_group) {
+    return new NewFedoraDatastream($id, $control_group);
+  }
 }
 
 class NewFedoraObject extends AbstractFedoraObject {
+  private $datastreams = array();
 
   public function  __construct($id, FedoraRepository $repository) {
     parent::__construct($id, $repository);
@@ -190,16 +199,70 @@ class NewFedoraObject extends AbstractFedoraObject {
     $this->objectProfile['objLabel'] = '';
   }
 
-  public function delete() {
-    $this->state = 'D';
+  public function constructDatastream($id, $control_group) {
+    return parent::constructDatastream($id, $control_group);
   }
 
-  public function getDatastream($id) {}
+  public function ingestDatastream(NewFedoraDatastream &$ds) {
+    if(!isset($this->datastreams[$ds->id])) {
+      $this->datastreams[$ds->id] = $ds;
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
+  }
 
-  public function addDatastream($id, $params = array()) {}
+  public function purgeDatastream($id) {
+    if(isset($this->datastreams[$id])) {
+      unset($this->datastreams[$id]);
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
+  }
+
+  public function getDatastream($id) {
+    if(isset($this->datastreams[$id])) {
+      return $this->datastreams[$id];
+    }
+    else {
+      return NULL;
+    }
+  }
+
+  public function count() {
+    return count($this->datastreams);
+  }
+
+  public function offsetExists ($offset) {
+    return isset($this->datastreams[$offset]);
+  }
+
+  public function offsetGet ($offset) {
+    if($this->offsetExists($offset)) {
+      return $this->datastreams[$offset];
+    }
+    else {
+      return NULL;
+    }
+  }
+
+  public function offsetSet ($offset, $value) {
+    trigger_error("Datastreams must be added though the NewFedoraObect->ingestDatastream() function.", E_USER_WARNING);
+  }
+
+  public function offsetUnset ($offset) {
+    $this->purgeDatastream($offset);
+  }
+
+  public function getIterator() {
+    return new ArrayIterator($this->datastreams);
+  }
 }
 
-class FedoraObject extends AbstractFedoraObject implements Countable, ArrayAccess, IteratorAggregate  {
+class FedoraObject extends AbstractFedoraObject {
 
   protected $datastreams = NULL;
   public $forceUpdate = FALSE;
@@ -210,10 +273,6 @@ class FedoraObject extends AbstractFedoraObject implements Countable, ArrayAcces
     $this->objectProfile = $this->repository->api->a->getObjectProfile($id);
     $this->objectProfile['objCreateDate'] = new FedoraDate($this->objectProfile['objCreateDate']);
     $this->objectProfile['objLastModDate'] = new FedoraDate($this->objectProfile['objLastModDate']);
-  }
-
-  public function delete() {
-    $this->state = 'd';
   }
 
   protected function populateDatastreams() {
@@ -255,8 +314,6 @@ class FedoraObject extends AbstractFedoraObject implements Countable, ArrayAcces
 
     return $this->datastreams[$id];
   }
-
-  public function addDatastream($id, $params = array()) {}
 
   protected function stateMagicProperty($function, $value) {
     $previous_state = $this->objectProfile['objState'];
@@ -330,6 +387,32 @@ class FedoraObject extends AbstractFedoraObject implements Countable, ArrayAcces
       case 'unset':
         trigger_error("Cannot $function the readonly object->models.", E_USER_WARNING);
         break;
+    }
+  }
+
+  public function constructDatastream($id, $control_group) {
+    return parent::constructDatastream($id, $control_group);
+  }
+
+  public function ingestDatastream(NewFedoraDatastream &$ds) {
+    $this->populateDatastreams();
+    if(!isset($this->datastreams[$ds->id])) {
+      $params = array(
+        'controlGroup' => $ds->controlGroup,
+        'dsLabel' => $ds->label,
+        'versionable' => $ds->versionable,
+        'dsState' => $ds->state,
+        'formatURI' => $ds->format,
+        'checksumType' => $ds->checksumType,
+        'mimeType' => $ds->mimetype,
+      );
+      $dsinfo = $this->repository->api->m->addDatastream($this->id, $ds->id, $ds->contentType, $ds->content, $params);
+      $ds = new FedoraDatastream($ds->id, $this, $this->repository, $dsinfo);
+      $this->datastreams[$ds->id] = $ds;
+      return $ds;
+    }
+    else {
+      return FALSE;
     }
   }
 
