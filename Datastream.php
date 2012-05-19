@@ -316,7 +316,7 @@ class FedoraDatastream extends AbstractFedoraDatastream implements Countable, Ar
 
   protected function controlGroupMagicProperty($function, $value) {
     $this->populateDatastreamInfo();
-    parent::controlGroupMagicProperty($function, $value);
+    return parent::controlGroupMagicProperty($function, $value);
   }
 
   protected function stateMagicProperty($function, $value) {
