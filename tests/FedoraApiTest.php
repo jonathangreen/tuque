@@ -612,6 +612,12 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
       }
       unset($actual['objModels']);
       unset($expected['objModels']);
+      $this->assertArrayHasKey('objDissIndexViewURL', $actual);
+      $this->assertArrayHasKey('objItemIndexViewURL', $actual);
+      unset($actual['objDissIndexViewURL']);
+      unset($expected['objDissIndexViewURL']);
+      unset($actual['objItemIndexViewURL']);
+      unset($expected['objItemIndexViewURL']);
       $this->assertEquals($expected, $actual);
     }
   }
