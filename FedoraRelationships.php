@@ -348,8 +348,12 @@ class FedoraRelsExt extends FedoraRelationships {
     parent::__construct($namespaces);
   }
 
-  private function initializeDatastream() {
-    if(!$this->initialized) {
+  /**
+   * Initialize the datastrem that we are using. We use this function to
+   * delay this as long as possible, in case it never has be be called.
+   */
+  protected function initializeDatastream() {
+    if (!$this->initialized) {
       $this->initialized = TRUE;
       if (isset($this->object['RELS-EXT'])) {
         $ds = $this->object['RELS-EXT'];
@@ -460,5 +464,143 @@ class FedoraRelsExt extends FedoraRelationships {
   public function get($predicate_uri = NULL, $predicate = NULL, $object = NULL, $literal = FALSE) {
     $this->initializeDatastream();
     return parent::get($this->object->id, $predicate_uri, $predicate, $object, $literal);
+  }
+}
+
+class FedoraRelsInt extends FedoraRelationships {
+  protected $new = FALSE;
+  protected $initialized = FALSE;
+  protected $aboutDs;
+
+  /**
+   * Objects Construct!
+   *
+   * @param AbstractFedoraObject $datastream
+   *   The datastream whose relationships we are manipulating
+   */
+  public function __construct(AbstractFedoraDatastream $datastream) {
+    $this->aboutDs = $datastream;
+
+    $namespaces = array(
+      'islandora' => ISLANDORA_RELS_INT_URI,
+    );
+
+    parent::__construct($namespaces);
+  }
+
+  /**
+   * Delay initialization by waiting to set datastream with this function.
+   */
+  protected function initializeDatastream() {
+    if (!$this->initialized) {
+      $this->initialized = TRUE;
+      if (isset($this->aboutDs->parent['RELS-INT'])) {
+        $ds = $this->aboutDs->parent['RELS-INT'];
+      }
+      else {
+        $ds = $this->aboutDs->parent->constructDatastream('RELS-INT', 'X');
+        $ds->label = 'Fedora Relationship Metadata.';
+        $this->new = TRUE;
+      }
+      $this->datastream = $ds;
+    }
+  }
+
+  /**
+   * Add a new relationship.
+   *
+   * @param string $predicate_uri
+   *   The URI to use as the namespace of the predicate. If you would like the
+   *   XML to use a prefix instead of the full predicate call the
+   *   FedoraRelationships::registerNamespace() function first.
+   * @param string $predicate
+   *   The predicate tag to add.
+   * @param string $object
+   *   The object for the relationship that is being created.
+   * @param boolean $literal
+   *   Specifies if the object is a literal or not.
+   */
+  public function add($predicate_uri, $predicate, $object, $literal = FALSE) {
+    $this->initializeDatastream();
+    parent::add("{$this->aboutDs->parent->id}/{$this->aboutDs->id}", $predicate_uri, $predicate, $object, $literal);
+
+    if ($this->new) {
+      $this->aboutDs->parent->ingestDatastream($this->datastream);
+    }
+  }
+
+  /**
+   * This function removes relationships that match the pattern from the
+   * datastream. Any parameter can be given as NULL which will make it a
+   * wildcard.
+   *
+   * @param string $predicate_uri
+   *   The URI to use as the namespace of the predicate. This is ignored if
+   *   predicate is NULL.
+   * @param string $predicate
+   *   The predicate tag to filter removed results by.
+   * @param string $object
+   *   The object for the relationship to filter by.
+   * @param boolean $literal
+   *   Defines if the $object is a literal or not.
+   *
+   * @return boolean
+   *   TRUE if relationships were removed, FALSE otherwise.
+   */
+  public function remove($predicate_uri = NULL, $predicate = NULL, $object = NULL, $literal = FALSE) {
+    $this->initializeDatastream();
+    $return = parent::remove("{$this->aboutDs->parent->id}/{$this->aboutDs->id}", $predicate_uri, $predicate, $object, $literal);
+
+    if ($this->new && $return) {
+      $this->aboutDs->parent->ingestDatastream($this->datastream);
+    }
+
+    return $return;
+  }
+
+  /**
+   * This function queries the relationships in the assocaited datastream. Any
+   * parameter except for $subject can be set to NULL to act as a wildcard.
+   * Calling with just $subject will return all relationships.
+   *
+   * @param string $predicate_uri
+   *   The URI to use as the namespace of the predicate. This is ignored if
+   *   predicate is NULL.
+   * @param string $predicate
+   *   The predicate tag to filter by.
+   * @param string $object
+   *   The object for the relationship to filter by.
+   * @param boolean $literal
+   *   Defines if the $object is a literal or not.
+   *
+   * @return array
+   *   This returns an indexed array with all the matching relationships. The
+   *   array is of the form:
+   *   @code
+   *   Array
+   *   (
+   *       [0] => Array
+   *           (
+   *               [predicate] => Array
+   *                   (
+   *                       [value] => thepredicate
+   *                       [alias] => thexmlprefix
+   *                       [namespace] => http://crazycool.com#
+   *                   )
+   *
+   *               [object] => Array
+   *                   (
+   *                       [literal] => TRUE
+   *                       [value] => test
+   *                   )
+   *
+   *           )
+   *
+   *   )
+   *   @endcode
+   */
+  public function get($predicate_uri = NULL, $predicate = NULL, $object = NULL, $literal = FALSE) {
+    $this->initializeDatastream();
+    return parent::get("{$this->aboutDs->parent->id}/{$this->aboutDs->id}", $predicate_uri, $predicate, $object, $literal);
   }
 }

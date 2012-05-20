@@ -1,6 +1,12 @@
 <?php
 require_once "FedoraRelationships.php";
-
+/**
+ * @todo pull more tests out of tjhe microservices version of these functions
+ *  to make sure we handle more cases.
+ *
+ * @todo remove any calls to StringEqualsXmlString because it uses the
+ *  domdocument cannonicalization function that doesn't work properly on cent
+ */
 class FedoraRelationshipsTest extends PHPUnit_Framework_TestCase {
 
   function testRelationshipDescription() {
@@ -12,7 +18,12 @@ $expected = <<<XML
   </Description>
 </RDF>
 XML;
-    $datastream = new NewFedoraDatastream('RELS-INT', 'M');
+    $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+    $this->api = new FedoraApi($connection);
+    $cache = new SimpleCache();
+    $repository = new FedoraRepository($this->api, $cache);
+    $object = $repository->constructNewObject("test:test");
+    $datastream = $object->constructDatastream('RELS-INT', 'M');
     $rel = new FedoraRelationships();
     $rel->datastream = $datastream;
 
@@ -49,7 +60,12 @@ XML;
   </description>
 </RDF>
 XML;
-    $datastream = new NewFedoraDatastream('RELS-INT', 'M');
+    $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+    $this->api = new FedoraApi($connection);
+    $cache = new SimpleCache();
+    $repository = new FedoraRepository($this->api, $cache);
+    $object = $repository->constructNewObject("test:test");
+    $datastream = $object->constructDatastream('RELS-INT', 'M');
     $datastream->content = $content;
     $rel = new FedoraRelationships();
     $rel->datastream = $datastream;

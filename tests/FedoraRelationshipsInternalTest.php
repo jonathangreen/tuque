@@ -1,7 +1,7 @@
 <?php
 require_once "FedoraRelationships.php";
 
-class FedoraRelationshipsInternalTest extends PHPUnit_Framework_TestCase {
+class FedoraRelationshipsExternalTest extends PHPUnit_Framework_TestCase {
 
   function setUp() {
     $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
@@ -9,20 +9,16 @@ class FedoraRelationshipsInternalTest extends PHPUnit_Framework_TestCase {
     $cache = new SimpleCache();
     $repository = new FedoraRepository($this->api, $cache);
     $this->object = $repository->constructNewObject('test:awesome');
-    $this->datastream = $this->object->constructDatastream('test');
-    $this->datastream2 = $this->object->constructDatastream('test2');
 
-    $this->datastream->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasAwesomeness', 'jonathan:green');
-    $this->datastream->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:model');
-    $this->datastream->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPage', '22', TRUE);
-    $this->datastream->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'theawesomecollection:awesome');
-    $this->datastream->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:woot');
-
-    $this->datastream2->relationships->add(ISLANDORA_RELS_INT_URI, 'isPage', '22', TRUE);
+    $this->object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasAwesomeness', 'jonathan:green');
+    $this->object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:model');
+    $this->object->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPage', '22', TRUE);
+    $this->object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'theawesomecollection:awesome');
+    $this->object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:woot');
   }
 
   function testGetAll() {
-    $relationships = $this->datastream->relationships->get();
+    $relationships = $this->object->relationships->get();
     $this->assertEquals(5, count($relationships));
     $this->assertEquals('hasAwesomeness', $relationships[0]['predicate']['value']);
     $this->assertEquals('jonathan:green', $relationships[0]['object']['value']);
@@ -36,7 +32,7 @@ class FedoraRelationshipsInternalTest extends PHPUnit_Framework_TestCase {
   }
 
   function testGetOne() {
-    $rels = $this->datastream->relationships->get(FEDORA_MODEL_URI, 'hasModel');
+    $rels = $this->object->relationships->get(FEDORA_MODEL_URI, 'hasModel');
     $this->assertEquals(2, count($rels));
     $this->assertEquals('hasModel', $rels[0]['predicate']['value']);
     $this->assertEquals('islandora:model', $rels[0]['object']['value']);
@@ -45,22 +41,22 @@ class FedoraRelationshipsInternalTest extends PHPUnit_Framework_TestCase {
   }
 
   function testRemovePredicate() {
-    $this->datastream->relationships->remove(FEDORA_MODEL_URI, 'hasModel');
-    $rels = $this->datastream->relationships->get(FEDORA_MODEL_URI, 'hasModel');
+    $this->object->relationships->remove(FEDORA_MODEL_URI, 'hasModel');
+    $rels = $this->object->relationships->get(FEDORA_MODEL_URI, 'hasModel');
     $this->assertEquals(0, count($rels));
   }
 
   function testRemoveSpecificPredicate() {
-    $this->datastream->relationships->remove(FEDORA_MODEL_URI, 'hasModel', 'islandora:model');
-    $rels = $this->datastream->relationships->get(FEDORA_MODEL_URI, 'hasModel');
+    $this->object->relationships->remove(FEDORA_MODEL_URI, 'hasModel', 'islandora:model');
+    $rels = $this->object->relationships->get(FEDORA_MODEL_URI, 'hasModel');
     $this->assertEquals(1, count($rels));
     $this->assertEquals('hasModel', $rels[0]['predicate']['value']);
     $this->assertEquals('islandora:woot', $rels[0]['object']['value']);
   }
 
   function testRemoveObject() {
-    $this->datastream->relationships->remove(NULL, NULL, 'islandora:model');
-    $rels = $this->datastream->relationships->get(FEDORA_MODEL_URI, 'hasModel');
+    $this->object->relationships->remove(NULL, NULL, 'islandora:model');
+    $rels = $this->object->relationships->get(FEDORA_MODEL_URI, 'hasModel');
     $this->assertEquals(1, count($rels));
     $this->assertEquals('hasModel', $rels[0]['predicate']['value']);
     $this->assertEquals('islandora:woot', $rels[0]['object']['value']);

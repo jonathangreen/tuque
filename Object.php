@@ -122,7 +122,7 @@ abstract class AbstractObject extends MagicProperty implements Countable, ArrayA
    * @return AbstractDatastream
    *   Returns an instantiated Datastream object.
    */
-  abstract public function constructDatastream($id, $control_group);
+  abstract public function constructDatastream($id, $control_group = 'M');
 
   /**
    * Ingests a datastream object into the repository.
@@ -304,8 +304,8 @@ abstract class AbstractFedoraObject extends AbstractObject {
   /**
    * @see AbstractObject::constructDatastream()
    */
-  public function constructDatastream($id, $control_group) {
-    return new NewFedoraDatastream($id, $control_group);
+  public function constructDatastream($id, $control_group = 'M') {
+    return new NewFedoraDatastream($id, $control_group, $this, $this->repository);
   }
 }
 
@@ -337,7 +337,7 @@ class NewFedoraObject extends AbstractFedoraObject {
   /**
    * @see AbstractObject::constructDatastream()
    */
-  public function constructDatastream($id, $control_group) {
+  public function constructDatastream($id, $control_group = 'M') {
     return parent::constructDatastream($id, $control_group);
   }
 
@@ -627,7 +627,7 @@ class FedoraObject extends AbstractFedoraObject {
   /**
    * @see AbstractObject::constructDatastream()
    */
-  public function constructDatastream($id, $control_group) {
+  public function constructDatastream($id, $control_group = 'M') {
     return parent::constructDatastream($id, $control_group);
   }
 
