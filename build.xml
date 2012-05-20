@@ -68,6 +68,7 @@
    <arg value="--report=checkstyle" />
    <arg value="--extensions=php" />
    <arg value="--ignore=tests/" />
+   <arg value="--ignore=build/" />
    <arg value="--report-file=${basedir}/build/logs/checkstyle.xml" />
    <arg value="--standard=Drupal" />
    <arg path="${basedir}" />
