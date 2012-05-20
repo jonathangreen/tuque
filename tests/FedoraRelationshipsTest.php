@@ -4,11 +4,16 @@ require_once "FedoraRelationships.php";
 class FedoraRelationshipsTest extends PHPUnit_Framework_TestCase {
 
   function testRelationship() {
-    $rel = new FedoraRelationship();
-    $rel->addRelationship('one', 'two', 'three');
-    print_r($rel->toString());
+    $datastream = new NewFedoraDatastream('RELS-INT', 'M');
 
-    print_r($rel->getRelationships());
+
+    $rel = new FedoraRelationships($datastream);
+
+    $rel->registerNamespaceAlias('fuckyah', 'http://crazycool.com#');
+    $rel->addRelationship('one', 'http://crazycool.com#', 'woot', 'test', TRUE);
+
+    print_r($datastream->content);
+    print_r($rel->getRelationships('one'));
   }
 
 }
