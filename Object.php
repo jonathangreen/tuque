@@ -166,13 +166,13 @@ abstract class AbstractFedoraObject extends AbstractObject {
   public function  __construct($id, FedoraRepository $repository) {
     $this->repository = $repository;
     $this->objectId = $id;
-    $this->relationships = new FedoraRelsExt($this);
     unset($this->id);
     unset($this->state);
     unset($this->createdDate);
     unset($this->lastModifiedDate);
     unset($this->label);
     unset($this->owner);
+    $this->relationships = new FedoraRelsExt($this);
   }
 
   /**

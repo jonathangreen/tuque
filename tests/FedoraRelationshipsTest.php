@@ -13,7 +13,8 @@ $expected = <<<XML
 </RDF>
 XML;
     $datastream = new NewFedoraDatastream('RELS-INT', 'M');
-    $rel = new FedoraRelationships($datastream);
+    $rel = new FedoraRelationships();
+    $rel->datastream = $datastream;
 
     $rel->registerNamespace('fuckyah', 'http://crazycool.com#');
     $rel->add('one', 'http://crazycool.com#', 'woot', 'test', TRUE);
@@ -50,7 +51,8 @@ XML;
 XML;
     $datastream = new NewFedoraDatastream('RELS-INT', 'M');
     $datastream->content = $content;
-    $rel = new FedoraRelationships($datastream);
+    $rel = new FedoraRelationships();
+    $rel->datastream = $datastream;
 
     $rel->add('one', 'http://crazycool.com#', 'woot', '1234', TRUE);
     $this->assertXmlStringEqualsXmlString($expected, $datastream->content);

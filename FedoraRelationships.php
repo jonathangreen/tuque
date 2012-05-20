@@ -25,7 +25,7 @@ class FedoraRelationships {
    * The datastream this class is manipulating.
    * @var AbstractFedoraDatastream
    */
-  protected $datastream = NULL;
+  public $datastream = NULL;
 
   /**
    * An array of namespaces that is used in the document.
@@ -38,17 +38,13 @@ class FedoraRelationships {
   /**
    * The constructor. This will usually be called by one of its subclasses.
    *
-   * @param AbstractFedoraDatastream $datastream
-   *   The datastream that we are manipulating (relsint, relsext, etc).
-   *
    * @param array $namespaces
    *   An array of default namespaces.
    */
-  public function  __construct(AbstractFedoraDatastream $datastream, array $namespaces = NULL) {
+  public function  __construct(array $namespaces = NULL) {
     if ($namespaces) {
       $this->namespaces = array_merge($this->namespaces, $namespaces);
     }
-    $this->datastream = $datastream;
   }
 
   /**
@@ -332,6 +328,7 @@ class FedoraRelationships {
 
 class FedoraRelsExt extends FedoraRelationships {
   protected $new = FALSE;
+  protected $initialized = FALSE;
 
   /**
    * Objects Construct!
@@ -342,22 +339,29 @@ class FedoraRelsExt extends FedoraRelationships {
   public function __construct(AbstractFedoraObject $object) {
     $this->object = $object;
 
-    if (isset($object['RELS-EXT'])) {
-      $ds = $object['RELS-EXT'];
-    }
-    else {
-      $ds = $object->constructDatastream('RELS-EXT', 'X');
-      $ds->label = 'Fedora Object to Object Relationship Metadata.';
-      $this->new = TRUE;
-    }
-
     $namespaces = array(
       'fedora' => FEDORA_RELS_EXT_URI,
       'fedora-model' => FEDORA_MODEL_URI,
       'islandora' => ISLANDORA_RELS_EXT_URI,
     );
 
-    parent::__construct($ds, $namespaces);
+    parent::__construct($namespaces);
+  }
+
+  private function initializeDatastream() {
+    if(!$this->initialized) {
+      $this->initialized = TRUE;
+      if (isset($this->object['RELS-EXT'])) {
+        $ds = $this->object['RELS-EXT'];
+      }
+      else {
+        $ds = $this->object->constructDatastream('RELS-EXT', 'X');
+        $ds->label = 'Fedora Object to Object Relationship Metadata.';
+        $this->new = TRUE;
+      }
+
+      $this->datastream = $ds;
+    }
   }
 
   /**
@@ -375,6 +379,7 @@ class FedoraRelsExt extends FedoraRelationships {
    *   Specifies if the object is a literal or not.
    */
   public function add($predicate_uri, $predicate, $object, $literal = FALSE) {
+    $this->initializeDatastream();
     parent::add($this->object->id, $predicate_uri, $predicate, $object, $literal);
 
     if ($this->new) {
@@ -401,6 +406,7 @@ class FedoraRelsExt extends FedoraRelationships {
    *   TRUE if relationships were removed, FALSE otherwise.
    */
   public function remove($predicate_uri = NULL, $predicate = NULL, $object = NULL, $literal = FALSE) {
+    $this->initializeDatastream();
     $return = parent::remove($this->object->id, $predicate_uri, $predicate, $object, $literal);
 
     if ($this->new && $return) {
@@ -452,6 +458,7 @@ class FedoraRelsExt extends FedoraRelationships {
    *   @endcode
    */
   public function get($predicate_uri = NULL, $predicate = NULL, $object = NULL, $literal = FALSE) {
+    $this->initializeDatastream();
     return parent::get($this->object->id, $predicate_uri, $predicate, $object, $literal);
   }
 }
