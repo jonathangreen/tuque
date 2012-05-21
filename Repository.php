@@ -5,6 +5,7 @@
  * defines a concrete implementation for Fedora.
  */
 
+require_once "RepositoryQuery.php";
 require_once "FoxmlDocument.php";
 require_once "Object.php";
 
@@ -101,6 +102,13 @@ class FedoraRepository extends AbstractRepository {
   protected $cache;
 
   /**
+   * This provides some convientent methods for searching the resource index.
+   *
+   * @var RepositoryQuery
+   */
+  public $ri;
+
+  /**
    * Constructor for the FedoraRepository Object.
    *
    * @param FedoraApi $api
@@ -112,6 +120,7 @@ class FedoraRepository extends AbstractRepository {
   public function __construct(FedoraApi $api, AbstractCache $cache) {
     $this->api = $api;
     $this->cache = $cache;
+    $this->ri = new RepositoryQuery($this->api->connection);
   }
 
   /**
