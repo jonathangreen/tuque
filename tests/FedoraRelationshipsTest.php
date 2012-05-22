@@ -72,5 +72,11 @@ XML;
 
     $rel->add('one', 'http://crazycool.com#', 'woot', '1234', TRUE);
     $this->assertXmlStringEqualsXmlString($expected, $datastream->content);
+
+    $rels = $rel->get('one');
+    print_r($datastream->content);
+    $this->assertEquals(2, count($rels));
+    $this->assertEquals('test', $rels[0]['object']['value']);
+    $this->assertEquals('1234', $rels[1]['object']['value']);
   }
 }
