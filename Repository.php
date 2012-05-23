@@ -144,9 +144,11 @@ class FedoraRepository extends AbstractRepository {
 
     if (!$id) {
       $id = $this->api->m->getNextPid();
+      var_dump($id);
     }
     elseif (count($exploded) == 1) {
       $id = $this->api->m->getNextPid($exploded[0]);
+      var_dump($id);
     }
 
     return new NewFedoraObject($id, $this);
