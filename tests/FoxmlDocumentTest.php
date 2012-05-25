@@ -19,14 +19,14 @@ class FoxmlDocumentTest extends PHPUnit_Framework_TestCase {
     // create an object and populate datastreams
     $string1 = FedoraTestHelpers::randomString(10);
     $string2 = FedoraTestHelpers::randomString(10);
-//    $this->testPid = "$string1:$string2";
-    $this->testPid = 'test:islandora';
+    $this->testPid = "$string1:$string2";
     $this->fedora_object = $repository->constructObject($this->testPid);
     $this->fedora_object->owner = 'Test';
     $this->fedora_object->label = 'Test label';
-    $mods = $this->fedora_object->constructDatastream('MODS', 'X', $this->fedora_object, $repository);
+    $inline = $this->fedora_object->constructDatastream('INLINE', 'X');
 
-    $mods_string = '<mods xmlns="http://www.loc.gov/mods/v3" ID="TopTier/Breast/">
+    $this->mods_string = '
+<mods xmlns="http://www.loc.gov/mods/v3" ID="TopTier/Breast/">
           <titleInfo>
             <title>Selective chemical probe
                         inhibitor of Stat3, identified through structure-based virtual screening,
@@ -39,26 +39,39 @@ class FoxmlDocumentTest extends PHPUnit_Framework_TestCase {
               <roleTerm authority="marcrelator" type="text">author</roleTerm>
             </role>
           </name>
-        </mods>';
-    $mods->label = 'MODS record';
-    $mods->setContentFromString($mods_string);
-    $this->fedora_object->ingestDatastream($mods);
-//    $this->datastream2 = new NewFedoraDatastream('MADS', 'M', $this->fedora_object, $repository);
-//    $this->datastream2->label = 'Managed datastream';
-//    $this->datastream2->setContentFromUrl('http://localhost/:8080/fedora/objects/fedora-system:FedoraObject-3.0/datastreams/DC/content');
-//    $this->datastream2->checksumType = 'MD5';
-//    $this->datastream3 = new NewFedoraDatastream('MADS', 'E', $this->fedora_object, $repository);
-//    $this->datastream3->label = 'Exernal datastream';
-//    $this->datastream3->url = 'http://localhost/:8080/fedora/objects/fedora-system:FedoraObject-3.0/datastreams/DC/content';
-//    $this->datastream4 = new NewFedoraDatastream('MADS', 'R', $this->fedora_object, $repository);
-//    $this->datastream4->label = 'Redirect datastream';
-//    $this->datastream4->url = 'http://localhost/:8080/fedora/objects/fedora-system:FedoraObject-3.0/datastreams/DC/content';
+        </mods>
+';
+    $inline->label = 'MODS record';
+    $inline->checksumType = 'MD5';
+    $inline->setContentFromString($this->mods_string);
+    $this->fedora_object->ingestDatastream($inline);
+    $managed = $this->fedora_object->constructDatastream('MANAGED', 'M');
+    $managed->label = 'Managed datastream';
+    $managed->setContentFromUrl('http://localhost:8080/fedora/objects/fedora-system:FedoraObject-3.0/datastreams/DC/content');
+    $managed->checksumType = 'MD5';
+    $this->fedora_object->ingestDatastream($managed);
+    $external = $this->fedora_object->constructDatastream('EXTERNAL', 'E');
+    $external->label = 'Exernal datastream';
+    $external->url = 'http://localhost:8080/fedora/objects/fedora-system:FedoraObject-3.0/datastreams/DC/content';
+    $external->checksumType = 'MD5';
+    $this->fedora_object->ingestDatastream($external);
+    $redirect = $this->fedora_object->constructDatastream('REDIRECT', 'R');
+    $redirect->label = 'Redirect datastream';
+    $redirect->url = 'http://localhost:8080/fedora/objects/fedora-system:FedoraObject-3.0/datastreams/DC/content';
+    $redirect->checksumType = 'MD5';
+    $this->fedora_object->ingestDatastream($redirect);
     $repository->ingestObject($this->fedora_object);
     $this->object = new FedoraObject($this->testPid, $repository);
+    $this->dc_content = '
+<oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+  <dc:title>Content Model Object for All Objects</dc:title>
+  <dc:identifier>fedora-system:FedoraObject-3.0</dc:identifier>
+</oai_dc:dc>
+';
   }
 
   protected function tearDown() {
-//    $this->api->m->purgeObject($this->testPid);
+    $this->api->m->purgeObject($this->testPid);
   }
 
   protected function getValue($data) {
@@ -66,28 +79,67 @@ class FoxmlDocumentTest extends PHPUnit_Framework_TestCase {
     return $values[$data];
   }
 
-  public function testFOXMLObject() {
+  public function testFOXMLLabel() {
     $this->assertEquals('Test label', $this->object->label);
+  }
+  
+  public function testFOXMLOwner() {
     
     $this->assertEquals('Test', $this->object->owner);
+  }
+  
+  public function testFOXMLPid() {
     
     $this->assertEquals($this->object->id, $this->testPid);
     $this->assertTrue(isset($this->object->id));
-    
+  }
+   
+  public function testFOXMLState() {
     $this->assertEquals('A', $this->object->state);
-    
-    $this->assertEquals(2, count($this->object));
+  }
+  
+  public function testFOXMLDS() {
+    $this->assertEquals(5, count($this->object));    
+  }
+  
+  public function testFOXMLDSDC() {
     $this->assertTrue(isset($this->object['DC']));
-    $this->assertTrue(isset($this->object[$this->testDsid]));
     $this->assertFalse(isset($this->object['foo']));
     $this->assertFalse($this->object['foo']);
     $this->assertInstanceOf('FedoraDatastream', $this->object['DC']);
     $this->assertEquals('DC', $this->object['DC']->id);
-    foreach ($this->object as $id => $ds) {
-      $this->assertTrue(in_array($id, array('DC', $this->testDsid)));
-      $this->assertTrue(in_array($ds->id, array('DC', $this->testDsid)));
-    }
-    $this->assertEquals("\n<test> test </test>\n", $this->object[$this->testDsid]->content);
+  }
+  
+  public function testFOXMLDSX() {
+    $this->assertTrue(isset($this->object['INLINE']));
+    $this->assertInstanceOf('FedoraDatastream', $this->object['INLINE']);
+    $this->assertEquals('INLINE', $this->object['INLINE']->id);
+    $this->assertEquals($this->mods_string, $this->object['INLINE']->content);
+    $this->assertEquals('MD5', $this->object['INLINE']->checksumType);
+  }
+  
+  public function testFOXMLDSM() {
+    $this->assertTrue(isset($this->object['MANAGED']));
+    $this->assertInstanceOf('FedoraDatastream', $this->object['MANAGED']);
+    $this->assertEquals('MANAGED', $this->object['MANAGED']->id);
+    $this->assertEquals($this->dc_content, $this->object['MANAGED']->content);
+    $this->assertEquals('MD5', $this->object['MANAGED']->checksumType);
+  }
+  
+  public function testFOXMLDSR() {
+    $this->assertTrue(isset($this->object['REDIRECT']));
+    $this->assertInstanceOf('FedoraDatastream', $this->object['REDIRECT']);
+    $this->assertEquals('REDIRECT', $this->object['REDIRECT']->id);
+    $this->assertEquals($this->dc_content, $this->object['REDIRECT']->content);
+    $this->assertEquals('MD5', $this->object['REDIRECT']->checksumType);    
+  }
+  
+  public function testFOXMLDSE() {
+    $this->assertTrue(isset($this->object['EXTERNAL']));
+    $this->assertInstanceOf('FedoraDatastream', $this->object['EXTERNAL']);
+    $this->assertEquals('EXTERNAL', $this->object['EXTERNAL']->id);
+    $this->assertEquals($this->dc_content, $this->object['EXTERNAL']->content);
+    $this->assertEquals('MD5', $this->object['EXTERNAL']->checksumType); 
   }
 
 }
