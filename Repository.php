@@ -165,6 +165,8 @@ class FedoraRepository extends AbstractRepository {
             $url = $this->api->m->upload($ds->content);
             $ds->contentType = 'url';
             $ds->content = $url;
+            break;
+
           case 'string':
             $temp = tempnam(sys_get_temp_dir(), 'tuque-temp');
             file_put_contents($temp, $ds->content);
@@ -172,6 +174,8 @@ class FedoraRepository extends AbstractRepository {
             unlink($temp);
             $ds->contentType = 'url';
             $ds->content = $url;
+            break;
+          
           default:
             break;
         }
@@ -180,7 +184,6 @@ class FedoraRepository extends AbstractRepository {
 
     $dom = new FoxmlDocument($object);
     $xml = $dom->saveXml();
-    print_r($xml);
     $id = $this->api->m->ingest(array('string' => $xml));
     $object = new FedoraObject($id, $this);
     $this->cache->set($id, $object);
