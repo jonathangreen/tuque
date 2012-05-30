@@ -14,6 +14,7 @@ class ObjectTest extends PHPUnit_Framework_TestCase {
     $this->api = new FedoraApi($connection);
     $cache = new SimpleCache();
     $repository = new FedoraRepository($this->api, $cache);
+    $this->repository = $repository;
 
     // create an object 
     $string1 = FedoraTestHelpers::randomString(10);
@@ -183,6 +184,17 @@ class ObjectTest extends PHPUnit_Framework_TestCase {
 
     $this->assertInstanceOf('FedoraDatastream', $newds);
     $this->assertEquals("\n<xml></xml>\n", $newds->content);
+  }
+
+  public function testManagedAdd() {
+    $object = $this->repository->constructObject();
+    $ds = $object->constructDatastream('test', 'M');
+    $filepath = getcwd() . '/tests/test_data/test.png';
+    $ds->setContentFromFile($filepath);
+    //$ds->setContentFromUrl('http://imgs.xkcd.com/comics/budget_news.png');
+    $ds->mimetype = 'image/png';
+    $object->ingestDatastream($ds);
+    $this->repository->ingestObject($object);
   }
 
 }

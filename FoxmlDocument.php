@@ -272,13 +272,15 @@ class FoxmlDocument extends DOMDocument {
    */
   private function createDocumentDatastream($ds) {
     $datastream = $this->createDatastreamElement($ds->id, $ds->state, $ds->controlGroup, $ds->versionable);
-    $version = $this->createDatastreamVersionElement($ds->id . '.0', $ds->label, $ds->mimetype, $ds->format);
-    $content = $this->createDatastreamContentLocationElement('URL', $ds->content);
-    $version_node = $this->root->appendChild($datastream)->appendChild($version);
-    if (isset($ds->checksumType)) {
-      $digest = $this->createDatastreamDigestElement($ds->checksumType, $ds->checksum);
-      $version_node->appendChild($digest);
-    }
-    $version_node->appendChild($content);
+    $datastream->setAttribute('FEDORA_URI', $ds->content);
+    //$version = $this->createDatastreamVersionElement($ds->id . '.0', $ds->label, $ds->mimetype, $ds->format);
+    //$content = $this->createDatastreamContentLocationElement('URL', $ds->content);
+    //$version_node = $this->root->appendChild($datastream)->appendChild($version);
+    //if (isset($ds->checksumType)) {
+    //  $digest = $this->createDatastreamDigestElement($ds->checksumType, $ds->checksum);
+    //  $version_node->appendChild($digest);
+    //}
+    //$version_node->appendChild($content);
+    $this->root->appendChild($datastream);
   }
 }
