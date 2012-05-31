@@ -90,7 +90,7 @@ class FedoraRelationships {
     }
     else {
       $document = new DomDocument("1.0", "UTF-8");
-      $rootelement = $document->createElementNS(RDF_URI, 'RDF');
+      $rootelement = $document->createElement('rdf:RDF');
       $document->appendChild($rootelement);
     }
 
