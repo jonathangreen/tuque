@@ -256,12 +256,13 @@ class FoxmlDocument extends DOMDocument {
       $version_node->appendChild($digest);
     }
     $version_node->appendChild($content)->appendChild($child);
-    // Once again god damn you libxml...
-    //$class = get_class($ds->content);
-    //$namespaces = call_user_func(array($class, 'getRequiredNamespaces'));
-    //foreach ($namespaces as $prefix => $uri) {
-    //  $child->setAttributeNS(self::xmlns, "xmlns:$prefix", $uri);
-    //}
+    $simple_dom = simplexml_import_dom($xml_dom);
+    $namespaces = $simple_dom->getDocNamespaces(TRUE);
+    foreach ($namespaces as $prefix => $uri) {
+      if($prefix) {
+        $child->setAttributeNS(self::xmlns, "xmlns:$prefix", $uri);
+      }
+    }
   }
 
   /**
