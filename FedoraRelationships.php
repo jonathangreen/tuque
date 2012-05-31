@@ -96,10 +96,17 @@ class FedoraRelationships {
 
     // Setup the default namespace aliases.
     foreach ($this->namespaces as $alias => $uri) {
-      $document->documentElement->setAttributeNS(XMLNS, "xmlns:$alias", $uri);
+      // if we use setAttributeNS here we drop the rdf: from about which
+      // breaks things, so we do this, then the hack below.
+      $document->documentElement->setAttribute("xmlns:$alias", $uri);
     }
 
-    return $document;
+    // this is a hack, but it makes sure namespaces are properly registered
+    $document_namespaces = new DomDocument();
+    $document_namespaces->preserveWhiteSpace = FALSE;
+    $document_namespaces->loadXml($document->saveXML());
+
+    return $document_namespaces;
   }
 
   /**
@@ -137,7 +144,7 @@ class FedoraRelationships {
     if ($description_lower->length == 0 && $description_upper->length == 0) {
       $description = $document->createElementNS(RDF_URI, 'Description');
       $document->documentElement->appendChild($description);
-      $description->setAttributeNS(RDF_URI, 'about', "info:fedora/$subject");
+      $description->setAttributeNS(RDF_URI, 'rdf:about', "info:fedora/$subject");
     }
     elseif ($description_lower->length) {
       $description = $description_lower->item(0);
@@ -153,7 +160,7 @@ class FedoraRelationships {
       $relationship->nodeValue = $object;
     }
     else {
-      $relationship->setAttributeNS(RDF_URI, 'resource', 'info:fedora/' . $object);
+      $relationship->setAttributeNS(RDF_URI, 'rdf:resource', 'info:fedora/' . $object);
     }
 
     $this->updateDatastream($document);

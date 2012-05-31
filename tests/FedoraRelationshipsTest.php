@@ -28,9 +28,8 @@ XML;
     $rel->registerNamespace('fuckyah', 'http://crazycool.com#');
     $rel->add('http://crazycool.com#', 'woot', 'test', TRUE);
 
-    //$this->assertXmlStringEqualsXmlString($expected, $object['RELS-EXT']->content);
-
     $relationships = $rel->get();
+
     $this->assertEquals(1, count($relationships));
     $this->assertEquals('fuckyah', $relationships[0]['predicate']['alias']);
     $this->assertEquals('http://crazycool.com#', $relationships[0]['predicate']['namespace']);
@@ -72,5 +71,29 @@ XML;
     $this->assertEquals(2, count($rels));
     $this->assertEquals('test', $rels[0]['object']['value']);
     $this->assertEquals('1234', $rels[1]['object']['value']);
+  }
+
+  function testGetFromExistingWithRdf() {
+    $content = <<<XML
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:fedora="info:fedora/fedora-system:def/relations-external#" xmlns:fedora-model="info:fedora/fedora-system:def/model#" xmlns:islandora="http://islandora.ca/ontology/relsext#">
+  <rdf:Description rdf:about="info:fedora/islandora:479">
+    <fedora-model:hasModel rdf:resource="info:fedora/islandora:sp_basic_image"></fedora-model:hasModel>
+    <fedora:isMemberOfCollection rdf:resource="info:fedora/islandora:sp_basic_image_collection"></fedora:isMemberOfCollection>
+  </rdf:Description>
+</rdf:RDF>
+XML;
+    $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+    $this->api = new FedoraApi($connection);
+    $cache = new SimpleCache();
+    $repository = new FedoraRepository($this->api, $cache);
+    $object = $repository->constructObject("islandora:479");
+    $datastream = $object->constructDatastream('RELS-EXT', 'M');
+    $datastream->content = $content;
+    $object->ingestDatastream($datastream);
+
+    $relations = $object->relationships->get('info:fedora/fedora-system:def/relations-external#', 'isMemberOfCollection');
+
+    $this->assertEquals(1, count($relations));
+    $this->assertEquals('islandora:sp_basic_image_collection', $relations[0]['object']['value']);
   }
 }
