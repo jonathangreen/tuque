@@ -139,7 +139,7 @@ class FoxmlDocument extends DOMDocument {
    * Checks that the content and dsid are valid and then passes the FOXML creation off
    * to the relevant function. Currently any 'string' content that is marked as a managed
    * datastream will be ingested as inline.
-   * 
+   *
    * @todo Implement fedora upload function to allow strings to be added as managed datastreams
    */
   public function createDocumentDatastreams() {
@@ -158,9 +158,9 @@ class FoxmlDocument extends DOMDocument {
 
   /**
    * Creates FOXML for any inline datastreams based on the information passed in the $ds object.
-   * 
+   *
    * @param object $ds
-   *   The datastream object 
+   *   The datastream object
    */
   private function createInlineDocumentDatastream($ds) {
     $datastream = $this->createDatastreamElement($ds->id, $ds->state, $ds->controlGroup, $ds->versionable);
@@ -186,9 +186,9 @@ class FoxmlDocument extends DOMDocument {
 
   /**
    * Creates FOXML for any managed, externally referenced or redirect datastreams bases on the $ds object
-   * 
+   *
    * @param object $ds
-   *   The datastream object 
+   *   The datastream object
    */
   private function createDocumentDatastream($ds) {
     $datastream = $this->createDatastreamElement($ds->id, $ds->state, $ds->controlGroup, $ds->versionable);
