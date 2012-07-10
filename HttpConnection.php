@@ -108,13 +108,13 @@ abstract class HttpConnection {
   public $reuseConnection = TRUE;
   
   /**
-   * curl is supposed to figure out what version of ssl on its own BUT the 
-   * php on MAMP seems to fail at this for duracloud.  it seems ok on other 
-   * sites.  This needs further testing and hopefully we don't need it.
-   * TODO: check this
+   * some servers require the version of ssl to be set.
+   * we set it to -1 which will allow php to try and figure out what
+   * version to use.  in some cases you may have to set this to 
+   * 2 or 3
    * @var int 
    */
-  public $sslVersion = 3;
+  public $sslVersion = -1;
   /**
    * Turn on to print debug infotmation to stderr.
    * @var type boolean
@@ -277,7 +277,9 @@ class CurlConnection extends HttpConnection {
     curl_setopt($this->curlContext, CURLOPT_URL, $url);
     curl_setopt($this->curlContext, CURLOPT_SSL_VERIFYPEER, $this->verifyPeer);
     curl_setopt($this->curlContext, CURLOPT_SSL_VERIFYHOST, $this->verifyHost ? 2 : 1);
-    curl_setopt($this->curlContext, CURLOPT_SSLVERSION, $this->sslVersion);
+    if($this->sslVersion != -1){
+      curl_setopt($this->curlContext, CURLOPT_SSLVERSION, $this->sslVersion);
+    }
     if ($this->timeout) {
       curl_setopt($this->curlContext, CURLOPT_TIMEOUT, $this->timeout);
     }
