@@ -53,7 +53,8 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
 
     try {
       parent::__construct();
-    } catch (HttpConnectionException $e) {
+    } 
+    catch (HttpConnectionException $e) {
       throw new RepositoryException($e->getMessage(), $e->getCode(), $e);
     }
   }
@@ -131,7 +132,8 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
   public function getRequest($url, $headers_only = false) {
     try {
       return parent::getRequest($this->buildUrl($url), $headers_only);
-    } catch (HttpConnectionException $e) {
+    } 
+    catch (HttpConnectionException $e) {
       $this->parseFedoraExceptions($e);
     }
   }
@@ -142,7 +144,8 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
   public function postRequest($url, $type = 'none', $data = NULL, $content_type = NULL) {
     try {
       return parent::postRequest($this->buildUrl($url), $type, $data, $content_type);
-    } catch (HttpConnectionException $e) {
+    } 
+    catch (HttpConnectionException $e) {
       $this->parseFedoraExceptions($e);
     }
   }
@@ -153,7 +156,8 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
   public function patchRequest($url, $type = 'none', $data = NULL, $content_type = NULL) {
     try {
       return parent::patchRequest($this->buildUrl($url), $type, $data, $content_type);
-    } catch (HttpConnectionException $e) {
+    } 
+    catch (HttpConnectionException $e) {
       $this->parseFedoraExceptions($e);
     }
   }
@@ -164,7 +168,8 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
   public function putRequest($url, $type = 'none', $file = NULL) {
     try {
       return parent::putRequest($this->buildUrl($url), $type, $file);
-    } catch (HttpConnectionException $e) {
+    } 
+    catch (HttpConnectionException $e) {
       $this->parseFedoraExceptions($e);
     }
   }
@@ -175,7 +180,8 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
   public function deleteRequest($url) {
     try {
       return parent::deleteRequest($this->buildUrl($url));
-    } catch (HttpConnectionException $e) {
+    } 
+    catch (HttpConnectionException $e) {
       $this->parseFedoraExceptions($e);
     }
   }
