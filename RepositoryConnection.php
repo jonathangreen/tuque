@@ -1,10 +1,10 @@
 <?php
-
 /**
  * @file
  * This file contains the implementation of a connection to Fedora. And the
  * interface for a repository configuration.
  */
+
 require_once 'HttpConnection.php';
 require_once 'RepositoryException.php';
 
@@ -12,7 +12,6 @@ require_once 'RepositoryException.php';
  * The general interface for a RepositoryConfig object.
  */
 interface RepositoryConfigInterface {
-
   /**
    * Simple constructor defintion for the repository
    */
@@ -53,7 +52,7 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
 
     try {
       parent::__construct();
-    } 
+    }
     catch (HttpConnectionException $e) {
       throw new RepositoryException($e->getMessage(), $e->getCode(), $e);
     }
@@ -129,10 +128,10 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
    *
    * @see CurlConnection::getRequest()
    */
-  public function getRequest($url, $headers_only = false) {
+  public function getRequest($url) {
     try {
-      return parent::getRequest($this->buildUrl($url), $headers_only);
-    } 
+      return parent::getRequest($this->buildUrl($url));
+    }
     catch (HttpConnectionException $e) {
       $this->parseFedoraExceptions($e);
     }
@@ -144,19 +143,19 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
   public function postRequest($url, $type = 'none', $data = NULL, $content_type = NULL) {
     try {
       return parent::postRequest($this->buildUrl($url), $type, $data, $content_type);
-    } 
+    }
     catch (HttpConnectionException $e) {
       $this->parseFedoraExceptions($e);
     }
   }
 
-  /**
+   /**
    * @see CurlConnection::patchRequest()
    */
   public function patchRequest($url, $type = 'none', $data = NULL, $content_type = NULL) {
     try {
       return parent::patchRequest($this->buildUrl($url), $type, $data, $content_type);
-    } 
+    }
     catch (HttpConnectionException $e) {
       $this->parseFedoraExceptions($e);
     }
@@ -168,7 +167,7 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
   public function putRequest($url, $type = 'none', $file = NULL) {
     try {
       return parent::putRequest($this->buildUrl($url), $type, $file);
-    } 
+    }
     catch (HttpConnectionException $e) {
       $this->parseFedoraExceptions($e);
     }
@@ -180,7 +179,7 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
   public function deleteRequest($url) {
     try {
       return parent::deleteRequest($this->buildUrl($url));
-    } 
+    }
     catch (HttpConnectionException $e) {
       $this->parseFedoraExceptions($e);
     }
@@ -222,5 +221,4 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
     }
     throw new RepositoryException($message, $code, $e);
   }
-
 }
