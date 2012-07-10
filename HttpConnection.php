@@ -602,7 +602,7 @@ class CurlConnection extends HttpConnection {
     if ($this->reuseConnection) {
       curl_setopt($this->curlContext, CURLOPT_HTTPGET, FALSE);
       curl_setopt($this->curlContext, CURLOPT_NOBODY, FALSE);
-      curl_setopt($this->curlContext, CURLOPT_HEADER, TRUE);
+      curl_setopt($this->curlContext, CURLOPT_HEADER, FALSE);
     }
     else {
       $this->unallocateCurlContext();
