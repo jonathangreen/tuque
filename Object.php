@@ -772,7 +772,7 @@ class FedoraObject extends AbstractFedoraObject {
   }
 
   /**
-   * Returns pids of coolections of whihc object is a member
+   * Returns pids of collections of which object is a member
    * @return array
    */
   public function getParentPids() {
