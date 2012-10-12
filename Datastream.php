@@ -1169,7 +1169,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
    * @see AbstractDatastream::controlGroup
    */
   protected function controlGroupMagicProperty($function, $value) {
-    if(!isset($this->datastreamInfo['dsControlGroup'])) {
+    if (!isset($this->datastreamInfo['dsControlGroup'])) {
       $this->populateDatastreamInfo();
     }
     return parent::controlGroupMagicProperty($function, $value);
@@ -1181,7 +1181,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
   protected function locationMagicProperty($function, $value) {
     switch ($function) {
       case 'get':
-        if(!isset($this->datastreamInfo['dsLocation'])) {
+        if (!isset($this->datastreamInfo['dsLocation'])) {
           $this->populateDatastreamInfo();
         }
         return $this->datastreamInfo['dsLocation'];
@@ -1204,7 +1204,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
   protected function stateMagicProperty($function, $value) {
     switch ($function) {
       case 'get':
-        if(!isset($this->datastreamInfo['dsState'])) {
+        if (!isset($this->datastreamInfo['dsState'])) {
           $this->populateDatastreamInfo();
         }
         return $this->datastreamInfo['dsState'];
@@ -1236,14 +1236,14 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
   protected function labelMagicProperty($function, $value) {
     switch ($function) {
       case 'get':
-        if(!isset($this->datastreamInfo['dsLabel'])) {
+        if (!isset($this->datastreamInfo['dsLabel'])) {
           $this->populateDatastreamInfo();
         }
         return $this->datastreamInfo['dsLabel'];
         break;
 
       case 'isset':
-        if(!isset($this->datastreamInfo['dsLabel'])) {
+        if (!isset($this->datastreamInfo['dsLabel'])) {
           $this->populateDatastreamInfo();
         }
         return $this->isDatastreamProperySet($this->datastreamInfo['dsLabel'], '');
@@ -1265,7 +1265,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
   protected function versionableMagicProperty($function, $value) {
     switch ($function) {
       case 'get':
-        if(!isset($this->datastreamInfo['dsVersionable'])) {
+        if (!isset($this->datastreamInfo['dsVersionable'])) {
           $this->populateDatastreamInfo();
         }
         // Convert to a boolean.
@@ -1298,7 +1298,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
   protected function mimetypeMagicProperty($function, $value) {
     switch ($function) {
       case 'get':
-        if(!isset($this->datastreamInfo['dsMIME'])) {
+        if (!isset($this->datastreamInfo['dsMIME'])) {
           $this->populateDatastreamInfo();
         }
         return $this->datastreamInfo['dsMIME'];
@@ -1329,14 +1329,14 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
   protected function formatMagicProperty($function, $value) {
     switch ($function) {
       case 'get':
-        if(!isset($this->datastreamInfo['dsFormatURI'])) {
+        if (!isset($this->datastreamInfo['dsFormatURI'])) {
           $this->populateDatastreamInfo();
         }
         return $this->datastreamInfo['dsFormatURI'];
         break;
 
       case 'isset':
-        if(!isset($this->datastreamInfo['dsFormatURI'])) {
+        if (!isset($this->datastreamInfo['dsFormatURI'])) {
           $this->populateDatastreamInfo();
         }
         return $this->isDatastreamProperySet($this->datastreamInfo['dsFormatURI'], '');
@@ -1358,7 +1358,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
   protected function sizeMagicProperty($function, $value) {
     switch ($function) {
       case 'get':
-        if(!isset($this->datastreamInfo['dsSize'])) {
+        if (!isset($this->datastreamInfo['dsSize'])) {
           $this->populateDatastreamInfo();
         }
         return $this->datastreamInfo['dsSize'];
@@ -1382,14 +1382,14 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
   protected function checksumMagicProperty($function, $value) {
     switch ($function) {
       case 'get':
-        if(!isset($this->datastreamInfo['dsChecksum'])) {
+        if (!isset($this->datastreamInfo['dsChecksum'])) {
           $this->populateDatastreamInfo();
         }
         return $this->datastreamInfo['dsChecksum'];
         break;
 
       case 'isset':
-        if(!isset($this->datastreamInfo['dsChecksum'])) {
+        if (!isset($this->datastreamInfo['dsChecksum'])) {
           $this->populateDatastreamInfo();
         }
         return $this->isDatastreamProperySet($this->datastreamInfo['dsChecksum'], 'none');
@@ -1408,14 +1408,14 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
   protected function checksumTypeMagicProperty($function, $value) {
     switch ($function) {
       case 'get':
-        if(!isset($this->datastreamInfo['dsChecksumType'])) {
+        if (!isset($this->datastreamInfo['dsChecksumType'])) {
           $this->populateDatastreamInfo();
         }
         return $this->datastreamInfo['dsChecksumType'];
         break;
 
       case 'isset':
-        if(!isset($this->datastreamInfo['dsChecksumType'])) {
+        if (!isset($this->datastreamInfo['dsChecksumType'])) {
           $this->populateDatastreamInfo();
         }
         return $this->isDatastreamProperySet($this->datastreamInfo['dsChecksumType'], 'DISABLED');
@@ -1443,7 +1443,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
   protected function createdDateMagicProperty($function, $value) {
     switch ($function) {
       case 'get':
-        if(!isset($this->datastreamInfo['dsCreateDate'])) {
+        if (!isset($this->datastreamInfo['dsCreateDate'])) {
           $this->populateDatastreamInfo();
         }
         return new FedoraDate($this->datastreamInfo['dsCreateDate']);
@@ -1500,7 +1500,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
   protected function urlMagicProperty($function, $value) {
     switch ($function) {
       case 'get':
-        if(!isset($this->datastreamInfo['dsLocation'])) {
+        if (!isset($this->datastreamInfo['dsLocation'])) {
           $this->populateDatastreamInfo();
         }
         if ($this->controlGroup == 'E' || $this->controlGroup == 'R') {
@@ -1542,14 +1542,14 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
   protected function logMessageMagicProperty($function, $value) {
     switch ($function) {
       case 'get':
-        if(!isset($this->datastreamInfo['dsLogMessage'])) {
+        if (!isset($this->datastreamInfo['dsLogMessage'])) {
           $this->populateDatastreamInfo();
         }
         return $this->datastreamInfo['dsLogMessage'];
         break;
 
       case 'isset':
-        if(!isset($this->datastreamInfo['dsLogMessage'])) {
+        if (!isset($this->datastreamInfo['dsLogMessage'])) {
           $this->populateDatastreamInfo();
         }
         return $this->isDatastreamProperySet($this->datastreamInfo['dsLogMessage'], '');
