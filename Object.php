@@ -177,7 +177,8 @@ abstract class AbstractFedoraObject extends AbstractObject {
 
   /**
    * Implements Magic Method.  Returns PID of object when object is printed
-   * @return <type>
+   *
+   * @return string
    */
   public function __toString() {
     return $this->id;
@@ -764,27 +765,19 @@ class FedoraObject extends AbstractFedoraObject {
   }
 
   /**
-   * Returns array of object's datastreams
-   * @return array 
-   */
-  public function listDatastreams() {
-    return $this->repository->api->a->listDatastreams($this->id);
-  }
-
-  /**
-   * Returns pids of collections of which object is a member
+   * Returns IDs of collections of which object is a member
+   *
    * @return array
    */
-  public function getParentPids() {
-    
+  public function getParents() {
     $collections = array_merge(
             $this->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOfCollection'),
             $this->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf'));
-    $collection_pids = array();
+    $collection_ids = array();
     foreach ($collections as $collection) {
-      $collection_pids[] = $collection['object']['value'];
+      $collection_ids[] = $collection['object']['value'];
     }
-    return $collection_pids;
+    return $collection_ids;
   }
 
 }
