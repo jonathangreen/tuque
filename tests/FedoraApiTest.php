@@ -64,7 +64,7 @@ class FedoraApiIngestTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals(1, count($results['results']));
     $this->assertEquals($pid, $results['results'][0]['pid']);
   }
-  
+
   public function testIngestRandomPid() {
     $string1 = FedoraTestHelpers::randomString(10);
     $string2 = FedoraTestHelpers::randomString(10);
@@ -153,7 +153,7 @@ FOXML;
     $this->assertEquals($pid, $results['results'][0]['pid']);
     $this->assertEquals($expected_label, $results['results'][0]['label']);
   }
-  
+
   public function testIngestLogMessage() {
     $string1 = FedoraTestHelpers::randomString(10);
     $string2 = FedoraTestHelpers::randomString(10);
@@ -232,7 +232,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
   public $fixtures;
   public $display;
   public $pids;
-  
+
   static $purge = TRUE;
   static $saved;
 
@@ -587,6 +587,14 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     $expected = file_get_contents('tests/test_data/fixture1_fixture_oldest.png');
     $actual = $this->apia->getDatastreamDissemination($this->pids[0], 'fixture', '2012-03-13T17:40:29.057Z');
     $this->assertEquals($expected, $actual);
+  }
+
+  function testGetDatastreamDisseminationToFile() {
+    $expected = file_get_contents('tests/test_data/fixture1_fixture_newest.png');
+    $file = tempnam(sys_get_temp_dir(), "test");
+    $return = $this->apia->getDatastreamDissemination($this->pids[0], 'fixture', NULL, $file);
+    $this->assertTrue($return);
+    $this->assertEquals($expected, file_get_contents($file));
   }
 
   function testGetDissemination() {

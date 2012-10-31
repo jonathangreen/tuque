@@ -293,7 +293,7 @@ class CurlConnection extends HttpConnection {
   /**
    * This sets the curl options
    */
-  protected function setupCurlContext($url, $file = NULL) {
+  protected function setupCurlContext($url) {
     if (!$this->curlContext) {
       $this->getCurlContext();
     }
@@ -317,14 +317,8 @@ class CurlConnection extends HttpConnection {
     curl_setopt($this->curlContext, CURLOPT_FAILONERROR, FALSE);
     curl_setopt($this->curlContext, CURLOPT_FOLLOWLOCATION, 1);
 
-    if($file) {
-      curl_setopt($this->curlContext, CURLOPT_FILE, $file);
-      curl_setopt($this->curlContext, CURLOPT_HEADER, FALSE);
-    }
-    else {
-      curl_setopt($this->curlContext, CURLOPT_RETURNTRANSFER, TRUE);
-      curl_setopt($this->curlContext, CURLOPT_HEADER, TRUE);
-    }
+    curl_setopt($this->curlContext, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($this->curlContext, CURLOPT_HEADER, TRUE);
 
     if ($this->debug) {
       curl_setopt($this->curlContext, CURLOPT_VERBOSE, 1);
@@ -569,16 +563,20 @@ class CurlConnection extends HttpConnection {
    * @see HttpConnection::getRequest
    */
   function getRequest($url, $headers_only = FALSE, $file = NULL) {
-    if($file) {
-      $file = fopen($file, 'w+');
-    }
-    $this->setupCurlContext($url, $file);
+    $this->setupCurlContext($url);
+
     if($headers_only){
       curl_setopt($this->curlContext, CURLOPT_NOBODY, TRUE);
       curl_setopt($this->curlContext, CURLOPT_HEADER, TRUE);
     } else {
       curl_setopt($this->curlContext, CURLOPT_CUSTOMREQUEST, 'GET');
       curl_setopt($this->curlContext, CURLOPT_HTTPGET, TRUE);
+    }
+
+    if($file) {
+      $file = fopen($file, 'w+');
+      curl_setopt($this->curlContext, CURLOPT_FILE, $file);
+      curl_setopt($this->curlContext, CURLOPT_HEADER, FALSE);
     }
 
     // Ugly substitute for a try catch finally block.
@@ -600,6 +598,7 @@ class CurlConnection extends HttpConnection {
 
     if($file) {
       fclose($file);
+      curl_setopt($this->curlContext, CURLOPT_FILE, fopen('php://stdout', 'w'));
     }
 
     if ($exception) {
