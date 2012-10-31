@@ -83,16 +83,6 @@ class ObjectTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue(isset($this->object->id));
   }
 
-  public function testObjectIdUnsetException() {
-    $this->setExpectedException('Exception');
-    unset($this->object->id);
-  }
-
-  public function testObjectIdChangeException() {
-    $this->setExpectedException('Exception');
-    $this->object->id = 'foo';
-  }
-
   /**
    * @depends testObjectIdChangeException
    */
