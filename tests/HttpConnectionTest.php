@@ -14,6 +14,7 @@ class HttpConnectionTest extends PHPUnit_Framework_TestCase {
     $file = tempnam(sys_get_temp_dir(),'test');
     $page = $connection->getRequest('http://hudson.islandora.ca/files/xml.xml', FALSE, $file);
     $this->assertEquals("<woo><test><xml/></test></woo>\n", file_get_contents($file));
+    unlink($file);
   }
 
 }

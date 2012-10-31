@@ -595,6 +595,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     $return = $this->apia->getDatastreamDissemination($this->pids[0], 'fixture', NULL, $file);
     $this->assertTrue($return);
     $this->assertEquals($expected, file_get_contents($file));
+    unlink($file);
   }
 
   function testGetDissemination() {
