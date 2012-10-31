@@ -276,7 +276,9 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
       'title' => 'title1', 'creator' => 'creator1', 'subject' => 'subject1',
       'description' => 'description1', 'publisher' => 'publisher1',
       'contributor' => 'contributor1', 'date' => 'date1', 'type' => 'type1',
-      'format' => 'format1', 'identifier' => $pid, 'source' => 'source1',
+      'format' => 'format1',
+      //'identifier' => $pid,
+      'source' => 'source1',
       'language' => 'language1', 'relation' => 'relation1', 'coverage' => 'coverage1',
       'rights' => 'rights1',
     );
@@ -417,7 +419,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
       'date' => 'date2',
       'type' => 'type2',
       'format' => 'format2',
-      'identifier' => array('identifier2', $pid),
+      //'identifier' => array('identifier2', $pid),
       'source' => 'source2',
       'language' => 'language2',
       'relation' => 'relation2',
@@ -515,6 +517,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     // test it, since it changes every time.
     $this->assertArrayHasKey('mDate', $result['results'][0]);
     unset($result['results'][0]['mDate']);
+    unset($result['results'][0]['identifier']);
     $this->assertEquals($this->fixtures[$pid]['findObjects'],$result['results'][0]);
 
     // Test that we have a session key
@@ -537,6 +540,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     // test it, since it changes every time.
     $this->assertArrayHasKey('mDate', $result['results'][0]);
     unset($result['results'][0]['mDate']);
+    unset($result['results'][0]['identifier']);
     $this->assertEquals($this->fixtures[$pid]['findObjects'],$result['results'][0]);
   }
 
@@ -547,6 +551,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     foreach($result['results'] as $results) {
       $this->assertArrayHasKey('mDate', $results);
       unset($results['mDate']);
+      unset($results['identifier']);
       $this->assertEquals($this->fixtures[$results['pid']]['findObjects'], $results);
     }
   }
@@ -571,6 +576,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
           }
           $result = $this->apia->findObjects('query', $query, NULL, $display);
           $this->assertEquals(1,count($result['results']));
+          unset($result['results'][0]['identifier']);
           $this->assertEquals($this->fixtures[$pid]['findObjects'], $result['results'][0]);
         }
       }
