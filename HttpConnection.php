@@ -175,9 +175,12 @@ abstract class HttpConnection {
    * @param string $url
    *   The URL to post the request to. Should start with the
    *   protocol. For example: http://.
-   *
    * @param boolean $headers_only
    *   This will cause curl to only return the HTTP headers.
+   * @param string $file
+   *   A file to output the content of request to. If this is set then headers
+   *   are not returned and the 'content' and 'headers' keys of the return isn't
+   *   set.
    *
    * @throws HttpConnectionException
    *
@@ -187,7 +190,7 @@ abstract class HttpConnection {
    *   * $return['headers'] = The HTTP headers of the reply
    *   * $return['content'] = The body of the HTTP reply
    */
-  abstract public function getRequest($url, $headers_only = FALSE);
+  abstract public function getRequest($url, $headers_only = FALSE, $file = FALSE);
 
   /**
    * Send a HTTP PUT request to URL.
@@ -290,7 +293,7 @@ class CurlConnection extends HttpConnection {
   /**
    * This sets the curl options
    */
-  protected function setupCurlContext($url) {
+  protected function setupCurlContext($url, $file = NULL) {
     if (!$this->curlContext) {
       $this->getCurlContext();
     }
@@ -313,8 +316,16 @@ class CurlConnection extends HttpConnection {
     }
     curl_setopt($this->curlContext, CURLOPT_FAILONERROR, FALSE);
     curl_setopt($this->curlContext, CURLOPT_FOLLOWLOCATION, 1);
-    curl_setopt($this->curlContext, CURLOPT_RETURNTRANSFER, TRUE);
-    curl_setopt($this->curlContext, CURLOPT_HEADER, TRUE);
+
+    if($file) {
+      curl_setopt($this->curlContext, CURLOPT_FILE, $file);
+      curl_setopt($this->curlContext, CURLOPT_HEADER, FALSE);
+    }
+    else {
+      curl_setopt($this->curlContext, CURLOPT_RETURNTRANSFER, TRUE);
+      curl_setopt($this->curlContext, CURLOPT_HEADER, TRUE);
+    }
+
     if ($this->debug) {
       curl_setopt($this->curlContext, CURLOPT_VERBOSE, 1);
     }
@@ -334,7 +345,7 @@ class CurlConnection extends HttpConnection {
    * @return array
    *   Array has keys: (status, headers, content).
    */
-  protected function doCurlRequest() {
+  protected function doCurlRequest($file = NULL) {
     $curl_response = curl_exec($this->curlContext);
 
     // Since we are using exceptions we trap curl error
@@ -351,16 +362,18 @@ class CurlConnection extends HttpConnection {
 
     $response = array();
     $response['status'] = $info['http_code'];
-    $response['headers'] = substr($curl_response, 0, $info['header_size'] - 1);
-    $response['content'] = substr($curl_response, $info['header_size']);
+    if($file == NULL) {
+      $response['headers'] = substr($curl_response, 0, $info['header_size'] - 1);
+      $response['content'] = substr($curl_response, $info['header_size']);
 
-    // We do some ugly stuff here to strip the error string out
-    // of the HTTP headers, since curl doesn't provide any helper.
-    $http_error_string = explode("\r\n\r\n", $response['headers']);
-    $http_error_string = $http_error_string[count($http_error_string) - 1];
-    $http_error_string = explode("\r\n", $http_error_string);
-    $http_error_string = substr($http_error_string[0], 13);
-    $http_error_string = trim($http_error_string);
+      // We do some ugly stuff here to strip the error string out
+      // of the HTTP headers, since curl doesn't provide any helper.
+      $http_error_string = explode("\r\n\r\n", $response['headers']);
+      $http_error_string = $http_error_string[count($http_error_string) - 1];
+      $http_error_string = explode("\r\n", $http_error_string);
+      $http_error_string = substr($http_error_string[0], 13);
+      $http_error_string = trim($http_error_string);
+    }
 
     // Throw an exception if this isn't a 2XX response.
     if (!preg_match("/^2/", $info['http_code'])) {
@@ -555,8 +568,11 @@ class CurlConnection extends HttpConnection {
   /**
    * @see HttpConnection::getRequest
    */
-  function getRequest($url, $headers_only = FALSE) {
-    $this->setupCurlContext($url);
+  function getRequest($url, $headers_only = FALSE, $file = NULL) {
+    if($file) {
+      $file = fopen($file, 'w+');
+    }
+    $this->setupCurlContext($url, $file);
     if($headers_only){
       curl_setopt($this->curlContext, CURLOPT_NOBODY, TRUE);
       curl_setopt($this->curlContext, CURLOPT_HEADER, TRUE);
@@ -568,7 +584,7 @@ class CurlConnection extends HttpConnection {
     // Ugly substitute for a try catch finally block.
     $exception = NULL;
     try {
-      $results = $this->doCurlRequest();
+      $results = $this->doCurlRequest($file);
     } catch (HttpConnectionException $e) {
       $exception = $e;
     }
@@ -580,6 +596,10 @@ class CurlConnection extends HttpConnection {
     }
     else {
       $this->unallocateCurlContext();
+    }
+
+    if($file) {
+      fclose($file);
     }
 
     if ($exception) {
