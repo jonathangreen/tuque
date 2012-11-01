@@ -82,6 +82,12 @@ abstract class AbstractObject extends MagicProperty implements Countable, ArrayA
    * @var string
    */
   public $logMessage;
+  /**
+   * An array of strings containing the content models of the object.
+   *
+   * @var array
+   */
+  public $models;
 
   /**
    * Set the state of the object to deleted.
@@ -172,6 +178,7 @@ abstract class AbstractFedoraObject extends AbstractObject {
     unset($this->label);
     unset($this->owner);
     unset($this->logMessage);
+    unset($this->models);
     $this->relationships = new FedoraRelsExt($this);
   }
 
