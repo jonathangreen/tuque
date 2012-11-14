@@ -151,6 +151,43 @@ abstract class AbstractDatastream extends MagicProperty {
    */
   public $logMessage;
 
+  /**
+   * Unsets public members.
+   *
+   * We only define the public members of the object for Doxygen, they aren't actually accessed or used,
+   * and if they are not unset, they can cause problems after unserialization.
+   */
+  public function __construct() {
+    $this->unset_members();
+  }
+
+  /**
+   * Upon unserialization unset any public members.
+   */
+  public function __wakeup() {
+    $this->unset_members();
+  }
+
+  /**
+   * Unsets public members, required for child classes to funciton properly with MagicProperties.
+   */
+  private function unset_members() {
+    unset($this->id);
+    unset($this->label);
+    unset($this->controlGroup);
+    unset($this->versionable);
+    unset($this->state);
+    unset($this->mimetype);
+    unset($this->format);
+    unset($this->size);
+    unset($this->checksum);
+    unset($this->checksumType);
+    unset($this->createdDate);
+    unset($this->content);
+    unset($this->url);
+    unset($this->location);
+    unset($this->logMessage);
+  }
 }
 
 /**
@@ -194,21 +231,7 @@ abstract class AbstractFedoraDatastream extends AbstractDatastream {
    *   The identifier of the datastream.
    */
   public function __construct($id, AbstractFedoraObject $object, FedoraRepository $repository) {
-    unset($this->id);
-    unset($this->label);
-    unset($this->controlGroup);
-    unset($this->versionable);
-    unset($this->state);
-    unset($this->mimetype);
-    unset($this->format);
-    unset($this->size);
-    unset($this->checksum);
-    unset($this->checksumType);
-    unset($this->createdDate);
-    unset($this->content);
-    unset($this->url);
-    unset($this->location);
-    unset($this->logMessage);
+    parent::__construct();
     $this->datastreamId = $id;
     $this->parent = $object;
     $this->repository = $repository;
@@ -686,7 +709,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
   protected function contentMagicProperty($function, $value) {
     switch ($function) {
       case 'get':
-        switch($this->datastreamInfo['content']['type']) {
+        switch ($this->datastreamInfo['content']['type']) {
           case 'string':
           case 'url':
             return $this->datastreamInfo['content']['content'];
@@ -830,7 +853,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
       trigger_error("Function cannot be called on a {$this->controlGroup} datastream. Please use datastream->url.", E_USER_WARNING);
       return;
     }
-    switch($this->datastreamInfo['content']['type']) {
+    switch ($this->datastreamInfo['content']['type']) {
       case 'file':
         copy($this->datastreamInfo['content']['content'], $file);
         return TRUE;

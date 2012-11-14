@@ -22,14 +22,14 @@ require_once 'FedoraRelationships.php';
  * $object = new AbstractObject()
  *
  * // access every object
- * foreach($object as $dsid => $dsObject) {
+ * foreach ($object as $dsid => $dsObject) {
  *   // print dsid and set contents to "foo"
  *   print($dsid);
  *   $dsObject->content = 'foo';
  * }
  *
  * // test if there is a datastream called 'DC'
- * if(isset($object['DC'])) {
+ * if (isset($object['DC'])) {
  *   // if there is print its contents
  *   print($object['DC']->content);
  * }
@@ -136,6 +136,38 @@ abstract class AbstractObject extends MagicProperty implements Countable, ArrayA
    * Ingests a datastream object into the repository.
    */
   abstract public function ingestDatastream(&$ds);
+
+  /**
+   * Unsets public members.
+   *
+   * We only define the public members of the object for Doxygen, they aren't actually accessed or used,
+   * and if they are not unset, they can cause problems after unserialization.
+   */
+  public function __construct() {
+    $this->unset_members();
+  }
+
+  /**
+   * Upon unserialization unset any public members.
+   */
+  public function __wakeup() {
+    $this->unset_members();
+  }
+
+  /**
+   * Unsets public members, required for child classes to funciton properly with MagicProperties.
+   */
+  private function unset_members() {
+    unset($this->id);
+    unset($this->state);
+    unset($this->createdDate);
+    unset($this->lastModifiedDate);
+    unset($this->label);
+    unset($this->owner);
+    unset($this->logMessage);
+    unset($this->models);
+  }
+
 }
 
 /**
@@ -169,16 +201,9 @@ abstract class AbstractFedoraObject extends AbstractObject {
    * Constructosaurus.
    */
   public function __construct($id, FedoraRepository $repository) {
+    parent::__construct();
     $this->repository = $repository;
     $this->objectId = $id;
-    unset($this->id);
-    unset($this->state);
-    unset($this->createdDate);
-    unset($this->lastModifiedDate);
-    unset($this->label);
-    unset($this->owner);
-    unset($this->logMessage);
-    unset($this->models);
     $this->relationships = new FedoraRelsExt($this);
   }
 
@@ -356,7 +381,7 @@ abstract class AbstractFedoraObject extends AbstractObject {
         foreach ($rels_models as $model) {
           $models[] = $model['object']['value'];
         }
-        if(!in_array('fedora-system:FedoraObject-3.0', $models)) {
+        if (!in_array('fedora-system:FedoraObject-3.0', $models)) {
           $models[] = 'fedora-system:FedoraObject-3.0';
         }
         return $models;
@@ -368,14 +393,14 @@ abstract class AbstractFedoraObject extends AbstractObject {
         break;
 
       case 'set':
-        if(!is_array($value)) {
+        if (!is_array($value)) {
           $models = array($value);
         }
         else {
           $models = $value;
         }
 
-        if(!in_array('fedora-system:FedoraObject-3.0', $models)) {
+        if (!in_array('fedora-system:FedoraObject-3.0', $models)) {
           $models[] = 'fedora-system:FedoraObject-3.0';
         }
         foreach ($models as $model) {
@@ -740,7 +765,7 @@ class FedoraObject extends AbstractFedoraObject {
       );
       $temp = tempnam(sys_get_temp_dir(), 'tuque');
       $return = $ds->getContent($temp);
-      if($return === TRUE) {
+      if ($return === TRUE) {
         $type = 'file';
         $content = $temp;
       }
@@ -825,4 +850,3 @@ class FedoraObject extends AbstractFedoraObject {
   }
 
 }
-
