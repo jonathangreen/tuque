@@ -450,6 +450,26 @@ class NewFedoraObject extends AbstractFedoraObject {
   }
 
   /**
+   * We override this as the object may need to manipulate its ID before ingestion.
+   *
+   * @see AbstractObject::id
+   */
+  protected function idMagicProperty($function, $value) {
+    switch ($function) {
+      case 'get':
+        return isset($this->objectId) ? $this->objectId : NULL;
+      case 'isset':
+        return isset($this->objectId);
+      case 'set':
+        $this->objectId = $value;
+        break;
+      case 'unset':
+        unset($this->objectId);
+        break;
+    }
+  }
+
+  /**
    * @see AbstractObject::constructDatastream()
    */
   public function constructDatastream($id, $control_group = 'M') {
