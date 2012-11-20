@@ -1,8 +1,9 @@
 name = Tuque
-description = "PHP Fedora Commons Repository API"
+description = "PHP based Fedora Repository API"
 package = Islandora
 version = 7.x-dev
 core = 7.x
+files[] = Cache.php
 files[] = Datastream.php
 files[] = FedoraApi.php
 files[] = FedoraApiSerializer.php
