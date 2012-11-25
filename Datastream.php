@@ -810,15 +810,18 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
   /**
    *  @see AbstractDatastream::setContentFromFile
    */
-  public function setContentFromFile($file) {
+  public function setContentFromFile($file, $copy = TRUE) {
     if ($this->controlGroup == 'E' || $this->controlGroup == 'R') {
       trigger_error("Function cannot be called on a {$this->controlGroup} datastream. Please use datastream->url.", E_USER_WARNING);
       return;
     }
-    $tmpfile = tempnam(sys_get_temp_dir(), 'tuque');
-    copy($file, $tmpfile);
+    if ($copy) {
+      $tmpfile = tempnam(sys_get_temp_dir(), 'tuque');
+      copy($file, $tmpfile);
+      $file = $tmpfile;
+    }
     $this->datastreamInfo['content']['type'] = 'file';
-    $this->datastreamInfo['content']['content'] = $tmpfile;
+    $this->datastreamInfo['content']['content'] = $file;
   }
 
   /**
