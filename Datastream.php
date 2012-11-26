@@ -809,6 +809,9 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
 
   /**
    *  @see AbstractDatastream::setContentFromFile
+   *
+   * @param boolean $copy
+   *   If TRUE this object will copy and manage the given file, if FALSE the management of the files is up to the caller.
    */
   public function setContentFromFile($file, $copy = TRUE) {
     if ($this->controlGroup == 'E' || $this->controlGroup == 'R') {
@@ -819,6 +822,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
       $tmpfile = tempnam(sys_get_temp_dir(), 'tuque');
       copy($file, $tmpfile);
       $file = $tmpfile;
+      $this->datastreamInfo['content']['copied'] = TRUE;
     }
     $this->datastreamInfo['content']['type'] = 'file';
     $this->datastreamInfo['content']['content'] = $file;
@@ -869,7 +873,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
   }
 
   public function __destruct() {
-    if ($this->datastreamInfo['content']['type'] == 'file') {
+    if ($this->datastreamInfo['content']['type'] == 'file' && $this->datastreamInfo['content']['copied'] == TRUE) {
       unlink($this->datastreamInfo['content']['content']);
     }
   }
