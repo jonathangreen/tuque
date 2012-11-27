@@ -408,6 +408,14 @@ abstract class AbstractFedoraDatastream extends AbstractDatastream {
 class NewFedoraDatastream extends AbstractFedoraDatastream {
 
   /**
+   * Used to determine if we should delete the contents of this datastream when
+   * this class is destoryed.
+   *
+   * @var boolean
+   */
+  protected $copied = FALSE;
+
+  /**
    * The constructor for a new fedora datastream.
    *
    * @param string $id
@@ -818,11 +826,11 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
       trigger_error("Function cannot be called on a {$this->controlGroup} datastream. Please use datastream->url.", E_USER_WARNING);
       return;
     }
+    $this->copied = $copy;
     if ($copy) {
       $tmpfile = tempnam(sys_get_temp_dir(), 'tuque');
       copy($file, $tmpfile);
       $file = $tmpfile;
-      $this->datastreamInfo['content']['copied'] = TRUE;
     }
     $this->datastreamInfo['content']['type'] = 'file';
     $this->datastreamInfo['content']['content'] = $file;
@@ -873,7 +881,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
   }
 
   public function __destruct() {
-    if ($this->datastreamInfo['content']['type'] == 'file' && $this->datastreamInfo['content']['copied'] == TRUE) {
+    if ($this->datastreamInfo['content']['type'] == 'file' && $this->copied == TRUE) {
       unlink($this->datastreamInfo['content']['content']);
     }
   }
