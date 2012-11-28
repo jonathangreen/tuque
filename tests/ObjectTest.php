@@ -15,7 +15,7 @@ class ObjectTest extends PHPUnit_Framework_TestCase {
     $cache = new SimpleCache();
     $repository = new FedoraRepository($this->api, $cache);
 
-    // create an object 
+    // create an object
     $string1 = FedoraTestHelpers::randomString(10);
     $string2 = FedoraTestHelpers::randomString(10);
     $this->testDsid = FedoraTestHelpers::randomCharString(10);
@@ -63,7 +63,7 @@ class ObjectTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals('foo', $this->object->owner);
     $this->assertEquals('foo', $this->getValue('objOwnerId'));
     $this->assertTrue(isset($this->object->owner));
-    
+
     unset($this->object->owner);
     $this->assertEquals('', $this->object->owner);
     $this->assertEquals('', $this->getValue('objOwnerId'));
@@ -81,18 +81,6 @@ class ObjectTest extends PHPUnit_Framework_TestCase {
   public function testObjectId() {
     $this->assertEquals($this->object->id, $this->testPid);
     $this->assertTrue(isset($this->object->id));
-  }
-
-  public function testObjectIdUnsetException() {
-    $this->markTestIncomplete();
-    $this->setExpectedException('Exception');
-    unset($this->object->id);
-  }
-
-  public function testObjectIdChangeException() {
-    $this->markTestIncomplete();
-    $this->setExpectedException('Exception');
-    $this->object->id = 'foo';
   }
 
   /**
@@ -166,11 +154,13 @@ class ObjectTest extends PHPUnit_Framework_TestCase {
   public function testObjectIngestDs() {
     $newds = $this->object->constructDatastream('test', 'M');
     $newds->label = 'I am a new day!';
+    $newds->content = 'tro lo lo lo';
     $this->object->ingestDatastream($newds);
 
     $this->assertInstanceOf('FedoraDatastream', $newds);
     $this->assertEquals('I am a new day!', $newds->label);
     $this->assertEquals('text/xml', $newds->mimetype);
+    $this->assertEquals('tro lo lo lo', $newds->content);
 
     $result = $this->api->m->getDatastream($this->testPid, 'test');
     $this->assertInternalType('array', $result);
@@ -185,4 +175,56 @@ class ObjectTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals("\n<xml></xml>\n", $newds->content);
   }
 
+  public function testObjectIngestDsFile() {
+    $temp = tempnam(sys_get_temp_dir(), 'tuque');
+    file_put_contents($temp, 'this is a tesssst!');
+
+    $newds = $this->object->constructDatastream('test', 'M');
+    $newds->label = 'I am a new day!';
+    $newds->setContentFromFile($temp);
+    $this->object->ingestDatastream($newds);
+
+    $this->assertInstanceOf('FedoraDatastream', $newds);
+    $this->assertEquals('I am a new day!', $newds->label);
+    $this->assertEquals('text/xml', $newds->mimetype);
+    $this->assertEquals('this is a tesssst!', $newds->content);
+
+    $result = $this->api->m->getDatastream($this->testPid, 'test');
+    $this->assertInternalType('array', $result);
+    unlink($temp);
+  }
+
+  public function testObjectIngestDsChangeFile() {
+    $temp = tempnam(sys_get_temp_dir(), 'tuque');
+    file_put_contents($temp, 'this is a tesssst!');
+
+    $newds = $this->object->constructDatastream('test', 'M');
+    $newds->label = 'I am a new day!';
+    $newds->setContentFromFile($temp);
+    file_put_contents($temp, 'walla walla');
+    $this->object->ingestDatastream($newds);
+
+    $this->assertInstanceOf('FedoraDatastream', $newds);
+    $this->assertEquals('I am a new day!', $newds->label);
+    $this->assertEquals('text/xml', $newds->mimetype);
+    $this->assertEquals('this is a tesssst!', $newds->content);
+
+    $result = $this->api->m->getDatastream($this->testPid, 'test');
+    $this->assertInternalType('array', $result);
+    unlink($temp);
+  }
+
+  public function testObjectModels() {
+    $models = $this->object->models;
+    $this->assertEquals(array('fedora-system:FedoraObject-3.0'), $models);
+    $this->object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'pid:jesus');
+    $this->object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'pid:rofl');
+    $models = $this->object->models;
+    $this->assertEquals(array('pid:jesus', 'pid:rofl', 'fedora-system:FedoraObject-3.0'), $models);
+  }
+
+  public function testObjectModelsAdd() {
+    $this->object->models = array('router:killah', 'jon:is:great');
+    $this->assertEquals(array('router:killah', 'jon:is:great', 'fedora-system:FedoraObject-3.0'), $this->object->models);
+  }
 }

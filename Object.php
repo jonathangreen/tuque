@@ -78,10 +78,16 @@ abstract class AbstractObject extends MagicProperty implements Countable, ArrayA
   public $lastModifiedDate;
   /**
    * Log message associated with the creation of the object in Fedora.
-   * 
+   *
    * @var string
    */
   public $logMessage;
+  /**
+   * An array of strings containing the content models of the object.
+   *
+   * @var array
+   */
+  public $models;
 
   /**
    * Set the state of the object to deleted.
@@ -172,6 +178,7 @@ abstract class AbstractFedoraObject extends AbstractObject {
     unset($this->label);
     unset($this->owner);
     unset($this->logMessage);
+    unset($this->models);
     $this->relationships = new FedoraRelsExt($this);
   }
 
@@ -339,6 +346,50 @@ abstract class AbstractFedoraObject extends AbstractObject {
   }
 
   /**
+   * @see AbstractObject::models
+   */
+  protected function modelsMagicProperty($function, $value) {
+    switch ($function) {
+      case 'get':
+        $models = array();
+        $rels_models = $this->relationships->get(FEDORA_MODEL_URI, 'hasModel');
+        foreach ($rels_models as $model) {
+          $models[] = $model['object']['value'];
+        }
+        if(!in_array('fedora-system:FedoraObject-3.0', $models)) {
+          $models[] = 'fedora-system:FedoraObject-3.0';
+        }
+        return $models;
+        break;
+
+      case 'isset':
+        $rels_models = $this->relationships->get(FEDORA_MODEL_URI, 'hasModel');
+        return (count($rels_models) > 0);
+        break;
+
+      case 'set':
+        if(!is_array($value)) {
+          $models = array($value);
+        }
+        else {
+          $models = $value;
+        }
+
+        if(!in_array('fedora-system:FedoraObject-3.0', $models)) {
+          $models[] = 'fedora-system:FedoraObject-3.0';
+        }
+        foreach ($models as $model) {
+          $this->relationships->add(FEDORA_MODEL_URI, 'hasModel', $model);
+        }
+        break;
+
+      case 'unset':
+        $this->relationships->remove(FEDORA_MODEL_URI, 'hasModel');
+        break;
+    }
+  }
+
+  /**
    * @see AbstractObject::constructDatastream()
    */
   public function constructDatastream($id, $control_group = 'M') {
@@ -500,8 +551,15 @@ class FedoraObject extends AbstractFedoraObject {
    */
   public function __construct($id, FedoraRepository $repository) {
     parent::__construct($id, $repository);
+    $this->refresh();
+  }
 
-    $this->objectProfile = $this->repository->api->a->getObjectProfile($id);
+  /**
+   * This function clears the object cache, so everything will be
+   * requested directly from fedora again.
+   */
+  public function refresh() {
+    $this->objectProfile = $this->repository->api->a->getObjectProfile($this->id);
     $this->objectProfile['objCreateDate'] = new FedoraDate($this->objectProfile['objCreateDate']);
     $this->objectProfile['objLastModDate'] = new FedoraDate($this->objectProfile['objLastModDate']);
     $this->objectProfile['objLogMessage'] = '';
@@ -645,31 +703,6 @@ class FedoraObject extends AbstractFedoraObject {
   }
 
   /**
-   * @see AbstractObject::models
-   */
-  protected function modelsMagicProperty($function, $value) {
-    switch ($function) {
-      case 'get':
-        $models = array();
-        // Cut off info:fedora/.
-        foreach ($this->objectProfile['objModels'] as $model) {
-          $models[] = substr($model, 12);
-        }
-        return $models;
-        break;
-
-      case 'isset':
-        return TRUE;
-        break;
-
-      case 'set':
-      case 'unset':
-        trigger_error("Cannot $function the readonly object->models.", E_USER_WARNING);
-        break;
-    }
-  }
-
-  /**
    * @see AbstractObject::logMessage
    */
   protected function logMessageMagicProperty($function, $value) {
@@ -705,7 +738,18 @@ class FedoraObject extends AbstractFedoraObject {
         'mimeType' => $ds->mimetype,
         'logMessage' => $ds->logMessage,
       );
-      $dsinfo = $this->repository->api->m->addDatastream($this->id, $ds->id, $ds->contentType, $ds->content, $params);
+      $temp = tempnam(sys_get_temp_dir(), 'tuque');
+      $return = $ds->getContent($temp);
+      if($return === TRUE) {
+        $type = 'file';
+        $content = $temp;
+      }
+      else {
+        $type = 'url';
+        $content = $ds->content;
+      }
+      $dsinfo = $this->repository->api->m->addDatastream($this->id, $ds->id, $type, $content, $params);
+      unlink($temp);
       $ds = new FedoraDatastream($ds->id, $this, $this->repository, $dsinfo);
       $this->datastreams[$ds->id] = $ds;
       return $ds;
