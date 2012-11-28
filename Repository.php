@@ -108,9 +108,9 @@ class FedoraRepository extends AbstractRepository {
    */
   public $ri;
 
-  private $queryClass = 'RepositoryQuery';
-  private $newObjectClass = 'NewFedoraObject';
-  private $objectClass = 'FedoraObject';
+  protected $queryClass = 'RepositoryQuery';
+  protected $newObjectClass = 'NewFedoraObject';
+  protected $objectClass = 'FedoraObject';
 
   /**
    * Constructor for the FedoraRepository Object.
@@ -180,7 +180,7 @@ class FedoraRepository extends AbstractRepository {
             $ds->contentType = 'url';
             $ds->content = $url;
             break;
-          
+
           default:
             break;
         }
