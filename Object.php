@@ -424,7 +424,9 @@ abstract class AbstractFedoraObject extends AbstractObject {
           $models[] = 'fedora-system:FedoraObject-3.0';
         }
         foreach ($models as $model) {
-          $this->relationships->add(FEDORA_MODEL_URI, 'hasModel', $model);
+          if (!in_array($model, $this->models)) {
+            $this->relationships->add(FEDORA_MODEL_URI, 'hasModel', $model);
+          }
         }
         break;
 
