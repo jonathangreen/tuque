@@ -184,7 +184,7 @@ class FedoraRepository extends AbstractRepository {
   }
 
   /**
-   * @see AbstractRepository::ingestObject()
+   * @see AbstractRepository::getObject()
    * @todo perhaps we should check if an object exists instead of catching
    *   the exception
    */
