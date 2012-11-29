@@ -224,6 +224,9 @@ abstract class AbstractFedoraDatastream extends AbstractDatastream {
    */
   protected $datastreamInfo = NULL;
 
+  protected $fedoraRelsIntClass = 'FedoraRelsInt';
+  protected $fedoraDatastreamVersionClass = 'FedoraDatastreamVersion';
+
   /**
    * The constructor for the datastream.
    *
@@ -235,7 +238,7 @@ abstract class AbstractFedoraDatastream extends AbstractDatastream {
     $this->datastreamId = $id;
     $this->parent = $object;
     $this->repository = $repository;
-    $this->relationships = new FedoraRelsInt($this);
+    $this->relationships = new $this->fedoraRelsIntClass($this);
   }
 
   /**
@@ -1674,7 +1677,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
    */
   public function offsetGet($offset) {
     $this->populateDatastreamHistory();
-    return new FedoraDatastreamVersion($this->id, $this->datastreamHistory[$offset], $this, $this->parent, $this->repository);
+    return new $this->fedoraDatastreamVersionClass($this->id, $this->datastreamHistory[$offset], $this, $this->parent, $this->repository);
   }
 
   /**
@@ -1705,7 +1708,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
   public function getIterator() {
     $history = array();
     foreach ($this->datastreamHistory as $key => $value) {
-      $history[$key] = new FedoraDatastreamVersion($this->id, $value, $this, $this->parent, $this->repository);
+      $history[$key] = new $this->fedoraDatastreamVersionClass($this->id, $value, $this, $this->parent, $this->repository);
     }
     return new ArrayIterator($history);
   }
