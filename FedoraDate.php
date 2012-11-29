@@ -32,6 +32,19 @@ class FedoraDate {
   }
 
   /**
+   * Equivalent to DateTime::format.
+   *
+   * @param string $format
+   *   Format accepted by date().
+   *
+   * @return string
+   *   Returns the formatted date string on success or FALSE on failure.
+   */
+  function format($format) {
+    return $this->date->format($format);
+  }
+
+  /**
    * Instantiate FedoraDate.
    *
    * @param string $time
