@@ -107,10 +107,6 @@ class FedoraApiSerializer {
    *   An array representation of the XML.
    */
   protected function flattenDocument($xml, $make_array = array()) {
-    if (!$xml) {
-      return '';
-    }
-
     if ($xml->count() == 0) {
       return (string) $xml;
     }
