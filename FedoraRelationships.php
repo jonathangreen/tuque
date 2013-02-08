@@ -144,9 +144,7 @@ class FedoraRelationships {
    *   Specifies if the object is a literal or not.
    */
   protected function internalAdd($subject, $predicate_uri, $predicate, $object, $type = RELS_TYPE_URI) {
-    if($type === TRUE){
-      $type = RELS_TYPE_PLAIN_LITERAL;
-    }
+    $type = intval($type);
     $document = $this->getDom();
     $xpath = $this->getXpath($document);
 
