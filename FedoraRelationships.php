@@ -5,13 +5,22 @@
  * This file defines the classes that are used for manipulaing the fedora
  * relationships datastreams.
  */
-
 define("XMLNS", "http://www.w3.org/2000/xmlns/");
-define("RDF_URI", 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
 define('FEDORA_RELS_EXT_URI', 'info:fedora/fedora-system:def/relations-external#');
 define("FEDORA_MODEL_URI", 'info:fedora/fedora-system:def/model#');
 define("ISLANDORA_RELS_EXT_URI", 'http://islandora.ca/ontology/relsext#');
 define("ISLANDORA_RELS_INT_URI", "http://islandora.ca/ontology/relsint#");
+
+define("RELS_TYPE_URI", 0);
+define("RDF_URI", 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
+
+define("RELS_TYPE_PLAIN_LITERAL", 1);
+define("RELS_TYPE_STRING", 2);
+define("RELS_STRING_NS", "http://www.w3.org/2001/XMLSchema#string");
+define("RELS_TYPE_INT", 3);
+define("RELS_INT_NS", "http://www.w3.org/2001/XMLSchema#int");
+define("RELS_TYPE_DATETIME", 4);
+define("RELS_DATETIME_NS", "http://www.w3.org/2001/XMLSchema#dateTime");
 
 require_once "RepositoryException.php";
 
@@ -21,12 +30,12 @@ require_once "RepositoryException.php";
  * @todo potentially we should validate the predicate URI
  */
 class FedoraRelationships {
+
   /**
    * The datastream this class is manipulating.
    * @var AbstractFedoraDatastream
    */
   public $datastream = NULL;
-
   /**
    * An array of namespaces that is used in the document.
    * @var array
@@ -41,7 +50,7 @@ class FedoraRelationships {
    * @param array $namespaces
    *   An array of default namespaces.
    */
-  public function  __construct(array $namespaces = NULL) {
+  public function __construct(array $namespaces = NULL) {
     if ($namespaces) {
       $this->namespaces = array_merge($this->namespaces, $namespaces);
     }
@@ -113,8 +122,8 @@ class FedoraRelationships {
    * This updates the associated datastreams content.
    */
   protected function updateDatastream($document) {
-      $document->formatOutput = TRUE;
-      $this->datastream->content = $document->saveXml();
+    $document->formatOutput = TRUE;
+    $this->datastream->content = $document->saveXml();
   }
 
   /**
@@ -134,7 +143,8 @@ class FedoraRelationships {
    * @param boolean $literal
    *   Specifies if the object is a literal or not.
    */
-  protected function internalAdd($subject, $predicate_uri, $predicate, $object, $literal = FALSE) {
+  protected function internalAdd($subject, $predicate_uri, $predicate, $object, $type = RELS_TYPE_URI) {
+    $type = intval($type);
     $document = $this->getDom();
     $xpath = $this->getXpath($document);
 
@@ -155,12 +165,26 @@ class FedoraRelationships {
 
     $relationship = $document->createElementNS($predicate_uri, $predicate);
     $description->appendChild($relationship);
-
-    if ($literal) {
+    if ($type != RELS_TYPE_URI) {
       $relationship->nodeValue = $object;
     }
-    else {
-      $relationship->setAttributeNS(RDF_URI, 'rdf:resource', 'info:fedora/' . $object);
+
+    switch ($type) {
+      case RELS_TYPE_URI:
+        $relationship->setAttributeNS(RDF_URI, 'rdf:resource', 'info:fedora/' . $object);
+        break;
+
+      case RELS_TYPE_STRING:
+        $relationship->setAttribute('rdf:datatype', 'http://www.w3.org/2001/XMLSchema#string');
+        break;
+
+      case RELS_TYPE_INT:
+        $relationship->setAttribute('rdf:datatype', 'http://www.w3.org/2001/XMLSchema#int');
+        break;
+
+      case RELS_TYPE_DATETIME:
+        $relationship->setAttribute('rdf:datatype', 'http://www.w3.org/2001/XMLSchema#dateTime');
+        break;
     }
 
     $this->updateDatastream($document);
@@ -359,9 +383,11 @@ class FedoraRelationships {
       $this->updateDatastream($document);
     }
   }
+
 }
 
 class FedoraRelsExt extends FedoraRelationships {
+
   protected $new = FALSE;
   protected $initialized = FALSE;
 
@@ -419,9 +445,9 @@ class FedoraRelsExt extends FedoraRelationships {
    * @param boolean $literal
    *   Specifies if the object is a literal or not.
    */
-  public function add($predicate_uri, $predicate, $object, $literal = FALSE) {
+  public function add($predicate_uri, $predicate, $object, $type = RELS_TYPE_URI) {
     $this->initializeDatastream();
-    parent::internalAdd($this->object->id, $predicate_uri, $predicate, $object, $literal);
+    parent::internalAdd($this->object->id, $predicate_uri, $predicate, $object, $type);
 
     if ($this->new) {
       $this->object->ingestDatastream($this->datastream);
@@ -507,9 +533,11 @@ class FedoraRelsExt extends FedoraRelationships {
     $this->initializeDatastream();
     return parent::changeObjectID($id);
   }
+
 }
 
 class FedoraRelsInt extends FedoraRelationships {
+
   protected $new = FALSE;
   protected $initialized = FALSE;
   protected $aboutDs;
@@ -561,12 +589,12 @@ class FedoraRelsInt extends FedoraRelationships {
    *   The predicate tag to add.
    * @param string $object
    *   The object for the relationship that is being created.
-   * @param boolean $literal
-   *   Specifies if the object is a literal or not.
+   * @param string $type
+   *   Specifies if the object is a literal or if not, what the atttribute type should be.
    */
-  public function add($predicate_uri, $predicate, $object, $literal = FALSE) {
+  public function add($predicate_uri, $predicate, $object, $type = RELS_TYPE_URI) {
     $this->initializeDatastream();
-    parent::internalAdd("{$this->aboutDs->parent->id}/{$this->aboutDs->id}", $predicate_uri, $predicate, $object, $literal);
+    parent::internalAdd("{$this->aboutDs->parent->id}/{$this->aboutDs->id}", $predicate_uri, $predicate, $object, $type);
 
     if ($this->new) {
       $this->aboutDs->parent->ingestDatastream($this->datastream);
@@ -585,15 +613,15 @@ class FedoraRelsInt extends FedoraRelationships {
    *   The predicate tag to filter removed results by.
    * @param string $object
    *   The object for the relationship to filter by.
-   * @param boolean $literal
-   *   Defines if the $object is a literal or not.
+   * @param string $type
+   *   Specifies if the object is a literal or if not, what the atttribute type should be.
    *
    * @return boolean
    *   TRUE if relationships were removed, FALSE otherwise.
    */
-  public function remove($predicate_uri = NULL, $predicate = NULL, $object = NULL, $literal = FALSE) {
+  public function remove($predicate_uri = NULL, $predicate = NULL, $object = NULL, $type = RELS_TYPE_URI) {
     $this->initializeDatastream();
-    $return = parent::internalRemove("{$this->aboutDs->parent->id}/{$this->aboutDs->id}", $predicate_uri, $predicate, $object, $literal);
+    $return = parent::internalRemove("{$this->aboutDs->parent->id}/{$this->aboutDs->id}", $predicate_uri, $predicate, $object, $type);
 
     if ($this->new && $return) {
       $this->aboutDs->parent->ingestDatastream($this->datastream);
@@ -614,8 +642,8 @@ class FedoraRelsInt extends FedoraRelationships {
    *   The predicate tag to filter by.
    * @param string $object
    *   The object for the relationship to filter by.
-   * @param boolean $literal
-   *   Defines if the $object is a literal or not.
+   * @param string $type
+   *   Specifies if the object is a literal or if not, what the atttribute type should be..
    *
    * @return array
    *   This returns an indexed array with all the matching relationships. The
@@ -643,13 +671,14 @@ class FedoraRelsInt extends FedoraRelationships {
    *   )
    *   @endcode
    */
-  public function get($predicate_uri = NULL, $predicate = NULL, $object = NULL, $literal = FALSE) {
+  public function get($predicate_uri = NULL, $predicate = NULL, $object = NULL, $type = RELS_TYPE_URI) {
     $this->initializeDatastream();
-    return parent::internalGet("{$this->aboutDs->parent->id}/{$this->aboutDs->id}", $predicate_uri, $predicate, $object, $literal);
+    return parent::internalGet("{$this->aboutDs->parent->id}/{$this->aboutDs->id}", $predicate_uri, $predicate, $object, $type);
   }
 
   public function changeObjectID($id) {
     $this->initializeDatastream();
     return parent::changeObjectID($id);
   }
+
 }

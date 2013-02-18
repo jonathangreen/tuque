@@ -76,9 +76,6 @@ class RepositoryQuery {
    *   The type of query to perform, as used by the risearch interface.
    * @param int $limit
    *   An integer, used to limit the number of results to return.
-   * @param int $offset
-   *   An integer, used to offset the results (results should be ordered, to
-   *   maintain consistency.
    *
    * @return array
    *   Indexed (numerical) array, containing a number of associative arrays,
@@ -86,7 +83,7 @@ class RepositoryQuery {
    *   URIs beginning with 'info:fedora/' will have this beginning stripped
    *   off, to facilitate their use as PIDs.
    */
-  function query($query, $type = 'itql', $limit = -1, $offset = 0) {
+  function query($query, $type = 'itql', $limit = -1) {
     // Construct the query URL.
     $url = '/risearch';
     $seperator = '?';
@@ -101,11 +98,7 @@ class RepositoryQuery {
     if ($limit > 0) {
       $this->connection->addParam($url, $seperator, 'limit', $limit);
     }
-    // Add offset if provided.
-    if ($offset > 0) {
-      $this->connection->addParam($url, $seperator, 'offset', $offset);
-    }
-
+    
     $result = $this->connection->getRequest($url);
 
     // Pass the query's results off to a decent parser.
@@ -117,8 +110,8 @@ class RepositoryQuery {
    *
    * @see self::performRiQuery()
    */
-  public function itqlQuery($query, $limit = -1, $offset = 0) {
-    return $this->query($query, 'itql', $limit, $offset);
+  public function itqlQuery($query, $limit = -1) {
+    return $this->query($query, 'itql', $limit);
   }
 
   /**
