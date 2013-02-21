@@ -140,7 +140,10 @@ class FedoraApiA {
   }
 
   /*
-   * Authenticate and provide basic information about user attributes
+   * Authenticate and provide basic information about a user's
+   * fedora attributes. Please note that calling this method
+   * with an unauthenticated (i.e. anonymous) user will throw
+   * an 'HttpConnectionException' with the message 'Unauthorized'. 
    *
    * @return array()
    *    Returns an array containing user attributes (i.e. fedoraRole).
