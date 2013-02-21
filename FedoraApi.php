@@ -139,6 +139,36 @@ class FedoraApiA {
     return $response;
   }
 
+  /*
+   * Authenticate and provide basic information about user attributes
+   *
+   * @return array()
+   *    Returns an array containing user attributes (i.e. fedoraRole).
+   *    @code
+   *    Array
+   *    (
+   *        [fedoraRole] => Array
+   *            (
+   *                [0] => authenticated user
+   *            )
+   *        [role] => Array
+   *            (
+   *                [0] => authenticated user
+   *            )
+   *    )
+   *    @endcode
+   */
+  public function userAttributes() {
+    $request = "/user";
+    $separator = '?';
+
+    $this->connection->addParam($request, $separator, 'xml', 'true');
+
+    $response = $this->connection->getRequest($request);
+    $response = $this->serializer->userAttributes($response);
+    return $response;
+  }
+
   /**
    * Query fedora to return a list of objects.
    *
