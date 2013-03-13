@@ -5,7 +5,8 @@ before_script:
   - mysql -u root -e "create database fedora;"
   - mysql -u root -e "GRANT ALL PRIVILEGES ON fedora.* To 'fedora'@'localhost' IDENTIFIED BY 'fedora';"
   - git clone git://github.com/jonathangreen/islandora_tomcat.git
-  - export CATALINA_HOME='islandora_tomcat'
+  - export CATALINA_HOME='./islandora_tomcat'
   - ./islandora_tomcat/bin/startup.sh
+  - sleep 10
 script:
   - phpunit -c tests/travis.xml tests/
