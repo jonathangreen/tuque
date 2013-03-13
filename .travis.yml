@@ -1,0 +1,11 @@
+language: php
+php:
+  - "5.3"
+before_script:
+  - mysql -e "create database fedora;"
+  - mysql -e "GRANT ALL PRIVILEGES ON fedora.* To 'fedora'@'localhost' IDENTIFIED BY 'fedora';"
+  - git clone git://github.com/jonathangreen/islandora_tomcat.git
+  - export CATALINA_HOME='islandora_tomcat'
+  - ./islandora_tomcat/bin/startup.sh
+script:
+  - phpunit -c tests/travis.xml tests/
