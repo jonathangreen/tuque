@@ -1737,7 +1737,6 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
  * Wraps a FedoraDatastream; creates a NewFedoraDatastream when mutated.
  *
  * Will only maintain the latest version of the given datastream.
- * XXX: May break if any wrapped objects override the MagicPropery methods.
  */
 class CopyOnWriteFedoraDatastream extends AbstractFedoraDatastream {
   /**
@@ -1750,13 +1749,21 @@ class CopyOnWriteFedoraDatastream extends AbstractFedoraDatastream {
    * Constructor; call inherited, and store the wrapped datastream.
    *
    * @param NewFedoraObject $parent
-   *   
+   *   The object to in which this datastream (will) exist.
+   * @param AbstractFedoraDatastream $wrapped_datastream
+   *   The datastream object we are to wrap.
    */
-  public function __construct(NewFedoraObject $parent, $wrapped_datastream) {
+  public function __construct(NewFedoraObject $parent, AbstractFedoraDatastream $wrapped_datastream) {
     parent::__construct($wrapped_datastream->id, $parent, $parent->repository);
     $this->wrapped_datastream = $wrapped_datastream;
   }
 
+  /**
+   * Create a NewFedoraDatastream copy, and wrap it instead of what we had.
+   *
+   * This is necessary to avoid the possibility of changing a datastream for
+   * another object, when copying datastreams between objects.
+   */
   protected function createNewDatastreamCopy() {
     $old_datastream = $this->wrapped_datastream;
 
