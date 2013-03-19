@@ -188,32 +188,31 @@ class FedoraRepository extends AbstractRepository {
   /**
    *  @todo validate the ID
    *  @todo catch the getNextPid errors
-   *  @todo handle $number_of_identifiers
    *
    *  @see AbstractRepository::getNextIdentifier
    */
   public function getNextIdentifier($namespace = NULL, $create_uuid = FALSE, $number_of_identifiers = 1) {
-    $pid = NULL;
-    // No namespace.
-    if (is_null($namespace)) {
-      if ($create_uuid) {
+    $pids = array();
+
+    if ($create_uuid) {
+      if (is_null($namespace)) {
         $repository_info = $this->api->a->describeRepository();
-        $pid = $repository_info['repositoryPID']['PID-namespaceIdentifier'] . ':' . $this->getUuid();
+        $namespace = $repository_info['repositoryPID']['PID-namespaceIdentifier'];
+      }
+      if ($number_of_identifiers > 1) {
+        for ($i = 1; $i <= $number_of_identifiers; $i++) {
+          $pids[] = $namespace . ':' . $this->getUuid();
+        }
       }
       else {
-        $pid = $this->api->m->getNextPid();
+        $pids = $namespace . ':' . $this->getUuid();
       }
     }
-    // If namespace is provided.
     else {
-      if ($create_uuid) {
-        $pid = $namespace . ':' . $this->getUuid();
-      }
-      else {
-        $pid = $this->api->m->getNextPid($namespace);
-      }
+      $pids = $this->api->m->getNextPid($namespace, $number_of_identifiers);
     }
-    return $pid;
+
+    return $pids;
   }
 
   /**

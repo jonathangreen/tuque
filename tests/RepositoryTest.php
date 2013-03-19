@@ -114,4 +114,40 @@ class RepositoryTest extends PHPUnit_Framework_TestCase {
     $this->repository->purgeObject($object->id);
   }
 
+  public function testNextIDUuidNamespaced() {
+    $namespace = FedoraTestHelpers::randomString(10);
+    $id = $this->repository->getNextIdentifier($namespace, TRUE);
+
+    $id_array = explode(':', $id);
+    $is_uuid = preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-(:?8|9|a|b)[a-f0-9]{3}-[a-f0-9]{12}\z/',
+                          $id_array[1]);
+
+    $this->assertEquals($namespace, $id_array[0]);
+    $this->assertEquals(TRUE, $is_uuid);
+  }
+
+  public function testNextIDUuid() {
+    $id = $this->repository->getNextIdentifier(NULL, TRUE);
+
+    $id_array = explode(':', $id);
+    $is_uuid = preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-(:?8|9|a|b)[a-f0-9]{3}-[a-f0-9]{12}\z/',
+                          $id_array[1]);
+
+    $this->assertEquals(TRUE, $is_uuid);
+  }
+
+  public function testNextIDNamespaced() {
+    $namespace = FedoraTestHelpers::randomString(10);
+    $id = $this->repository->getNextIdentifier($namespace, true);
+
+    $id_array = explode(':', $id);
+
+    $this->assertEquals($namespace, $id_array[0]);
+  }
+
+  public function testNextIDGetTwo() {
+    $ids = $this->repository->getNextIdentifier(NULL, FALSE, 2);
+    $this->assertEquals(2, count($ids));
+  }
+
 }
