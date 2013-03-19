@@ -1788,7 +1788,8 @@ class CopyOnWriteFedoraDatastream extends AbstractFedoraDatastream {
     $this->wrapped_datastream->logMessage = 'Datastream contents copied on write.';
 
     //XXX: This will break if the Fedora object will actually purge the object
-    //  on an "unset"...
+    //  on an "unset"...  Shouldn't happen, as we require $parent to be a
+    //  NewFedoraObject, which just unsets it.
     unset($this->parent[$this->wrapped_datastream->id]);
 
     $this->parent->ingestDatastream($this->wrapped_datastream);
