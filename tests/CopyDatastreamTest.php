@@ -37,6 +37,8 @@ class CopyDatastreamTest extends PHPUnit_Framework_TestCase {
     $this->api->m->addDatastream($this->testPid, $this->testDsid, 'string', $this->testDsContents, array('controlGroup' => 'M'));
     $this->object = new FedoraObject($this->testPid, $this->repository);
     $this->ds = new FedoraDatastream($this->testDsid, $this->object, $this->repository);
+    $this->ds->relationships->add('http://example.org/uri#', 'test-uri', 'http://example.org/a/page.html');
+    $this->ds->relationships->add('http://example.org/uri#', 'test-literal', 'some_kinda_literal', 1);
 
     $temp_dir = sys_get_temp_dir();
     $this->tempfile1 = tempnam($temp_dir, 'test');
@@ -112,6 +114,9 @@ class CopyDatastreamTest extends PHPUnit_Framework_TestCase {
    *   An array of ways in which the properties of $bravo vary from $alpha,
    *   mapping from properties names to the values on $bravo. Changes to the
    *   'content' property should reference a filename (not $this->tempfile1).
+   *   The 'relationship' property may be mapped to NULL if there are changes,
+   *   otherwise, relationships between the datastreams are assumed to be
+   *   unique.
    */
   protected function scanProperties(AbstractDatastream $alpha, AbstractDatastream $bravo, array $changed = array()) {
     $this->assertNotSame($alpha, $bravo, 'Datastreams being compared are not the same object.');
@@ -168,6 +173,15 @@ class CopyDatastreamTest extends PHPUnit_Framework_TestCase {
       && in_array($alpha->controlGroup, $gettable_control_groups)
       && in_array($bravo->controlGroup, $gettable_control_groups)) {
       $this->assertEquals($alpha->url, $bravo->url, 'Datastream URLs are equal.');
+    }
+
+    if (!array_key_exists('relationships', $changed)) {
+      foreach ($alpha->relationships->get() as $relationship) {
+        extract($relationship);
+        $rels = $bravo->relationships->get($predicate['namespace'],
+          $predicate['value'], $object['value'], $object['literal']);
+        $this->assertTrue(empty($rels), 'Unique relationships.');
+      }
     }
   }
 }
