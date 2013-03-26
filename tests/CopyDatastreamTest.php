@@ -84,15 +84,16 @@ class CopyDatastreamTest extends PHPUnit_Framework_TestCase {
    * the label) which should force the "copy-on-write" mechanism to fire.
    */
   public function testCopiedIngest() {
-    $this->assertTrue($this->new_object->ingestDatastream($this->object[$this->testDsid]), 'Create datastream entry on new object');
-    $datastream = $this->new_object[$this->testDsid];
-    $this->assertTrue($datastream instanceof CopyOnWriteFedoraDatastream, 'Datastream is a COW.');
+    $datastream = $this->object[$this->testDsid];
+    $this->assertTrue($datastream instanceof FedoraDatastream, 'Datastream initially exists.');
+    $this->assertTrue($this->new_object->ingestDatastream($datastream), 'Datastream ingested into new object');
+    $this->assertTrue($datastream instanceof NewFedoraDatastream, 'Datastream was copied into a NewFedoraDatastream.');
 
     $new_label = strrev($this->new_object[$this->testDsid]->label);
     $new_label .= $new_label;
 
     $this->new_object[$this->testDsid]->label = $new_label;
-    $this->assertEquals($datastream->label, $new_label, 'New label accessible through old wrapper.');
+    $this->assertEquals($datastream->label, $new_label, 'New label accessible through object.');
     $object = $this->repository->ingestObject($this->new_object);
 
     $this->scanProperties($this->object[$this->testDsid], $object[$this->testDsid], array(
