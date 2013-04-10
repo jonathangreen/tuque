@@ -29,7 +29,7 @@ abstract class AbstractDatastream extends MagicProperty {
   /**
    * Set the contents of the datastream from a URL. The contents of this
    * URL will be fetched, and the datastream will be updated to contain the
-   * contents of the URL. Https (SSL) will cause this to fail.
+   * contents of the URL.
    *
    * @param string $url
    *   The full URL to fetch.
@@ -842,7 +842,10 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
   }
 
   /**
-   *  @see AbstractDatastream::setContentFromUrl
+   * @see AbstractDatastream::setContentFromUrl
+   *
+   * @param string $url
+   *   Https (SSL) URL's will cause this to fail.
    */
   public function setContentFromUrl($url) {
     if ($this->controlGroup == 'E' || $this->controlGroup == 'R') {
@@ -1648,6 +1651,9 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
 
   /**
    * @see AbstractDatastream::setContentFromUrl
+   *
+   * @param string $url
+   *   Https (SSL) URL's will cause this to fail.
    */
   public function setContentFromUrl($url) {
     if ($this->controlGroup == 'E' || $this->controlGroup == 'R') {
