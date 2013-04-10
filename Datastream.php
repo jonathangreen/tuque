@@ -29,7 +29,7 @@ abstract class AbstractDatastream extends MagicProperty {
   /**
    * Set the contents of the datastream from a URL. The contents of this
    * URL will be fetched, and the datastream will be updated to contain the
-   * contents of the URL.
+   * contents of the URL. Https (SSL) will cause this to fail.
    *
    * @param string $url
    *   The full URL to fetch.
