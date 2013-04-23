@@ -401,12 +401,12 @@ abstract class AbstractFedoraObject extends AbstractObject {
         try {
           $rels_models = $this->relationships->get(FEDORA_MODEL_URI, 'hasModel');
         }
-        // Throwing an Exception here means there was an issue
+        // Throwing a RepositoryException here means there was an issue
         // retrieving the RELS-EXT content from Fedora.  Returning an empty
         // array as a reasonable default value for this edge case.  It was
         // encountered when attempting to purge and then immediately replace
         // a RELS-EXT datastream in order to switch control groups.
-        catch (Exception $e) {
+        catch (RepositoryException $e) {
           return $models;
           break;
         }
