@@ -1,22 +1,12 @@
 <?php
 /**
  * @file
- * This file contains the implementation of a connection to Fedora. And the
- * interface for a repository configuration.
+ * This file contains the implementation of a connection to Fedora. 
  */
 
+require_once 'RepositoryConfigInterface.php';
 require_once 'HttpConnection.php';
 require_once 'RepositoryException.php';
-
-/**
- * The general interface for a RepositoryConfig object.
- */
-interface RepositoryConfigInterface {
-  /**
-   * Simple constructor defintion for the repository
-   */
-  function __construct($url, $username, $password);
-}
 
 /**
  * Specific RepositoryConfig implementation that extends the CurlConnection

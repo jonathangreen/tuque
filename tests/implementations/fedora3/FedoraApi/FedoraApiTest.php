@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * A set of test classes that test the FedoraApi.php file
+ * A set of test classes that test the implementations/fedora3/FedoraApi.php file
  */
 
-require_once 'FedoraApi.php';
-require_once 'FedoraApiSerializer.php';
-require_once 'TestHelpers.php';
-require_once 'FedoraDate.php';
+require_once 'implementations/fedora3/FedoraApi.php';
+require_once 'implementations/fedora3/FedoraApiSerializer.php';
+require_once 'tests/TestHelpers.php';
+require_once 'implementations/fedora3/FedoraDate.php';
 
 class FedoraApiIngestTest extends PHPUnit_Framework_TestCase {
   protected $pids = array();

@@ -10,7 +10,7 @@
  */
 
 require_once 'RepositoryException.php';
-require_once 'RepositoryConnection.php';
+require_once 'implementations/fedora3/RepositoryConnection.php';
 
 /**
  * This is a simple class that brings FedoraApiM and FedoraApiA together.

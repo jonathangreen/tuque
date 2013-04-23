@@ -1,5 +1,5 @@
 <?php
-require_once "FedoraRelationships.php";
+require_once "implementations/fedora3/FedoraRelationships.php";
 /**
  * @todo pull more tests out of tjhe microservices version of these functions
  *  to make sure we handle more cases.

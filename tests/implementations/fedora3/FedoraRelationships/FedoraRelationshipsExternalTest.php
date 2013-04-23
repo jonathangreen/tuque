@@ -1,5 +1,5 @@
 <?php
-require_once "FedoraRelationships.php";
+require_once "implementations/fedora3/FedoraRelationships.php";
 
 class FedoraRelationshipsExternalTest extends PHPUnit_Framework_TestCase {
 

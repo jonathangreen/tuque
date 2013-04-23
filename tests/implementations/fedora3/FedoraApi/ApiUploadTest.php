@@ -1,5 +1,5 @@
 <?php
-require_once 'TestHelpers.php';
+require_once 'tests/TestHelpers.php';
 
 class UploadTest extends PHPUnit_Framework_TestCase {
 

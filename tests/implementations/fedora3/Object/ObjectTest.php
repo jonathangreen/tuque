@@ -1,11 +1,11 @@
 <?php
 
-require_once 'FedoraApi.php';
-require_once 'FedoraApiSerializer.php';
-require_once 'Object.php';
-require_once 'Repository.php';
+require_once 'implementations/fedora3/FedoraApi.php';
+require_once 'implementations/fedora3/FedoraApiSerializer.php';
+require_once 'implementations/fedora3/Object.php';
+require_once 'implementations/fedora3/Repository.php';
 require_once 'Cache.php';
-require_once 'TestHelpers.php';
+require_once 'tests/TestHelpers.php';
 
 class ObjectTest extends PHPUnit_Framework_TestCase {
 
