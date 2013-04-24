@@ -308,7 +308,7 @@ class FedoraApiA {
 
     $this->connection->addParam($request, $seperator, 'asOfDateTime', $as_of_date_time);
 
-    $response = $this->connection->getRequest($request, FALSE, $file);
+    $response = $this->connection->getRequest($request, array('file' => $file));
     $response = $this->serializer->getDatastreamDissemination($response, $file);
     return $response;
   }

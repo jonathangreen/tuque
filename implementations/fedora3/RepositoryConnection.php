@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * This file contains the implementation of a connection to Fedora. 
+ * This file contains the implementation of a connection to Fedora.
  */
 
 require_once 'RepositoryConfigInterface.php';
@@ -108,24 +108,11 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
   }
 
   /**
-   * Do a get request.
-   *
-   * @param string $url
-   *   The URL relative to the fedora path to use.
-   * @param string $headers_only
-   *   Returns only the headers
-   * @param string $file
-   *   The filename to output the request to. If this is set then no headers
-   *   will be returned.
-   *
-   * @return array
-   *   The contents of the get request
-   *
    * @see CurlConnection::getRequest()
    */
-  public function getRequest($url, $headers_only = false, $file = NULL) {
+  public function getRequest($url, $options = array()){
     try {
-      return parent::getRequest($this->buildUrl($url), $headers_only, $file);
+      return parent::getRequest($this->buildUrl($url), $options);
     }
     catch (HttpConnectionException $e) {
       $this->parseFedoraExceptions($e);
