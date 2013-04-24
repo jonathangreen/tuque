@@ -407,6 +407,12 @@ abstract class AbstractFedoraObject extends AbstractObject {
         // encountered when attempting to purge and then immediately replace
         // a RELS-EXT datastream in order to switch control groups.
         catch (RepositoryException $e) {
+          watchdog('tuque',
+                   "Exception getting models from RELS-EXT.\nCode: @code\nMessage: @msg",
+                   array("@code" => $e->getCode(),
+                         "@msg" => $e->getMessage()),
+                   WATCHDOG_ERROR
+          );
           return $models;
           break;
         }
