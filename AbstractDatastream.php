@@ -10,7 +10,7 @@ require_once 'MagicProperty.php';
 /**
  * This abstract class can be overriden by anything implementing a datastream.
  */
-abstract class AbstractDatastream extends MagicProperty {
+abstract class AbstractDatastream extends MagicProperty implements Countable, ArrayAccess, IteratorAggregate {
 
   /**
    * This will set the state of the datastream to deleted.
@@ -186,5 +186,142 @@ abstract class AbstractDatastream extends MagicProperty {
     unset($this->url);
     unset($this->location);
     unset($this->logMessage);
+  }
+}
+
+/**
+ * This is a decorator class menat to the applied to imeplmentations of the
+ * AbstractDatastream class. This allows other programs to decorate instances
+ * of AbstractDatastreams.
+ */
+class DatastreamDecorator extends AbstractDatastream {
+
+  /**
+   * The datastream being decorated.
+   * @var AbstractDatastream
+   */
+  protected $datastream;
+
+  /**
+   * Constructor for the datastream decorator.
+   *
+   * @param AbstractDatastream $datastream
+   *   The datastream to be decorated.
+   */
+  public function __construct(AbstractDatastream $datastream) {
+    parent::__construct();
+    $this->datastream = $datastream;
+  }
+
+  /**
+   * @see http://php.net/manual/en/language.oop5.overloading.php
+   */
+  public function __get($name) {
+    return $this->datastream->$name;
+  }
+
+  /**
+   * @see http://php.net/manual/en/language.oop5.overloading.php
+   */
+  public function __isset($name) {
+    return isset($this->datastream->$name);
+  }
+
+  /**
+   * @see http://php.net/manual/en/language.oop5.overloading.php
+   */
+  public function __set($name, $value) {
+    $this->datastream->$name = $value;
+  }
+
+  /**
+   * @see http://php.net/manual/en/language.oop5.overloading.php
+   */
+  public function __unset($name) {
+    unset($this->datastream->$name);
+  }
+
+  /**
+   * @see http://php.net/manual/en/language.oop5.overloading.php
+   */
+  public function __call($method, $arguments) {
+    return call_user_func_array(array($this->datastream, $method), $arguments);
+  }
+
+  /**
+   * @see AbstractDatastream::delete()
+   */
+  public function delete() {
+    return $this->datastream->delete();
+  }
+
+  /**
+   * @see AbstractDatastream::setContentFromFile()
+   */
+  public function setContentFromFile($file) {
+    return $this->datastream->setContentFromFile($file);
+  }
+
+  /**
+   * @see AbstractDatastream::setContentFromUrl()
+   */
+  public function setContentFromUrl($url) {
+    return $this->datastream->setContentFromUrl($url);
+  }
+
+  /**
+   * @see AbstractDatastream::setContentFromString()
+   */
+  public function setContentFromString($string) {
+    return $this->datastream->setContentFromString($string);
+  }
+
+  /**
+   * @see AbstractDatastream::getContent()
+   */
+  public function getContent($file) {
+    return $this->datastream->getContent($file);
+  }
+
+  /**
+   * @see AbstractObject::delete()
+   */
+  public function count() {
+    return $this->datastream->count();
+  }
+
+  /**
+   * @see ArrayAccess::offsetExists
+   */
+  public function offsetExists($offset) {
+    return $this->datastream->offsetExists($offset);
+  }
+
+  /**
+   * @see ArrayAccess::offsetGet
+   */
+  public function offsetGet($offset) {
+    return $this->datastream->offsetGet($offset);
+  }
+
+  /**
+   * @see ArrayAccess::offsetSet
+   */
+  public function offsetSet($offset, $value) {
+    return $this->datastream->offsetSet($offset, $value);
+  }
+
+  /**
+   * @see ArrayAccess::offsetUnset
+   */
+  public function offsetUnset($offset) {
+    return $this->datastream->offsetUnset($offset);
+  }
+
+  /**
+   * IteratorAggregate::getIterator()
+   */
+  public function getIterator() {
+    return $this->datastream->getIterator();
   }
 }

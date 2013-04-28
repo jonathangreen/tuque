@@ -1,10 +1,9 @@
 <?php
 
 require_once 'RepositoryFactory.php';
-require_once 'tests/TestHelpers.php';
-require_once 'tests/implementations/fedora3/Object/ObjectTest.php';
+require_once 'tests/implementations/ObjectTestBase.php';
 
-class NewObjectTest extends ObjectTest {
+class NewObjectTest extends ObjectTestBase {
 
   protected function setUp() {
     $this->repository = RepositoryFactory::getRepository('fedora3', new RepositoryConfig(FEDORAURL, FEDORAUSER, FEDORAPASS));

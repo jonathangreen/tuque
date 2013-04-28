@@ -110,3 +110,102 @@ abstract class AbstractRepository extends MagicProperty {
   abstract public function getNextIdentifier($namespace = NULL, $create_uuid = FALSE, $number_of_identifiers = 1);
 
 }
+
+/**
+ * This is a decorator class meant for implementations of AbstractRepository.
+ */
+class RepositoryDecorator extends AbstractRepository {
+
+  /**
+   * This is the repository this is being decorated.
+   * @var type AbstractRepository.
+   */
+  protected $repository;
+
+  /**
+   * Constructor.
+   *
+   * @param AbstractRepository $repository
+   *   The repository that is being decorated.
+   */
+  public function __construct(AbstractRepository $repository) {
+    $this->repository = $repository;
+  }
+
+  /**
+   * @see http://php.net/manual/en/language.oop5.overloading.php
+   */
+  public function __get($name) {
+    return $this->repository->$name;
+  }
+
+  /**
+   * @see http://php.net/manual/en/language.oop5.overloading.php
+   */
+  public function __isset($name) {
+    return isset($this->repository->$name);
+  }
+
+  /**
+   * @see http://php.net/manual/en/language.oop5.overloading.php
+   */
+  public function __set($name, $value) {
+    $this->repository->$name = $value;
+  }
+
+  /**
+   * @see http://php.net/manual/en/language.oop5.overloading.php
+   */
+  public function __unset($name) {
+    unset($this->repository->$name);
+  }
+
+  /**
+   * @see http://php.net/manual/en/language.oop5.overloading.php
+   */
+  public function __call($method, $arguments) {
+    return call_user_func_array(array($this->repository, $method), $arguments);
+  }
+
+  /**
+   * @see AbstractRepository::constructObject()
+   */
+  public function constructObject($id = NULL, $create_uuid = FALSE) {
+    return $this->repository->constructObject($id, $create_uuid);
+  }
+
+  /**
+   * @see AbstractRepository::ingestObject()
+   */
+  public function ingestObject(NewFedoraObject &$object) {
+    return $this->repository->ingestObject($object);
+  }
+
+  /**
+   * @see AbstractRepository::getObject()
+   */
+  public function getObject($id) {
+    return $this->repository->getObject($id);
+  }
+
+  /**
+   * @see AbstractRepository::purgeObject()
+   */
+  public function purgeObject($id) {
+    return $this->repository->purgeObject($id);
+  }
+
+  /**
+   * @see AbstractRepository::findObjects()
+   */
+  public function findObjects(array $search) {
+    return $this->repository->findObjects($search);
+  }
+
+  /**
+   * @see AbstractRepository::getNextIdentifier()
+   */
+  public function getNextIdentifier($namespace = NULL, $create_uuid = FALSE, $number_of_identifiers = 1) {
+    return $this->repository->getNextIdentifier($namespace, $create_uuid, $number_of_identifiers);
+  }
+}

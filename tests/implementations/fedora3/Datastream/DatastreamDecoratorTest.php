@@ -2,7 +2,7 @@
 
 require_once 'tests/implementations/DatastreamTestBase.php';
 
-class DatastreamTest extends DatastreamTestBase {
+class DatastreamDecoratorTest extends DatastreamTestBase {
 
   protected function setUp() {
     $this->repository = RepositoryFactory::getRepository('fedora3', new RepositoryConfig(FEDORAURL, FEDORAUSER, FEDORAPASS));
@@ -25,10 +25,10 @@ class DatastreamTest extends DatastreamTestBase {
     $this->api->m->addDatastream($this->testPid, $this->testDsidE, 'url', 'http://test.com.fop', array('controlGroup' => 'E'));
     $this->api->m->addDatastream($this->testPid, $this->testDsidX, 'string', $this->testDsContents, array('controlGroup' => 'X'));
     $this->object = new FedoraObject($this->testPid, $this->repository);
-    $this->ds = new FedoraDatastream($this->testDsid, $this->object, $this->repository);
-    $this->e = new FedoraDatastream($this->testDsidE, $this->object, $this->repository);
-    $this->r = new FedoraDatastream($this->testDsidR, $this->object, $this->repository);
-    $this->x = new FedoraDatastream($this->testDsidX, $this->object, $this->repository);
+    $this->ds = new DatastreamDecorator(new FedoraDatastream($this->testDsid, $this->object, $this->repository));
+    $this->e = new DatastreamDecorator(new FedoraDatastream($this->testDsidE, $this->object, $this->repository));
+    $this->r = new DatastreamDecorator(new FedoraDatastream($this->testDsidR, $this->object, $this->repository));
+    $this->x = new DatastreamDecorator(new FedoraDatastream($this->testDsidX, $this->object, $this->repository));
   }
 
   protected function tearDown() {

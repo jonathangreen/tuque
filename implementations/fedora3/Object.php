@@ -577,8 +577,8 @@ class FedoraObject extends AbstractFedoraObject {
    */
   protected function stateMagicPropertySet($value) {
     if ($this->objectProfile['objState'] != $value) {
-      $this->modifyObject(array('state' => $value));
       parent::stateMagicProperty('set', $value);
+      $this->modifyObject(array('state' => $this->objectProfile['objState']));
     }
   }
 

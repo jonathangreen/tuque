@@ -220,6 +220,48 @@ abstract class AbstractFedoraDatastream extends AbstractDatastream {
     }
   }
 
+  /**
+   * @see Countable::count
+   */
+  public function count() {
+    return 1;
+  }
+
+  /**
+   * @see ArrayAccess::offsetExists
+   */
+  public function offsetExists($offset) {
+    return $offset == 0 ? TRUE : FALSE;
+  }
+
+  /**
+   * @see ArrayAccess::offsetGet
+   */
+  public function offsetGet($offset) {
+    return $offset == 0 ? $this : NULL;
+  }
+
+  /**
+   * @see ArrayAccess::offsetSet
+   */
+  public function offsetSet($offset, $value) {
+    trigger_error("Datastream versions are read only and cannot be set.", E_USER_WARNING);
+  }
+
+  /**
+   * @see ArrayAccess::offsetUnset
+   */
+  public function offsetUnset($offset) {
+    trigger_error("Cannot unset last datastream version.", E_USER_WARNING);
+  }
+
+  /**
+   * IteratorAggregate::getIterator()
+   */
+  public function getIterator() {
+    $history = array($this);
+    return new ArrayIterator($history);
+  }
 }
 
 /**
@@ -986,7 +1028,7 @@ class FedoraDatastreamVersion extends AbstractExistingFedoraDatastream {
  * These functions respect datastream locking. If a datastream changes under
  * your feet then an exception will be raised.
  */
-class FedoraDatastream extends AbstractExistingFedoraDatastream implements Countable, ArrayAccess, IteratorAggregate {
+class FedoraDatastream extends AbstractExistingFedoraDatastream {
 
   /**
    * An array containing the datastream history.
@@ -1514,13 +1556,6 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
   public function offsetGet($offset) {
     $this->populateDatastreamHistory();
     return new $this->fedoraDatastreamVersionClass($this->id, $this->datastreamHistory[$offset], $this, $this->parent, $this->repository);
-  }
-
-  /**
-   * @see ArrayAccess::offsetSet
-   */
-  public function offsetSet($offset, $value) {
-    trigger_error("Datastream versions are read only and cannot be set.", E_USER_WARNING);
   }
 
   /**
