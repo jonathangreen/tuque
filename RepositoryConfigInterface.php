@@ -14,3 +14,17 @@ interface RepositoryConfigInterface {
    */
   function __construct($url, $username, $password);
 }
+
+/**
+ * Implementation of a repository config.
+ */
+class RepositoryConfig implements RepositoryConfigInterface{
+  /**
+   * Simple constructor defintion for the repository
+   */
+  function __construct($url, $username = NULL, $password = NULL){
+    $this->url = $url;
+    $this->username = $username;
+    $this->password = $password;
+  }
+}

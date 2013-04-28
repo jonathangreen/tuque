@@ -18,7 +18,7 @@ require_once 'RepositoryException.php';
  * fedora URL to. This makes is a bit easier to use. It also makes sure that
  * we always send usernames and passwords.
  */
-class RepositoryConnection extends CurlConnection implements RepositoryConfigInterface {
+class RepositoryConnection extends CurlConnection {
 
   public $url;
   public $username;
@@ -34,11 +34,12 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
    * @param string $password
    *   The password to connect with.
    */
-  function __construct($url = 'http://localhost:8080/fedora', $username = NULL, $password = NULL) {
+  function __construct(RepositoryConfigInterface $config) {
+
     // Make sure the url doesn't have a trailing slash.
-    $this->url = rtrim($url, "/");
-    $this->username = $username;
-    $this->password = $password;
+    $this->url = rtrim($config->url, "/");
+    $this->username = $config->username;
+    $this->password = $config->password;
 
     try {
       parent::__construct();
