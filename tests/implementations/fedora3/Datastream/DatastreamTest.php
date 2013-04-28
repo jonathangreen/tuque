@@ -194,6 +194,8 @@ class DatastreamTest extends PHPUnit_Framework_TestCase {
   }
 
   public function testContentSetUrl() {
+    // @todo fix.
+    $this->markTestIncomplete('We need a publically accessable place for these files.');
     $temp = tempnam(sys_get_temp_dir(), 'tuque');
     $this->ds->setContentFromUrl('http://hudson.islandora.ca/files/superlative.png');
     $actual = file_get_contents('http://hudson.islandora.ca/files/superlative.png');
@@ -234,6 +236,8 @@ class DatastreamTest extends PHPUnit_Framework_TestCase {
   }
 
   public function testContentXFromUrl() {
+    // @todo fix.
+    $this->markTestIncomplete('We need a publically accessable place for these files.');
     $url = 'http://hudson.islandora.ca/files/xml.xml';
     $data = <<<foo
 <woo>
