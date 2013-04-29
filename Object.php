@@ -398,24 +398,7 @@ abstract class AbstractFedoraObject extends AbstractObject {
       case 'get':
         $models = array();
 
-        try {
-          $rels_models = $this->relationships->get(FEDORA_MODEL_URI, 'hasModel');
-        }
-        // Throwing a RepositoryException here means there was an issue
-        // retrieving the RELS-EXT content from Fedora.  Returning an empty
-        // array as a reasonable default value for this edge case.  It was
-        // encountered when attempting to purge and then immediately replace
-        // a RELS-EXT datastream in order to switch control groups.
-        catch (RepositoryException $e) {
-          watchdog('tuque',
-                   "Exception getting models from RELS-EXT.\nCode: @code\nMessage: @msg",
-                   array("@code" => $e->getCode(),
-                         "@msg" => $e->getMessage()),
-                   WATCHDOG_ERROR
-          );
-          return $models;
-          break;
-        }
+        $rels_models = $this->relationships->get(FEDORA_MODEL_URI, 'hasModel');
 
         foreach ($rels_models as $model) {
           $models[] = $model['object']['value'];
@@ -722,7 +705,7 @@ class FedoraObject extends AbstractFedoraObject {
    * Purge a datastream.
    *
    * @param string $id
-   *   The id of hte datastream to purge.
+   *   The id of the datastream to purge.
    *
    * @return boolean
    *   Returns TRUE on success and FALSE on failure.
