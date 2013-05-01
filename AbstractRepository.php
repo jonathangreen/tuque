@@ -43,7 +43,7 @@ abstract class AbstractRepository extends MagicProperty {
    * @return AbstractObject
    *   The ingested abstract object.
    */
-  abstract public function ingestObject(NewFedoraObject &$object);
+  abstract public function ingestObject(AbstractObject &$object);
 
   /**
    * Gets a object from the repository.
@@ -177,7 +177,7 @@ class RepositoryDecorator extends AbstractRepository {
   /**
    * @see AbstractRepository::ingestObject()
    */
-  public function ingestObject(NewFedoraObject &$object) {
+  public function ingestObject(AbstractObject &$object) {
     return $this->repository->ingestObject($object);
   }
 

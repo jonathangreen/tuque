@@ -294,7 +294,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
    */
   public function __construct($id, $control_group, AbstractFedoraObject $object, FedoraRepository $repository) {
     parent::__construct($id, $object, $repository);
-
+    $this->ingested = FALSE;
     $group = $this->validateControlGroup($control_group);
 
     if ($group === FALSE) {
@@ -783,6 +783,7 @@ abstract class AbstractExistingFedoraDatastream extends AbstractFedoraDatastream
    */
   public function __construct($id, FedoraObject $object, FedoraRepository $repository) {
     parent::__construct($id, $object, $repository);
+    $this->ingested = TRUE;
   }
 
   /**

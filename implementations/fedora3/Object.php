@@ -303,6 +303,7 @@ class NewFedoraObject extends AbstractFedoraObject {
    */
   public function __construct($id, FedoraRepository $repository) {
     parent::__construct($id, $repository);
+    $this->ingested = FALSE;
     $this->objectProfile = array();
     $this->objectProfile['objState'] = 'A';
     $this->objectProfile['objOwnerId'] = $this->repository->api->connection->username;
@@ -350,7 +351,7 @@ class NewFedoraObject extends AbstractFedoraObject {
    * This is necessary to avoid the possibility of changing a datastream for
    * another object, when copying datastreams between objects.
    */
-  private function createNewDatastreamCopy(AbstractFedoraDatastream &$datastream) {
+  private function createNewDatastreamCopy(AbstractDatastream &$datastream) {
     $old_datastream = $datastream;
 
     $datastream = $this->constructDatastream($old_datastream->id, $old_datastream->controlGroup);
@@ -390,7 +391,7 @@ class NewFedoraObject extends AbstractFedoraObject {
    */
   public function ingestDatastream(&$ds) {
     if (!isset($this->datastreams[$ds->id])) {
-      if (!($ds instanceof NewFedoraDatastream)) {
+      if ($ds->ingested) {
         // Create a NewFedoraDatastream copy.
         $this->createNewDatastreamCopy($ds);
       }
@@ -501,6 +502,7 @@ class FedoraObject extends AbstractFedoraObject {
   public function __construct($id, FedoraRepository $repository) {
     parent::__construct($id, $repository);
     $this->refresh();
+    $this->ingested = TRUE;
   }
 
   /**
@@ -673,10 +675,7 @@ class FedoraObject extends AbstractFedoraObject {
         'formatURI' => $ds->format,
         'checksumType' => $ds->checksumType,
         'mimeType' => $ds->mimetype,
-        // Assume NewFedoraObjects will have a log message set.
-        'logMessage' => ($ds instanceof NewFedoraObject) ?
-          $ds->logMessage:
-          "Copied datastream from {$ds->parent->id}.",
+        'logMessage' => $ds->logMessage,
       );
       $temp = tempnam(sys_get_temp_dir(), 'tuque');
       $return = $ds->getContent($temp);

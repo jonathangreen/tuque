@@ -174,7 +174,7 @@ class FedoraRepository extends AbstractRepository {
    * @see AbstractRepository::ingestObject()
    * @todo error handling
    */
-  public function ingestObject(NewFedoraObject &$object) {
+  public function ingestObject(AbstractObject &$object) {
     // We want all the managed datastreams to be uploaded.
     foreach ($object as $ds) {
       if ($ds->controlGroup == 'M') {

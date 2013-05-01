@@ -85,6 +85,12 @@ abstract class AbstractObject extends MagicProperty implements Countable, ArrayA
    * @var array
    */
   public $models;
+  /**
+   * Boolean specifying if the object has been ingested into the repository.
+   *
+   * @var boolean
+   */
+  public $ingested;
 
   /**
    * Set the state of the object to deleted.
@@ -188,6 +194,12 @@ class ObjectDecorator extends AbstractObject {
   public function __construct(AbstractObject $object) {
     parent::__construct();
     $this->object = $object;
+    unset($this->ingested);
+  }
+
+  public function __wakeup() {
+    parent::__wakeup();
+    unset($this->ingested);
   }
 
   /**

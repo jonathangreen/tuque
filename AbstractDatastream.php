@@ -149,6 +149,13 @@ abstract class AbstractDatastream extends MagicProperty implements Countable, Ar
    * @var string
    */
   public $logMessage;
+  /**
+   * Boolean specifying if the datastream has been ingested into the repository.
+   *
+   * @var boolean
+   */
+  public $ingested;
+
 
   /**
    * Unsets public members.
@@ -211,6 +218,12 @@ class DatastreamDecorator extends AbstractDatastream {
   public function __construct(AbstractDatastream $datastream) {
     parent::__construct();
     $this->datastream = $datastream;
+    unset($this->ingested);
+  }
+
+  public function __wakeup() {
+    parent::__wakeup();
+    unset($this->ingested);
   }
 
   /**
