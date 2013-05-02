@@ -74,6 +74,8 @@ class FedoraRelationshipsExternalTest extends PHPUnit_Framework_TestCase {
 
   function testConvertRelsExtToManaged() {
     $this->assertTrue($this->object->purgeDatastream('RELS-EXT'));
+    $model = $this->object->relationships->get(FEDORA_MODEL_URI, 'hasModel');
+    $this->assertTrue(empty($model));
     $ds = $this->object->constructDatastream('RELS-EXT', 'M');
     $this->assertTrue($this->object->ingestDatastream($ds));
     $this->assertFalse(empty($this->object['RELS-EXT']));
