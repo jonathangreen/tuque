@@ -179,4 +179,3 @@ class CopyDatastreamTest extends PHPUnit_Framework_TestCase {
     }
   }
 }
-

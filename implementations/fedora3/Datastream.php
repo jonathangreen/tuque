@@ -98,7 +98,7 @@ abstract class AbstractFedoraDatastream extends AbstractDatastream {
    * @return boolean
    *   TRUE or FALSE
    */
-  protected function isDatastreamProperySet($actual, $unsetval) {
+  protected function isDatastreamPropertySet($actual, $unsetval) {
     if ($actual === $unsetval) {
       return FALSE;
     }
@@ -430,7 +430,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
         break;
 
       case 'isset':
-        return $this->isDatastreamProperySet($this->datastreamInfo['dsLabel'], '');
+        return $this->isDatastreamPropertySet($this->datastreamInfo['dsLabel'], '');
         break;
 
       case 'set':
@@ -509,7 +509,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
         break;
 
       case 'isset':
-        return $this->isDatastreamProperySet($this->datastreamInfo['dsFormatURI'], '');
+        return $this->isDatastreamPropertySet($this->datastreamInfo['dsFormatURI'], '');
         break;
 
       case 'set':
@@ -533,7 +533,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
         break;
 
       case 'isset':
-        return $this->isDatastreamProperySet($this->datastreamInfo['dsChecksum'], 'none');
+        return $this->isDatastreamPropertySet($this->datastreamInfo['dsChecksum'], 'none');
         break;
 
       case 'set':
@@ -555,7 +555,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
         break;
 
       case 'isset':
-        return $this->isDatastreamProperySet($this->datastreamInfo['dsChecksumType'], 'DISABLED');
+        return $this->isDatastreamPropertySet($this->datastreamInfo['dsChecksumType'], 'DISABLED');
         break;
 
       case 'set':
@@ -590,7 +590,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
         break;
 
       case 'isset':
-        return $this->isDatastreamProperySet($this->datastreamInfo['content']['content'], ' ');
+        return $this->isDatastreamPropertySet($this->datastreamInfo['content']['content'], ' ');
         break;
 
       case 'set':
@@ -666,7 +666,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
         break;
 
       case 'isset':
-        return $this->isDatastreamProperySet($this->datastreamInfo['dsLogMessage'], '');
+        return $this->isDatastreamPropertySet($this->datastreamInfo['dsLogMessage'], '');
         break;
 
       case 'set':
@@ -870,7 +870,7 @@ class FedoraDatastreamVersion extends AbstractExistingFedoraDatastream {
 
   /**
    * Since this whole class is read only, this is a general implementation of
-   * the MagicPropery function that is ready only.
+   * the MagicProperty function that is ready only.
    */
   protected function generalReadOnly($offset, $unset_val, $function, $value) {
     switch ($function) {
@@ -884,7 +884,7 @@ class FedoraDatastreamVersion extends AbstractExistingFedoraDatastream {
           return TRUE;
         }
         else {
-          return $this->isDatastreamProperySet($this->datastreamInfo[$offset], $unset_val);
+          return $this->isDatastreamPropertySet($this->datastreamInfo[$offset], $unset_val);
         }
         break;
 
@@ -967,7 +967,7 @@ class FedoraDatastreamVersion extends AbstractExistingFedoraDatastream {
         break;
 
       case 'isset':
-        return $this->isDatastreamProperySet($this->content, '');
+        return $this->isDatastreamPropertySet($this->content, '');
         break;
 
       case 'set':
@@ -1180,7 +1180,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream {
         if (!isset($this->datastreamInfo['dsLabel'])) {
           $this->populateDatastreamInfo();
         }
-        return $this->isDatastreamProperySet($this->datastreamInfo['dsLabel'], '');
+        return $this->isDatastreamPropertySet($this->datastreamInfo['dsLabel'], '');
         break;
 
       case 'set':
@@ -1273,7 +1273,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream {
         if (!isset($this->datastreamInfo['dsFormatURI'])) {
           $this->populateDatastreamInfo();
         }
-        return $this->isDatastreamProperySet($this->datastreamInfo['dsFormatURI'], '');
+        return $this->isDatastreamPropertySet($this->datastreamInfo['dsFormatURI'], '');
         break;
 
       case 'set':
@@ -1326,7 +1326,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream {
         if (!isset($this->datastreamInfo['dsChecksum'])) {
           $this->populateDatastreamInfo();
         }
-        return $this->isDatastreamProperySet($this->datastreamInfo['dsChecksum'], 'none');
+        return $this->isDatastreamPropertySet($this->datastreamInfo['dsChecksum'], 'none');
         break;
 
       case 'set':
@@ -1352,7 +1352,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream {
         if (!isset($this->datastreamInfo['dsChecksumType'])) {
           $this->populateDatastreamInfo();
         }
-        return $this->isDatastreamProperySet($this->datastreamInfo['dsChecksumType'], 'DISABLED');
+        return $this->isDatastreamPropertySet($this->datastreamInfo['dsChecksumType'], 'DISABLED');
         break;
 
       case 'set':
@@ -1405,7 +1405,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream {
         break;
 
       case 'isset':
-        return $this->isDatastreamProperySet($this->getDatastreamContent(), '');
+        return $this->isDatastreamPropertySet($this->getDatastreamContent(), '');
         break;
 
       case 'set':
@@ -1466,35 +1466,6 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream {
 
       case 'unset':
         trigger_error("Cannot unset the required datastream->url property.", E_USER_WARNING);
-        break;
-    }
-  }
-
-  /**
-   * @see AbstractDatastream::logMessage
-   */
-  protected function logMessageMagicProperty($function, $value) {
-    switch ($function) {
-      case 'get':
-        if (!isset($this->datastreamInfo['dsLogMessage'])) {
-          $this->populateDatastreamInfo();
-        }
-        return $this->datastreamInfo['dsLogMessage'];
-        break;
-
-      case 'isset':
-        if (!isset($this->datastreamInfo['dsLogMessage'])) {
-          $this->populateDatastreamInfo();
-        }
-        return $this->isDatastreamProperySet($this->datastreamInfo['dsLogMessage'], '');
-        break;
-
-      case 'set':
-        $this->modifyDatastream(array('dsLogMessage' => $value));
-        break;
-
-      case 'unset':
-        $this->modifyDatastream(array('dsLogMessage' => ''));
         break;
     }
   }
@@ -1592,4 +1563,3 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream {
     return $this->getDatastreamContent(NULL, $file);
   }
 }
-
