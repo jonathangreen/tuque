@@ -15,7 +15,7 @@ class FoxmlDocument extends DOMDocument {
   protected $root;
   protected $object;
 
-  public function __construct(NewFedoraObject $object) {
+  public function __construct(AbstractObject $object) {
     parent::__construct("1.0", "UTF-8"); // DomDocument
     $this->formatOutput = TRUE;
     $this->preserveWhiteSpace = FALSE;
@@ -140,7 +140,7 @@ class FoxmlDocument extends DOMDocument {
    */
   public function createDocumentDatastreams() {
     foreach ($this->object as $ds) {
-      switch($ds->controlGroup) {
+      switch ($ds->controlGroup) {
         case 'X':
           $this->createInlineDocumentDatastream($ds);
           break;
@@ -176,7 +176,7 @@ class FoxmlDocument extends DOMDocument {
     $simple_dom = simplexml_import_dom($xml_dom);
     $namespaces = $simple_dom->getDocNamespaces(TRUE);
     foreach ($namespaces as $prefix => $uri) {
-      if($prefix) {
+      if ($prefix) {
         $child->setAttributeNS(self::xmlns, "xmlns:$prefix", $uri);
       }
     }
