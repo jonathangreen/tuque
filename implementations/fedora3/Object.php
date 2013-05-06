@@ -675,7 +675,7 @@ class FedoraObject extends AbstractFedoraObject {
         'formatURI' => $ds->format,
         'checksumType' => $ds->checksumType,
         'mimeType' => $ds->mimetype,
-        'logMessage' => $ds->logMessage,
+        'logMessage' => isset($ds->logMessage) ? $ds->logMessage : "Copied datastream from {$ds->parent->id}.",
       );
       $temp = tempnam(sys_get_temp_dir(), 'tuque');
       $return = $ds->getContent($temp);
@@ -764,4 +764,3 @@ class FedoraObject extends AbstractFedoraObject {
   }
 
 }
-
