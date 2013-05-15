@@ -32,7 +32,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     $this->apim = new FedoraApiM($connection, $serializer);
     $this->apia = new FedoraApiA($connection, $serializer);
 
-    if(self::$purge == FALSE) {
+    if (self::$purge == FALSE) {
       $this->fixtures = self::$saved;
       return;
     }
@@ -258,7 +258,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
 
   protected function tearDown()
   {
-    if(self::$purge) {
+    if (self::$purge) {
       foreach ($this->fixtures as $key => $value) {
         try {
           $this->apim->purgeObject($key);
@@ -331,7 +331,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
     $namespace = $this->namespace;
     $result = $this->apia->findObjects('query', "pid~{$namespace}:*", NULL, $this->display);
     $this->assertEquals(2,count($result['results']));
-    foreach($result['results'] as $results) {
+    foreach ($result['results'] as $results) {
       $this->assertArrayHasKey('mDate', $results);
       unset($results['mDate']);
       unset($results['identifier']);
@@ -341,14 +341,14 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
 
   function testFindObjectsQueryEquals() {
     $display = array_diff($this->display, array('mDate'));
-    foreach($this->fixtures as $pid => $fixtures) {
+    foreach ($this->fixtures as $pid => $fixtures) {
       $data = $fixtures['findObjects'];
-      foreach($data as $key => $array) {
-        if(!is_array($array)) {
+      foreach ($data as $key => $array) {
+        if (!is_array($array)) {
           $array = array($array);
         }
-        foreach($array as $value) {
-          switch($key) {
+        foreach ($array as $value) {
+          switch ($key) {
             case 'cDate':
             case 'mDate':
             case 'dcmDate':
@@ -411,7 +411,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
       // to test them individually.
       $this->assertArrayHasKey('objModels', $actual);
       $this->assertEquals(count($expected['objModels']), count($actual['objModels']));
-      foreach($actual['objModels'] as $model) {
+      foreach ($actual['objModels'] as $model) {
         $this->assertTrue(in_array($model, $actual['objModels']));
       }
       unset($actual['objModels']);
@@ -424,7 +424,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
 
   function testListDatastreams() {
     foreach ($this->fixtures as $pid => $fixture) {
-      foreach($fixture['getObjectHistory'] as $datetime) {
+      foreach ($fixture['getObjectHistory'] as $datetime) {
         $actual = $this->apia->listDatastreams($pid, $datetime);
         $this->assertEquals($fixture['listDatastreams'][$datetime], $actual);
       }
@@ -461,8 +461,8 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
       $listDatastreams = $fixture['listDatastreams'];
 
       // Do a test with the data we have.
-      foreach($listDatastreams as $time => $datastreams) {
-        foreach($datastreams as $dsid => $data) {
+      foreach ($listDatastreams as $time => $datastreams) {
+        foreach ($datastreams as $dsid => $data) {
           $actual = $this->apim->getDatastream($pid, $dsid, array('asOfDateTime' => $time));
           $this->assertEquals($data['label'], $actual['dsLabel']);
           $this->assertEquals($data['mimetype'], $actual['dsMIME']);
@@ -483,7 +483,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
       }
 
       // Test with the more detailed current data.
-      foreach($fixture['dsids'] as $dsid => $data) {
+      foreach ($fixture['dsids'] as $dsid => $data) {
         $actual = $this->apim->getDatastream($pid, $dsid);
         $this->assertEquals($data['data'], $actual);
       }
@@ -583,12 +583,12 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
    */
   function testModifyDatastreamLabel() {
     foreach ($this->fixtures as $pid => $fixture) {
-      foreach($fixture['dsids'] as $dsid => $data) {
+      foreach ($fixture['dsids'] as $dsid => $data) {
         $this->apim->modifyDatastream($pid, $dsid, array('dsLabel' => 'testtesttest'));
         $actual = $this->apim->getDatastream($pid, $dsid);
         $expected = $data['data'];
         $this->assertEquals('testtesttest', $actual['dsLabel']);
-        foreach(array('dsLabel', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+        foreach (array('dsLabel', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
           unset($actual[$unset]);
           unset($expected[$unset]);
         }
@@ -602,13 +602,13 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
    */
   function testModifyDatastreamVersionable() {
     foreach ($this->fixtures as $pid => $fixture) {
-      foreach($fixture['dsids'] as $dsid => $data) {
-        foreach(array(FALSE, TRUE) as $versionable) {
+      foreach ($fixture['dsids'] as $dsid => $data) {
+        foreach (array(FALSE, TRUE) as $versionable) {
           $this->apim->modifyDatastream($pid, $dsid, array('versionable' => $versionable));
           $actual = $this->apim->getDatastream($pid, $dsid);
           $expected = $data['data'];
           $this->assertEquals($versionable ? 'true' : 'false', $actual['dsVersionable']);
-          foreach(array('dsVersionable', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+          foreach (array('dsVersionable', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
             unset($actual[$unset]);
             unset($expected[$unset]);
           }
@@ -641,13 +641,13 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
    */
   function testModifyDatastreamState() {
     foreach ($this->fixtures as $pid => $fixture) {
-      foreach($fixture['dsids'] as $dsid => $data) {
-        foreach(array('I', 'D', 'A') as $state) {
+      foreach ($fixture['dsids'] as $dsid => $data) {
+        foreach (array('I', 'D', 'A') as $state) {
           $this->apim->modifyDatastream($pid, $dsid, array('dsState' => $state));
           $actual = $this->apim->getDatastream($pid, $dsid);
           $expected = $data['data'];
           $this->assertEquals($state, $actual['dsState']);
-          foreach(array('dsState', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+          foreach (array('dsState', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
             unset($actual[$unset]);
             unset($expected[$unset]);
           }
@@ -662,21 +662,21 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
    */
   function testModifyDatastreamChecksum() {
     foreach ($this->fixtures as $pid => $fixture) {
-      foreach($fixture['dsids'] as $dsid => $data) {
-        foreach(array('MD5', 'SHA-1', 'SHA-256', 'SHA-384', 'SHA-512', 'DISABLED') as $type) {
+      foreach ($fixture['dsids'] as $dsid => $data) {
+        foreach (array('MD5', 'SHA-1', 'SHA-256', 'SHA-384', 'SHA-512', 'DISABLED') as $type) {
           $this->apim->modifyDatastream($pid, $dsid, array('checksumType' => $type));
           $actual = $this->apim->getDatastream($pid, $dsid);
           $expected = $data['data'];
           $this->assertEquals($type, $actual['dsChecksumType']);
-          foreach(array('dsChecksumType', 'dsChecksum', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+          foreach (array('dsChecksumType', 'dsChecksum', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
             unset($actual[$unset]);
             unset($expected[$unset]);
           }
           $this->assertEquals($expected, $actual);
 
-          if($actual['dsControlGroup'] == "M") {
+          if ($actual['dsControlGroup'] == "M") {
             $dscontent = $this->apia->getDatastreamDissemination($pid, $dsid);
-            switch($type) {
+            switch ($type) {
               case 'MD5':
                 $hash = hash('md5', $dscontent);
                 break;
@@ -711,12 +711,12 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
    */
   function testModifyDatastreamFormatURI() {
     foreach ($this->fixtures as $pid => $fixture) {
-      foreach($fixture['dsids'] as $dsid => $data) {
+      foreach ($fixture['dsids'] as $dsid => $data) {
         $this->apim->modifyDatastream($pid, $dsid, array('formatURI' => 'testtesttest'));
         $actual = $this->apim->getDatastream($pid, $dsid);
         $expected = $data['data'];
         $this->assertEquals('testtesttest', $actual['dsFormatURI']);
-        foreach(array('dsFormatURI', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+        foreach (array('dsFormatURI', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
           unset($actual[$unset]);
           unset($expected[$unset]);
         }
@@ -730,12 +730,12 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
    */
   function testModifyDatastreamMimeType() {
     foreach ($this->fixtures as $pid => $fixture) {
-      foreach($fixture['dsids'] as $dsid => $data) {
+      foreach ($fixture['dsids'] as $dsid => $data) {
         $this->apim->modifyDatastream($pid, $dsid, array('mimeType' => 'application/super-fucking-cool'));
         $actual = $this->apim->getDatastream($pid, $dsid);
         $expected = $data['data'];
         $this->assertEquals('application/super-fucking-cool', $actual['dsMIME']);
-        foreach(array('dsMIME', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+        foreach (array('dsMIME', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
           unset($actual[$unset]);
           unset($expected[$unset]);
         }
@@ -749,14 +749,14 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
    */
   function testModifyDatastreamAltIds() {
     foreach ($this->fixtures as $pid => $fixture) {
-      foreach($fixture['dsids'] as $dsid => $data) {
+      foreach ($fixture['dsids'] as $dsid => $data) {
         $this->apim->modifyDatastream($pid, $dsid, array('altIDs' => "one two three"));
         $actual = $this->apim->getDatastream($pid, $dsid);
         $expected = $data['data'];
         $this->assertArrayHasKey('dsAltID', $actual);
         $this->assertEquals(array('one', 'two', 'three'), $actual['dsAltID']);
         unset($actual['dsAltID']);
-        foreach(array('dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+        foreach (array('dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
           unset($actual[$unset]);
           unset($expected[$unset]);
         }

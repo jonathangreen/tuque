@@ -404,7 +404,6 @@ class CurlConnection extends HttpConnection {
     }
 
     $info = curl_getinfo(self::$curlContext);
-
     $response = array();
     $response['status'] = $info['http_code'];
     if ($file == NULL) {
