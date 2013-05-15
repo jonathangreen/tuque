@@ -389,7 +389,6 @@ class FedoraRelationships {
 class FedoraRelsExt extends FedoraRelationships {
 
   protected $new = FALSE;
-  protected $initialized = FALSE;
 
   /**
    * Objects Construct!
@@ -414,7 +413,6 @@ class FedoraRelsExt extends FedoraRelationships {
    * delay this as long as possible, in case it never has be be called.
    */
   protected function initializeDatastream() {
-    $this->initialized = TRUE;
     if (isset($this->object['RELS-EXT'])) {
       $ds = $this->object['RELS-EXT'];
     }
@@ -537,7 +535,6 @@ class FedoraRelsExt extends FedoraRelationships {
 class FedoraRelsInt extends FedoraRelationships {
 
   protected $new = FALSE;
-  protected $initialized = FALSE;
   protected $aboutDs;
 
   /**
