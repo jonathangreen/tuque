@@ -67,4 +67,22 @@ class FedoraRelationshipsExternalTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals('hasModel', $rels[0]['predicate']['value']);
     $this->assertEquals('islandora:woot', $rels[0]['object']['value']);
   }
+
+  function testPurge() {
+    $this->assertTrue($this->object->purgeDatastream('RELS-EXT'));
+  }
+
+  function testConvertRelsExtToManaged() {
+    $content = $this->object['RELS-EXT']->content;
+    $this->assertTrue($this->object->purgeDatastream('RELS-EXT'));
+    $model = $this->object->relationships->get(FEDORA_MODEL_URI, 'hasModel');
+    $this->assertTrue(empty($model));
+    $model = $this->object->models;
+    $this->assertEquals(1, count($model));
+    $ds = $this->object->constructDatastream('RELS-EXT', 'M');
+    $ds->content = $content;
+    $this->object->ingestDatastream($ds);
+    $this->assertFalse(empty($this->object['RELS-EXT']));
+    $this->assertTrue($this->object['RELS-EXT']->controlGroup == 'M');
+  }
 }

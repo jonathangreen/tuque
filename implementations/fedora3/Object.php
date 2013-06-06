@@ -303,7 +303,6 @@ class NewFedoraObject extends AbstractFedoraObject {
    */
   public function __construct($id, FedoraRepository $repository) {
     parent::__construct($id, $repository);
-    $this->ingested = FALSE;
     $this->objectProfile = array();
     $this->objectProfile['objState'] = 'A';
     $this->objectProfile['objOwnerId'] = $this->repository->api->connection->username;
@@ -391,7 +390,9 @@ class NewFedoraObject extends AbstractFedoraObject {
    */
   public function ingestDatastream(&$ds) {
     if (!isset($this->datastreams[$ds->id])) {
-      if ($ds->ingested) {
+      // The datastream does not already belong to this object, aka was created
+      // by this object.
+      if ($ds->parent != $this) {
         // Create a NewFedoraDatastream copy.
         $this->createNewDatastreamCopy($ds);
       }
@@ -502,7 +503,6 @@ class FedoraObject extends AbstractFedoraObject {
   public function __construct($id, FedoraRepository $repository) {
     parent::__construct($id, $repository);
     $this->refresh();
-    $this->ingested = TRUE;
   }
 
   /**
@@ -544,7 +544,7 @@ class FedoraObject extends AbstractFedoraObject {
    * Purge a datastream.
    *
    * @param string $id
-   *   The id of hte datastream to purge.
+   *   The id of the datastream to purge.
    *
    * @return boolean
    *   Returns TRUE on success and FALSE on failure.
