@@ -30,6 +30,6 @@ where $pid <fedora-model:label> $label';
     $results = count($this->repository->ri->itqlQuery($query));
     $number = $this->repository->ri->countQuery($query, 'itql');
 
-    $this->assertEqual($results, $number, 'The number of tuples returned was equal.');
+    $this->assertEquals($results, $number, 'The number of tuples returned was equal.');
   }
 }
