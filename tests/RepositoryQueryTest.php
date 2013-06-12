@@ -21,7 +21,7 @@ class RepositoryQueryTest extends PHPUnit_Framework_TestCase {
     $query = 'select $pid $label from <#ri>
 where $pid <fedora-model:label> $label';
     $results = $this->repository->ri->itqlQuery($query);
-    $this->pass('The query did not throw an exception.');
+    $this->assertTrue(TRUE, 'The query did not throw an exception.');
   }
 
   public function testCount() {
