@@ -1724,6 +1724,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
    * IteratorAggregate::getIterator()
    */
   public function getIterator() {
+    $this->populateDatastreamHistory();
     $history = array();
     foreach ($this->datastreamHistory as $key => $value) {
       $history[$key] = new $this->fedoraDatastreamVersionClass($this->id, $value, $this, $this->parent, $this->repository);
