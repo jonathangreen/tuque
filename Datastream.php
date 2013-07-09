@@ -997,7 +997,7 @@ class FedoraDatastreamVersion extends AbstractExistingFedoraDatastream {
   public function __construct($id, array $datastream_info, FedoraDatastream $datastream, FedoraObject $object, FedoraRepository $repository) {
     parent::__construct($id, $object, $repository);
     $this->datastreamInfo = $datastream_info;
-    $this->parent = $datastream;
+    $this->parent = $object;
   }
 
   /**
