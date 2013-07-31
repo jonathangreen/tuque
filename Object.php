@@ -721,6 +721,7 @@ class FedoraObject extends AbstractFedoraObject {
 
     $this->repository->api->m->purgeDatastream($this->id, $id);
     unset($this->datastreams[$id]);
+    $this->refresh();
     return TRUE;
   }
 
