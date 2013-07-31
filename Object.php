@@ -742,8 +742,8 @@ class FedoraObject extends AbstractFedoraObject {
    */
   protected function stateMagicPropertySet($value) {
     if ($this->objectProfile['objState'] != $value) {
-      $this->modifyObject(array('state' => $value));
       parent::stateMagicProperty('set', $value);
+      $this->modifyObject(array('state' => $this->objectProfile['objState']));
     }
   }
 
@@ -857,6 +857,7 @@ class FedoraObject extends AbstractFedoraObject {
       unlink($temp);
       $ds = new $this->fedoraDatastreamClass($ds->id, $this, $this->repository, $dsinfo);
       $this->datastreams[$ds->id] = $ds;
+      $this->objectProfile['objLastModDate'] = $ds->createdDate;
       return $ds;
     }
     else {
