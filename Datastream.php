@@ -1094,7 +1094,7 @@ class FedoraDatastreamVersion extends AbstractExistingFedoraDatastream {
       return $this->generalReadOnly('dsLocation', FALSE, $function, $value);
     }
     else {
-      trigger_error("No 'url' property on objects in control group {$this->controlGroup}", E_USER_WARNING);
+      trigger_error("No 'url' property on datastreams in control group {$this->controlGroup}", E_USER_WARNING);
     }
   }
 
