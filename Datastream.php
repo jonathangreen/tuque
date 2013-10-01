@@ -62,7 +62,9 @@ abstract class AbstractDatastream extends MagicProperty {
    */
   public $id;
   /**
-   * The label of the datastream.
+   * The label of the datastream. Fedora limits the label to be 255 characters.
+   * Anything after this amount is truncated.
+   *
    * @var string
    */
   public $label;
@@ -574,7 +576,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
         break;
 
       case 'set':
-        $this->datastreamInfo['dsLabel'] = $value;
+        $this->datastreamInfo['dsLabel'] = function_exists('mb_substr') ? mb_substr($value, 0, 255) : sub_str($value, 0, 255);
         break;
 
       case 'unset':
