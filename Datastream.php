@@ -576,7 +576,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream {
         break;
 
       case 'set':
-        $this->datastreamInfo['dsLabel'] = function_exists('mb_substr') ? mb_substr($value, 0, 255) : sub_str($value, 0, 255);
+        $this->datastreamInfo['dsLabel'] = function_exists('mb_substr') ? mb_substr($value, 0, 255) : substr($value, 0, 255);
         break;
 
       case 'unset':
@@ -1337,7 +1337,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
         break;
 
       case 'set':
-        $this->modifyDatastream(array('dsLabel' => $value));
+        $this->modifyDatastream(array('dsLabel' => function_exists('mb_substr') ? mb_substr($value, 0, 255) : substr($value, 0, 255)));
         break;
 
       case 'unset':
