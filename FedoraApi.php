@@ -979,7 +979,7 @@ class FedoraApiM {
 
     $request = "/objects/{$pid}/objectXML";
     $response = $this->connection->getRequest($request);
-    $response = $this->connection->serializer($response);
+    $response = $this->serializer->getObjectXml($response);
     return $response;
   }
 
