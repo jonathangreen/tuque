@@ -4,6 +4,7 @@ php:
   - "5.4"
 env:
   - FEDORA_VERSION="3.6.2"
+  - FEDORA_VERSION="3.7.0"
 # broken right now, should be fixed
 #  - FEDORA_VERSION="3.5"
 before_script:
@@ -12,6 +13,7 @@ before_script:
   - git clone -b $FEDORA_VERSION git://github.com/Islandora/islandora_tomcat.git
   - cd islandora_tomcat
   - export CATALINA_HOME='.'
+  - export JAVA_OPTS="-Xms1024m -Xmx1024m -XX:MaxPermSize=512m -XX:+CMSClassUnloadingEnabled -Djavax.net.ssl.trustStore=$CATALINA_HOME/fedora/server/truststore -Djavax.net.ssl.trustStorePassword=tomcat"
   - ./bin/startup.sh
   - cd ..
   - sleep 10

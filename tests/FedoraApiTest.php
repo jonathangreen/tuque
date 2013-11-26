@@ -355,7 +355,6 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
           'dsControlGroup' => 'X',
           'dsSize' => '860',
           'dsVersionable' => 'true',
-          'dsInfoType' => '',
           'dsLocation' => "$pid+DC+DC.1",
           'dsLocationType' => '',
           'dsChecksumType' => 'DISABLED',
@@ -374,7 +373,6 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
           'dsControlGroup' => 'M',
           'dsSize' => '68524',
           'dsVersionable' => 'true',
-          'dsInfoType' => '',
           'dsLocation' => "$pid+fixture+fixture.4",
           'dsLocationType' => 'INTERNAL_ID',
           'dsChecksumType' => 'DISABLED',
@@ -393,7 +391,6 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
           'dsControlGroup' => 'X',
           'dsSize' => '540',
           'dsVersionable' => 'true',
-          'dsInfoType' => '',
           'dsLocation' => "$pid+RELS-EXT+RELS-EXT.0",
           'dsLocationType' => 'INTERNAL_ID',
           'dsChecksumType' => 'DISABLED',
@@ -462,7 +459,6 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
           'dsControlGroup' => 'X',
           'dsSize' => '905',
           'dsVersionable' => 'true',
-          'dsInfoType' => '',
           'dsLocation' => "$pid+DC+DC.1",
           'dsLocationType' => '',
           'dsChecksumType' => 'DISABLED',
@@ -708,6 +704,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
       // Test with the more detailed current data.
       foreach($fixture['dsids'] as $dsid => $data) {
         $actual = $this->apim->getDatastream($pid, $dsid);
+        unset($actual['dsInfoType']);
         $this->assertEquals($data['data'], $actual);
       }
     }
@@ -719,6 +716,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
         $actual = $this->apim->getDatastreamHistory($pid, $dsid);
         // we should at least make sure we get the right count here
         $this->assertEquals($data['count'],count($actual));
+        unset($actual[0]['dsInfoType']);
         $this->assertEquals($data['data'], $actual[0]);
       }
     }
@@ -811,7 +809,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
         $actual = $this->apim->getDatastream($pid, $dsid);
         $expected = $data['data'];
         $this->assertEquals('testtesttest', $actual['dsLabel']);
-        foreach(array('dsLabel', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+        foreach(array('dsLabel', 'dsCreateDate', 'dsVersionID', 'dsLocation', 'dsInfoType') as $unset) {
           unset($actual[$unset]);
           unset($expected[$unset]);
         }
@@ -831,7 +829,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
           $actual = $this->apim->getDatastream($pid, $dsid);
           $expected = $data['data'];
           $this->assertEquals($versionable ? 'true' : 'false', $actual['dsVersionable']);
-          foreach(array('dsVersionable', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+          foreach(array('dsVersionable', 'dsCreateDate', 'dsVersionID', 'dsLocation', 'dsInfoType') as $unset) {
             unset($actual[$unset]);
             unset($expected[$unset]);
           }
@@ -870,7 +868,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
           $actual = $this->apim->getDatastream($pid, $dsid);
           $expected = $data['data'];
           $this->assertEquals($state, $actual['dsState']);
-          foreach(array('dsState', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+          foreach(array('dsState', 'dsCreateDate', 'dsVersionID', 'dsLocation', 'dsInfoType') as $unset) {
             unset($actual[$unset]);
             unset($expected[$unset]);
           }
@@ -891,7 +889,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
           $actual = $this->apim->getDatastream($pid, $dsid);
           $expected = $data['data'];
           $this->assertEquals($type, $actual['dsChecksumType']);
-          foreach(array('dsChecksumType', 'dsChecksum', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+          foreach(array('dsChecksumType', 'dsChecksum', 'dsCreateDate', 'dsVersionID', 'dsLocation', 'dsInfoType') as $unset) {
             unset($actual[$unset]);
             unset($expected[$unset]);
           }
@@ -939,7 +937,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
         $actual = $this->apim->getDatastream($pid, $dsid);
         $expected = $data['data'];
         $this->assertEquals('testtesttest', $actual['dsFormatURI']);
-        foreach(array('dsFormatURI', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+        foreach(array('dsFormatURI', 'dsCreateDate', 'dsVersionID', 'dsLocation', 'dsInfoType') as $unset) {
           unset($actual[$unset]);
           unset($expected[$unset]);
         }
@@ -958,7 +956,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
         $actual = $this->apim->getDatastream($pid, $dsid);
         $expected = $data['data'];
         $this->assertEquals('application/super-fucking-cool', $actual['dsMIME']);
-        foreach(array('dsMIME', 'dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+        foreach(array('dsMIME', 'dsCreateDate', 'dsVersionID', 'dsLocation', 'dsInfoType') as $unset) {
           unset($actual[$unset]);
           unset($expected[$unset]);
         }
@@ -979,7 +977,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
         $this->assertArrayHasKey('dsAltID', $actual);
         $this->assertEquals(array('one', 'two', 'three'), $actual['dsAltID']);
         unset($actual['dsAltID']);
-        foreach(array('dsCreateDate', 'dsVersionID', 'dsLocation') as $unset) {
+        foreach(array('dsCreateDate', 'dsVersionID', 'dsLocation', 'dsInfoType') as $unset) {
           unset($actual[$unset]);
           unset($expected[$unset]);
         }
