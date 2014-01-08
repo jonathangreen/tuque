@@ -578,7 +578,14 @@ class CurlConnection extends HttpConnection {
     curl_setopt(self::$curlContext, CURLOPT_CUSTOMREQUEST, 'PUT');
     switch (strtolower($type)) {
       case 'string':
-        $fh = fopen('php://memory', 'rw');
+        // Updated: slangerx, 2013-12-26; Reference: http://bit.ly/18Qym02
+        // When using 'php://memory' in Windows, the following error
+        // occurs when trying to ingest a page into the Book Solution Pack:
+        // "Warning: curl_setopt(): cannot represent a stream of type 
+        //  MEMORY as a STDIO FILE* in CurlConnection->putRequest()"
+        $file_stream = (((strtolower(substr(PHP_OS, 0, 3)) == 'win') ||
+                         (strtolower(substr(PHP_OS, 0, 6)) == 'cygwin')) ? 'php://temp' : 'php://memory');
+        $fh = fopen($file_stream, 'rw');
         fwrite($fh, $file);
         rewind($fh);
         $size = strlen($file);
@@ -655,8 +662,28 @@ class CurlConnection extends HttpConnection {
     }
 
     if ($file) {
+      // Updated: slangerx: 2013-09-09;
+      $file_original_path = $file;
+      // In Windows, using 'temporary://' with curl_setopt 'CURLOPT_FILE'
+      // results in the following error: "Warning: curl_setopt():
+      // DrupalTemporaryStreamWrapper::stream_cast is not implemented!"
+	  $file = str_replace('temporary://', sys_get_temp_dir() . '/', $file);
       $file = fopen($file, 'w+');
-      curl_setopt(self::$curlContext, CURLOPT_FILE, $file);
+      // Determine if the current operating system is Windows.
+      // Also check whether the output buffer is being utilized.
+      if (((strtolower(substr(PHP_OS, 0, 3)) == 'win') ||
+           (strtolower(substr(PHP_OS, 0, 6)) == 'cygwin')) &&
+          ($file_original_path == 'php://output')) {
+        // In Windows, ensure the image can be displayed onscreen. Just using
+        // 'CURLOPT_FILE' results in a broken image and the following error:
+        // "Warning: curl_setopt(): cannot represent a stream of type
+        // Output as a STDIO FILE* in CurlConnection->getRequest()"
+        // Resource: http://www.php.net/manual/en/function.curl-setopt.php#58074
+        curl_setopt(self::$curlContext, CURLOPT_RETURNTRANSFER, FALSE);
+      }
+      else {
+        curl_setopt(self::$curlContext, CURLOPT_FILE, $file);
+      }
       curl_setopt(self::$curlContext, CURLOPT_HEADER, FALSE);
     }
 
