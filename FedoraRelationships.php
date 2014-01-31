@@ -636,8 +636,9 @@ class FedoraRelsInt extends FedoraRelationships {
    *   The predicate tag to add.
    * @param string $object
    *   The object for the relationship that is being created.
-   * @param string $type
-   *   Specifies if the object is a literal or if not, what the atttribute type should be.
+   * @param int $type
+   *   What the attribute type should be. One of the defined literals beginning
+   *   with RELS_TYPE_.
    */
   public function add($predicate_uri, $predicate, $object, $type = RELS_TYPE_URI) {
     $this->initializeDatastream();
