@@ -9,6 +9,33 @@ require_once "FedoraRelationships.php";
  */
 class FedoraRelationshipsTest extends PHPUnit_Framework_TestCase {
 
+  function testAutoCommit() {
+    $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+    $this->api = new FedoraApi($connection);
+    $cache = new SimpleCache();
+    $repository = new FedoraRepository($this->api, $cache);
+    $object = $repository->constructObject("test:test");
+    $relationships = $object->relationships;
+    $relationships->autoCommit = FALSE;
+    $relationships->registerNamespace('fedaykin', 'http://imaginarycommandos.com#');
+    $relationships->add('http://imaginarycommandos.com#', 'isGhola', 'Stilgar', RELS_TYPE_PLAIN_LITERAL);
+    // Check DS not created.
+    $this->assertFalse(isset($object['RELS-EXT']));
+    // Check Get before commit.
+    $retrieved_relationships = $relationships->get();
+    $this->assertEquals(1, count($retrieved_relationships));
+    // Check commit created DS.
+    $relationships->commitRelationships();
+    $this->assertTrue(isset($object['RELS-EXT']));
+    // Check Get after commit.
+    $retrieved_commited_relationships = $relationships->get();
+    $this->assertEquals(1, count($retrieved_commited_relationships));
+    // Check Get after autoCommit is TRUE.
+    $relationships->autoCommit = TRUE;
+    $retrieved_auto_relationships = $relationships->get();
+    $this->assertEquals(1, count($retrieved_auto_relationships));
+  }
+
   function testRelationshipDescription() {
     $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
     $this->api = new FedoraApi($connection);

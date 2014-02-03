@@ -24,13 +24,40 @@ define("RELS_DATETIME_NS", "http://www.w3.org/2001/XMLSchema#dateTime");
 define("RELS_TYPE_FULL_URI", 5);
 
 require_once "RepositoryException.php";
+require_once 'MagicProperty.php';
 
 /**
  * This is the base class for Fedora Relationships.
  *
  * @todo potentially we should validate the predicate URI
  */
-class FedoraRelationships {
+class FedoraRelationships extends MagicProperty {
+
+  /**
+   * Wheather or not the DS has yet to be ingested.
+   *
+   * @var bool
+   */
+  protected $new = FALSE;
+
+  /**
+   * Wheather or not to auto-commit RELS.
+   *
+   * @var bool
+   *
+   * Here be dragons. If autoCommit is FALSE Fedora and the local DS object
+   * will not be immediately updated with RELS changes. Bad things may happen.
+   * Defaults to TRUE in the constructor as var has to start NULL for
+   * magicProperty.
+   */
+  public $autoCommit;
+
+  /**
+   * The cache used when $autoCommit is disabled.
+   *
+   * @var DomDocument
+   */
+  protected $domCache = NULL;
 
   /**
    * The datastream this class is manipulating.
@@ -52,14 +79,48 @@ class FedoraRelationships {
    *   An array of default namespaces.
    */
   public function __construct(array $namespaces = NULL) {
+    unset($this->autoCommit);
+    $this->nonMagicAutoCommit = TRUE;
     if ($namespaces) {
       $this->namespaces = array_merge($this->namespaces, $namespaces);
     }
   }
 
   /**
+   * MagicProperty for autoCommit.
+   */
+  protected function autoCommitMagicProperty($function, $value) {
+    switch ($function) {
+      case 'get':
+        return $this->nonMagicAutoCommit;
+        break;
+
+      case 'isset':
+        return isset($this->nonMagicAutoCommit);
+        break;
+
+      case 'set':
+        // Flush the cache if setting autoCommit.
+        if ($value == TRUE) {
+          $this->nonMagicAutoCommit = $value;
+          $this->saveRelationships($this->domCache);
+          $this->domCache = NULL;
+        }
+        // Set cache if unsetting autoCommit.
+        else if ($value == FALSE) {
+          $this->domCache = $this->getDom();
+          $this->nonMagicAutoCommit = $value;
+        }
+        break;
+
+      case 'unset':
+        $this->nonMagicAutoCommit = NULL;
+        break;
+    }
+  }
+  /**
    * Add a new namespace to the relationship xml. Doing this before adding new
-   * predicates with differnt URIs makes the XML look a little prettier.
+   * predicates with different URIs makes the XML look a little prettier.
    *
    * @param string $alias
    *   The alias to add.
@@ -68,6 +129,15 @@ class FedoraRelationships {
    */
   public function registerNamespace($alias, $uri) {
     $this->namespaces[$alias] = $uri;
+  }
+
+  /**
+   * Forces a commit of cached relationships.
+   */
+  public function commitRelationships() {
+    // Take advantage of magic.
+    $this->autoCommit = TRUE;
+    $this->autoCommit = FALSE;
   }
 
   /**
@@ -116,11 +186,14 @@ class FedoraRelationships {
    *   The domdocument to modify
    */
   protected function getDom() {
-    if (isset($this->datastream->content)) {
+    if (isset($this->datastream->content) && $this->autoCommit) {
       // @todo Proper exception handling.
       $document = new DomDocument();
       $document->preserveWhiteSpace = FALSE;
       $document->loadXml($this->datastream->content);
+    }
+    else if (!is_null($this->domCache) && !$this->autoCommit) {
+      $document = $this->domCache;
     }
     else {
       $document = new DomDocument("1.0", "UTF-8");
@@ -144,11 +217,22 @@ class FedoraRelationships {
   }
 
   /**
-   * This updates the associated datastreams content.
+   * Saves relationships to Fedora or localy.
+   *
+   * This updates the associated datastreams content, or the cache if
+   * autocommit is disabled.
    */
-  protected function updateDatastream($document) {
-    $document->formatOutput = TRUE;
-    $this->datastream->content = $document->saveXml();
+  protected function saveRelationships($document) {
+    if ($this->autoCommit) {
+      $document->formatOutput = TRUE;
+      $this->datastream->content = $document->saveXml();
+      if ($this->new) {
+        $this->datastream->parent->ingestDatastream($this->datastream);
+      }
+    }
+    else {
+      $this->domCache = $document;
+    }
   }
 
   /**
@@ -216,7 +300,7 @@ class FedoraRelationships {
         break;
     }
 
-    $this->updateDatastream($document);
+    $this->saveRelationships($document);
   }
 
   /**
@@ -393,7 +477,7 @@ class FedoraRelationships {
     }
 
     if ($return) {
-      $this->updateDatastream($document);
+      $this->saveRelationships($document);
     }
 
     return $return;
@@ -419,16 +503,13 @@ class FedoraRelationships {
         $uri[1] = $id;
         $about->value = implode('/', $uri);
       }
-      $this->updateDatastream($document);
+      $this->saveRelationships($document);
     }
   }
 
 }
 
 class FedoraRelsExt extends FedoraRelationships {
-
-  protected $new = FALSE;
-
   /**
    * Objects Construct!
    *
@@ -486,10 +567,6 @@ class FedoraRelsExt extends FedoraRelationships {
   public function add($predicate_uri, $predicate, $object, $type = RELS_TYPE_URI) {
     $this->initializeDatastream();
     parent::internalAdd($this->object->id, $predicate_uri, $predicate, $object, $type);
-
-    if ($this->new) {
-      $this->object->ingestDatastream($this->datastream);
-    }
   }
 
   /**
@@ -513,10 +590,6 @@ class FedoraRelsExt extends FedoraRelationships {
   public function remove($predicate_uri = NULL, $predicate = NULL, $object = NULL, $literal = FALSE) {
     $this->initializeDatastream();
     $return = parent::internalRemove($this->object->id, $predicate_uri, $predicate, $object, $literal);
-
-    if ($this->new && $return) {
-      $this->object->ingestDatastream($this->datastream);
-    }
 
     return $return;
   }
@@ -587,7 +660,6 @@ class FedoraRelsExt extends FedoraRelationships {
 
 class FedoraRelsInt extends FedoraRelationships {
 
-  protected $new = FALSE;
   protected $aboutDs;
 
   /**
@@ -643,10 +715,6 @@ class FedoraRelsInt extends FedoraRelationships {
   public function add($predicate_uri, $predicate, $object, $type = RELS_TYPE_URI) {
     $this->initializeDatastream();
     parent::internalAdd("{$this->aboutDs->parent->id}/{$this->aboutDs->id}", $predicate_uri, $predicate, $object, $type);
-
-    if ($this->new) {
-      $this->aboutDs->parent->ingestDatastream($this->datastream);
-    }
   }
 
   /**
@@ -671,9 +739,6 @@ class FedoraRelsInt extends FedoraRelationships {
     $this->initializeDatastream();
     $return = parent::internalRemove("{$this->aboutDs->parent->id}/{$this->aboutDs->id}", $predicate_uri, $predicate, $object, $type);
 
-    if ($this->new && $return) {
-      $this->aboutDs->parent->ingestDatastream($this->datastream);
-    }
 
     return $return;
   }
