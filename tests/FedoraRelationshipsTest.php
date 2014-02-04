@@ -30,7 +30,7 @@ class FedoraRelationshipsTest extends PHPUnit_Framework_TestCase {
     // Check Get after commit.
     $retrieved_commited_relationships = $relationships->get();
     $this->assertEquals(1, count($retrieved_commited_relationships));
-    // Check Get after autoCommit is TRUE.
+    // Regression test double setting autoCommit TRUE.
     $relationships->autoCommit = TRUE;
     $retrieved_auto_relationships = $relationships->get();
     $this->assertEquals(1, count($retrieved_auto_relationships));

@@ -108,7 +108,7 @@ class FedoraRelationships extends MagicProperty {
 
       case 'set':
         // Flush the cache if setting autoCommit.
-        if ($value == TRUE) {
+        if ($value == TRUE && !$this->nonMagicAutoCommit) {
           $this->nonMagicAutoCommit = $value;
           $this->saveRelationships($this->domCache);
           $this->domCache = NULL;
