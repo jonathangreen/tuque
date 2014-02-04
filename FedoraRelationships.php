@@ -149,10 +149,10 @@ class FedoraRelationships extends MagicProperty {
     if ($this->autoCommit == FALSE) {
       // Take advantage of magic.
       $this->autoCommit = TRUE;
-      $this->autoCommit = FALSE;
-      IF ($set_auto_commit) {
-        $this->autoCommit = TRUE;
+      if (!$set_auto_commit) {
+        $this->autoCommit = FALSE;
       }
+
     }
   }
 
