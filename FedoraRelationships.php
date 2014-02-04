@@ -140,11 +140,20 @@ class FedoraRelationships extends MagicProperty {
 
   /**
    * Forces a commit of cached relationships.
+   *
+   * @param bool $set_auto_commit
+   *   Determines exiting autoCommit state.
+   *   Defaults to TRUE.
    */
-  public function commitRelationships() {
-    // Take advantage of magic.
-    $this->autoCommit = TRUE;
-    $this->autoCommit = FALSE;
+  public function commitRelationships($set_auto_commit = TRUE) {
+    if ($this->autoCommit == FALSE) {
+      // Take advantage of magic.
+      $this->autoCommit = TRUE;
+      $this->autoCommit = FALSE;
+      IF ($set_auto_commit) {
+        $this->autoCommit = TRUE;
+      }
+    }
   }
 
   /**
