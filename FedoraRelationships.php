@@ -87,6 +87,13 @@ class FedoraRelationships extends MagicProperty {
   }
 
   /**
+   * Upon unserialization unset any MagicProperty vars.
+   */
+  public function __wakeup() {
+    unset($this->autoCommit);
+  }
+
+  /**
    * MagicProperty for autoCommit.
    */
   protected function autoCommitMagicProperty($function, $value) {
