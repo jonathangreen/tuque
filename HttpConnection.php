@@ -297,6 +297,20 @@ class CurlConnection extends HttpConnection {
   }
 
   /**
+   * Determines if the server operating system is Windows.
+   *
+   * @return bool
+   *   TRUE if Windows, FALSE otherwise.
+   */
+  public function isWindows() {
+    // Determine if PHP is currently running on Windows.
+    if (strpos(strtolower(php_uname('s')), 'windows') !== FALSE) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
    * Create a file to store cookies.
    */
   protected function createCookieFile() {
@@ -583,7 +597,7 @@ class CurlConnection extends HttpConnection {
         // occurs when trying to ingest a page into the Book Solution Pack:
         // "Warning: curl_setopt(): cannot represent a stream of type 
         //  MEMORY as a STDIO FILE* in CurlConnection->putRequest()"
-        $file_stream = ((strpos(strtolower(php_uname('s')), 'windows') !== FALSE) ? 'php://temp' : 'php://memory');
+        $file_stream = (($this->isWindows()) ? 'php://temp' : 'php://memory');
         $fh = fopen($file_stream, 'rw');
         fwrite($fh, $file);
         rewind($fh);
@@ -670,8 +684,7 @@ class CurlConnection extends HttpConnection {
       $file = fopen($file, 'w+');
       // Determine if the current operating system is Windows.
       // Also check whether the output buffer is being utilized.
-      if ((strpos(strtolower(php_uname('s')), 'windows') !== FALSE) &&
-          ($file_original_path == 'php://output')) {
+      if (($this->isWindows()) && ($file_original_path == 'php://output')) {
         // In Windows, ensure the image can be displayed onscreen. Just using
         // 'CURLOPT_FILE' results in a broken image and the following error:
         // "Warning: curl_setopt(): cannot represent a stream of type
