@@ -297,6 +297,20 @@ class CurlConnection extends HttpConnection {
   }
 
   /**
+   * Determines if the server operating system is Windows.
+   *
+   * @return bool
+   *   TRUE if Windows, FALSE otherwise.
+   */
+  protected function isWindows() {
+    // Determine if PHP is currently running on Windows.
+    if (strpos(strtolower(php_uname('s')), 'windows') !== FALSE) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
    * Create a file to store cookies.
    */
   protected function createCookieFile() {
@@ -578,7 +592,13 @@ class CurlConnection extends HttpConnection {
     curl_setopt(self::$curlContext, CURLOPT_CUSTOMREQUEST, 'PUT');
     switch (strtolower($type)) {
       case 'string':
-        $fh = fopen('php://memory', 'rw');
+        // When using 'php://memory' in Windows, the following error
+        // occurs when trying to ingest a page into the Book Solution Pack:
+        // "Warning: curl_setopt(): cannot represent a stream of type 
+        // MEMORY as a STDIO FILE* in CurlConnection->putRequest()"
+        // Reference: http://bit.ly/18Qym02
+        $file_stream = (($this->isWindows()) ? 'php://temp' : 'php://memory');
+        $fh = fopen($file_stream, 'rw');
         fwrite($fh, $file);
         rewind($fh);
         $size = strlen($file);
@@ -655,8 +675,25 @@ class CurlConnection extends HttpConnection {
     }
 
     if ($file) {
+      $file_original_path = $file;
+      // In Windows, using 'temporary://' with curl_setopt 'CURLOPT_FILE'
+      // results in the following error: "Warning: curl_setopt():
+      // DrupalTemporaryStreamWrapper::stream_cast is not implemented!"
+	  $file = str_replace('temporary://', sys_get_temp_dir() . '/', $file);
       $file = fopen($file, 'w+');
-      curl_setopt(self::$curlContext, CURLOPT_FILE, $file);
+      // Determine if the current operating system is Windows.
+      // Also check whether the output buffer is being utilized.
+      if (($this->isWindows()) && ($file_original_path == 'php://output')) {
+        // In Windows, ensure the image can be displayed onscreen. Just using
+        // 'CURLOPT_FILE' results in a broken image and the following error:
+        // "Warning: curl_setopt(): cannot represent a stream of type
+        // Output as a STDIO FILE* in CurlConnection->getRequest()"
+        // Resource: http://www.php.net/manual/en/function.curl-setopt.php#58074
+        curl_setopt(self::$curlContext, CURLOPT_RETURNTRANSFER, FALSE);
+      }
+      else {
+        curl_setopt(self::$curlContext, CURLOPT_FILE, $file);
+      }
       curl_setopt(self::$curlContext, CURLOPT_HEADER, FALSE);
     }
 
