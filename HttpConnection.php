@@ -302,7 +302,7 @@ class CurlConnection extends HttpConnection {
    * @return bool
    *   TRUE if Windows, FALSE otherwise.
    */
-  public function isWindows() {
+  protected function isWindows() {
     // Determine if PHP is currently running on Windows.
     if (strpos(strtolower(php_uname('s')), 'windows') !== FALSE) {
       return TRUE;
@@ -592,11 +592,11 @@ class CurlConnection extends HttpConnection {
     curl_setopt(self::$curlContext, CURLOPT_CUSTOMREQUEST, 'PUT');
     switch (strtolower($type)) {
       case 'string':
-        // Updated: slangerx, 2013-12-26; Reference: http://bit.ly/18Qym02
         // When using 'php://memory' in Windows, the following error
         // occurs when trying to ingest a page into the Book Solution Pack:
         // "Warning: curl_setopt(): cannot represent a stream of type 
-        //  MEMORY as a STDIO FILE* in CurlConnection->putRequest()"
+        // MEMORY as a STDIO FILE* in CurlConnection->putRequest()"
+        // Reference: http://bit.ly/18Qym02
         $file_stream = (($this->isWindows()) ? 'php://temp' : 'php://memory');
         $fh = fopen($file_stream, 'rw');
         fwrite($fh, $file);
@@ -675,7 +675,6 @@ class CurlConnection extends HttpConnection {
     }
 
     if ($file) {
-      // Updated: slangerx: 2013-09-09;
       $file_original_path = $file;
       // In Windows, using 'temporary://' with curl_setopt 'CURLOPT_FILE'
       // results in the following error: "Warning: curl_setopt():
