@@ -679,7 +679,9 @@ class CurlConnection extends HttpConnection {
       // In Windows, using 'temporary://' with curl_setopt 'CURLOPT_FILE'
       // results in the following error: "Warning: curl_setopt():
       // DrupalTemporaryStreamWrapper::stream_cast is not implemented!"
-	  $file = str_replace('temporary://', sys_get_temp_dir() . '/', $file);
+      if ($this->isWindows()) {
+        $file = str_replace('temporary://', sys_get_temp_dir() . '/', $file);
+      }
       $file = fopen($file, 'w+');
       // Determine if the current operating system is Windows.
       // Also check whether the output buffer is being utilized.
