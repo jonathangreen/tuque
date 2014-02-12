@@ -328,18 +328,14 @@ foo;
 
   /**
    * @expectedException        RepositoryException
-   * @expectedExceptionMessage Conflict
-   * @expectedExceptionCode 409
+   * @expectedExceptionCode 500
    */
   public function testLocking() {
     $ds1 = new FedoraDatastream($this->testDsid, $this->object, $this->repository);
     $ds2 = new FedoraDatastream($this->testDsid, $this->object, $this->repository);
-
     $this->assertEquals($this->testDsContents, $ds1->content);
-
     // access a member so that the datastructures are loaded
     $this->assertEquals($ds1->state, $ds2->state);
-
     $ds2->content = 'foo';
     $ds1->content = 'bar';
   }

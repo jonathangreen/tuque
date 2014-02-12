@@ -407,7 +407,6 @@ class CurlConnection extends HttpConnection {
     $remaining_attempts = 3;
     while ($remaining_attempts > 0) {
       $curl_response = curl_exec(self::$curlContext);
-
       // Since we are using exceptions we trap curl error
       // codes and toss an exception, here is a good error
       // code reference.
@@ -434,10 +433,11 @@ class CurlConnection extends HttpConnection {
         $http_error_string = substr($http_error_string[0], 13);
         $http_error_string = trim($http_error_string);
       }
-      $success = preg_match("/^2/", $info['http_code']);
-      $remaining_attempts = $success ? 0 : --$remaining_attempts;
+      $blocked = $info['http_code'] == 409;
+      $remaining_attempts = $blocked ? --$remaining_attempts : 0;
     }
     // Throw an exception if this isn't a 2XX response.
+    $success = preg_match("/^2/", $info['http_code']);
     if (!$success) {
       throw new HttpConnectionException($http_error_string, $info['http_code'], $response);
     }
