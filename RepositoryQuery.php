@@ -10,6 +10,7 @@
 class RepositoryQuery {
 
   public $connection;
+  const SIMPLE_XML_NAMESPACE = "http://www.w3.org/2001/sw/DataAccess/rf1/result";
 
   /**
    * Construct a new RI object.
@@ -35,7 +36,7 @@ class RepositoryQuery {
    */
   public static function parseSparqlResults($sparql) {
     // Load the results into a SimpleXMLElement.
-    $doc = new SimpleXMLElement($sparql, 0, FALSE, 'http://www.w3.org/2001/sw/DataAccess/rf1/result');
+    $doc = new SimpleXMLElement($sparql, 0, FALSE, self::SIMPLE_XML_NAMESPACE);
 
     // Storage.
     $results = array();
