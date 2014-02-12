@@ -403,43 +403,47 @@ class CurlConnection extends HttpConnection {
    * @return array
    *   Array has keys: (status, headers, content).
    */
-  protected function doCurlRequest($file = NULL) {
-    $curl_response = curl_exec(self::$curlContext);
+ protected function doCurlRequest($file = NULL) {
+    $remaining_attempts = 3;
+    while ($remaining_attempts > 0) {
+      $curl_response = curl_exec(self::$curlContext);
+      // Since we are using exceptions we trap curl error
+      // codes and toss an exception, here is a good error
+      // code reference.
+      // http://curl.haxx.se/libcurl/c/libcurl-errors.html
+      $error_code = curl_errno(self::$curlContext);
+      $error_string = curl_error(self::$curlContext);
+      if ($error_code != 0) {
+        throw new HttpConnectionException($error_string, $error_code);
+      }
 
-    // Since we are using exceptions we trap curl error
-    // codes and toss an exception, here is a good error
-    // code reference.
-    // http://curl.haxx.se/libcurl/c/libcurl-errors.html
-    $error_code = curl_errno(self::$curlContext);
-    $error_string = curl_error(self::$curlContext);
-    if ($error_code != 0) {
-      throw new HttpConnectionException($error_string, $error_code);
+      $info = curl_getinfo(self::$curlContext);
+
+      $response = array();
+      $response['status'] = $info['http_code'];
+      if ($file == NULL) {
+        $response['headers'] = substr($curl_response, 0, $info['header_size'] - 1);
+        $response['content'] = substr($curl_response, $info['header_size']);
+
+        // We do some ugly stuff here to strip the error string out
+        // of the HTTP headers, since curl doesn't provide any helper.
+        $http_error_string = explode("\r\n\r\n", $response['headers']);
+        $http_error_string = $http_error_string[count($http_error_string) - 1];
+        $http_error_string = explode("\r\n", $http_error_string);
+        $http_error_string = substr($http_error_string[0], 13);
+        $http_error_string = trim($http_error_string);
+      }
+      $blocked = $info['http_code'] == 409;
+      $remaining_attempts = $blocked ? --$remaining_attempts : 0;
     }
-
-    $info = curl_getinfo(self::$curlContext);
-
-    $response = array();
-    $response['status'] = $info['http_code'];
-    if ($file == NULL) {
-      $response['headers'] = substr($curl_response, 0, $info['header_size'] - 1);
-      $response['content'] = substr($curl_response, $info['header_size']);
-
-      // We do some ugly stuff here to strip the error string out
-      // of the HTTP headers, since curl doesn't provide any helper.
-      $http_error_string = explode("\r\n\r\n", $response['headers']);
-      $http_error_string = $http_error_string[count($http_error_string) - 1];
-      $http_error_string = explode("\r\n", $http_error_string);
-      $http_error_string = substr($http_error_string[0], 13);
-      $http_error_string = trim($http_error_string);
-    }
-
     // Throw an exception if this isn't a 2XX response.
-    if (!preg_match("/^2/", $info['http_code'])) {
+    $success = preg_match("/^2/", $info['http_code']);
+    if (!$success) {
       throw new HttpConnectionException($http_error_string, $info['http_code'], $response);
     }
-
     return $response;
   }
+
 
   /**
    * @see HttpConnection::patchRequest
@@ -594,7 +598,7 @@ class CurlConnection extends HttpConnection {
       case 'string':
         // When using 'php://memory' in Windows, the following error
         // occurs when trying to ingest a page into the Book Solution Pack:
-        // "Warning: curl_setopt(): cannot represent a stream of type 
+        // "Warning: curl_setopt(): cannot represent a stream of type
         // MEMORY as a STDIO FILE* in CurlConnection->putRequest()"
         // Reference: http://bit.ly/18Qym02
         $file_stream = (($this->isWindows()) ? 'php://temp' : 'php://memory');
