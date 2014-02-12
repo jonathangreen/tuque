@@ -328,9 +328,9 @@ foo;
 
   /**
    * This test had originally tested for an expected 409 error.  The 409
-   * has been dealt with, but we no get a 500, probably from having two
+   * has been dealt with, but we now get a 500, probably from having two
    * open references to the same object.  This should be investigated.
-   * 
+   *
    * @expectedException        RepositoryException
    * @expectedExceptionCode 500
    */
