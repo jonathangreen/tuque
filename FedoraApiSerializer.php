@@ -335,7 +335,7 @@ class FedoraApiSerializer {
 
     $dom = $this->loadDomDocument($request['content']);
     $xpath = new DomXPath($dom);
-    $results = $xpath->query("/rdf:RDF/rdf:Description/*");
+    $results = $xpath->query('/rdf:RDF/rdf:Description/*');
 
     foreach ($results as $element) {
       $relationship = array();

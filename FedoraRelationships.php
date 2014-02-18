@@ -335,8 +335,6 @@ class FedoraRelationships extends MagicProperty {
   /**
    * This function is used to create an xpath expression based on the input.
    *
-   * Add a new relationship.
-   *
    * @param DOMXPath $xpath_object
    *   The current xpath object.
    * @param string $subject
