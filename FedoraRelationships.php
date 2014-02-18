@@ -357,7 +357,6 @@ class FedoraRelationships extends MagicProperty {
    */
   protected function getXpathResults($xpath_object, $subject, $predicate_uri, $predicate, $object, $type) {
     $xpath = '/rdf:RDF/rdf:Description[@rdf:about="info:fedora/' . $subject . '"]';
-    $type = intval($type);
 
     // We do this to deal with the lowercase d.
     $result = $xpath_object->query($xpath);
