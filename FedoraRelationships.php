@@ -654,7 +654,7 @@ class FedoraRelsExt extends FedoraRelationships {
    * @param mixed $type
    *   What the attribute type should be. One of the defined literals beginning
    *   with RELS_TYPE_.  For backwards compatibility we support TRUE as
-   *   RELS_TYPE_PLAIN_LITERAL and 0 as RELS_TYPE_URI.
+   *   RELS_TYPE_PLAIN_LITERAL and FALSE as RELS_TYPE_URI.
    *
    * @return array
    *   This returns an indexed array with all the matching relationships. The
