@@ -34,6 +34,8 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
   public $username;
   public $password;
 
+  const FEDORA_URL = "http://localhost:8080/fedora";
+
   /**
    * This constructor for the RepositoryConnection.
    *
@@ -44,7 +46,7 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
    * @param string $password
    *   The password to connect with.
    */
-  function __construct($url = 'http://localhost:8080/fedora', $username = NULL, $password = NULL) {
+  function __construct($url = self::FEDORA_URL, $username = NULL, $password = NULL) {
     // Make sure the url doesn't have a trailing slash.
     $this->url = rtrim($url, "/");
     $this->username = $username;
@@ -133,7 +135,7 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
    *
    * @see CurlConnection::getRequest()
    */
-  public function getRequest($url, $headers_only = false, $file = NULL) {
+  public function getRequest($url, $headers_only = FALSE, $file = NULL) {
     try {
       return parent::getRequest($this->buildUrl($url), $headers_only, $file);
     }

@@ -1363,7 +1363,7 @@ class FedoraApiM {
    *   )
    *   @endcode
    */
-  public function validate($pid, $as_of_date_time=NULL) {
+  public function validate($pid, $as_of_date_time = NULL) {
     $pid = urlencode($pid);
 
     $request = "/objects/{$pid}/validate";

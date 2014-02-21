@@ -11,16 +11,24 @@ define("FEDORA_MODEL_URI", 'info:fedora/fedora-system:def/model#');
 define("ISLANDORA_RELS_EXT_URI", 'http://islandora.ca/ontology/relsext#');
 define("ISLANDORA_RELS_INT_URI", "http://islandora.ca/ontology/relsint#");
 
-define("RELS_TYPE_URI", 0);
+define("INIT_DS_FORMAT", "info:fedora/fedora-system:FedoraRELSExt-1.0");
+define("INIT_DS_LABEL", "Fedora Object to Object Relationship Metadata.");
+define("INIT_FEDORA_DS_LABEL", "Fedora Relationship Metadata.");
+define("INIT_DS_MIME", "application/rdf+xml");
+
+define("INIT_DS_CONTROL_GROUP", "X");
+
 define("RDF_URI", 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
 
+define("RELS_INT_NS", "http://www.w3.org/2001/XMLSchema#int");
+define("RELS_STRING_NS", "http://www.w3.org/2001/XMLSchema#string");
+define("RELS_DATETIME_NS", "http://www.w3.org/2001/XMLSchema#dateTime");
+
+define("RELS_TYPE_URI", 0);
 define("RELS_TYPE_PLAIN_LITERAL", 1);
 define("RELS_TYPE_STRING", 2);
-define("RELS_STRING_NS", "http://www.w3.org/2001/XMLSchema#string");
 define("RELS_TYPE_INT", 3);
-define("RELS_INT_NS", "http://www.w3.org/2001/XMLSchema#int");
 define("RELS_TYPE_DATETIME", 4);
-define("RELS_DATETIME_NS", "http://www.w3.org/2001/XMLSchema#dateTime");
 define("RELS_TYPE_FULL_URI", 5);
 
 require_once "RepositoryException.php";
@@ -159,6 +167,9 @@ class FedoraRelationships extends MagicProperty {
    * This function returns a domXPath object with all the current namespaces
    * already registered.
    *
+   * @param DOMDocument $document
+   *   The processing Dom Document.
+   *
    * @return DomXPath
    *   The object
    */
@@ -236,6 +247,9 @@ class FedoraRelationships extends MagicProperty {
    *
    * This updates the associated datastreams content, or the cache if
    * autocommit is disabled.
+   * 
+   * @param DOMDocument $document
+   *   The DOMDocument to save.
    */
   protected function saveRelationships($document) {
     if ($this->autoCommit) {
@@ -321,6 +335,19 @@ class FedoraRelationships extends MagicProperty {
   /**
    * This function is used to create an xpath expression based on the input.
    *
+   * @param DOMXPath $xpath_object
+   *   The current xpath object.
+   * @param string $subject
+   *   The subject. This can be a PID, or a PID/DSID combo. This string does
+   *   not contain the info:fedora/ part of the URI this is added automatically.
+   * @param string $predicate_uri
+   *   The URI to use as the namespace of the predicate. If you would like the
+   *   XML to use a prefix instead of the full predicate call the
+   *   FedoraRelationships::registerNamespace() function first.
+   * @param string $predicate
+   *   The predicate tag to add.
+   * @param string $object
+   *   The object for the relationship that is being created.
    * @param int $type
    *   What the attribute type should be. One of the defined literals beginning
    *   with RELS_TYPE_.
@@ -465,18 +492,19 @@ class FedoraRelationships extends MagicProperty {
    *   The predicate tag to filter removed results by.
    * @param string $object
    *   The object for the relationship to filter by.
-   * @param boolean $literal
-   *   Defines if the $object is a literal or not.
+   * @param int $type
+   *   What the attribute type should be. One of the defined literals beginning
+   *   with RELS_TYPE_. Defaults to RELS_TYPE_URI.
    *
    * @return boolean
    *   TRUE if relationships were removed, FALSE otherwise.
    */
-  protected function internalRemove($subject, $predicate_uri, $predicate, $object, $literal = FALSE) {
+  protected function internalRemove($subject, $predicate_uri, $predicate, $object, $type = RELS_TYPE_URI) {
     $return = FALSE;
     $document = $this->getDom();
     $xpath = $this->getXpath($document);
 
-    $result_elements = $this->getXpathResults($xpath, $subject, $predicate_uri, $predicate, $object, $literal);
+    $result_elements = $this->getXpathResults($xpath, $subject, $predicate_uri, $predicate, $object, $type);
 
     if ($result_elements->length > 0) {
       $return = TRUE;
@@ -545,7 +573,7 @@ class FedoraRelsExt extends FedoraRelationships {
 
   /**
    * Initialize the datastrem that we are using. We use this function to
-   * delay this as long as possible, in case it never has be be called.
+   * delay this as long as possible, in case it never has to be called.
    */
   protected function initializeDatastream() {
     if ($this->datastream === NULL) {
@@ -553,10 +581,10 @@ class FedoraRelsExt extends FedoraRelationships {
         $ds = $this->object['RELS-EXT'];
       }
       else {
-        $ds = $this->object->constructDatastream('RELS-EXT', 'X');
-        $ds->label = 'Fedora Object to Object Relationship Metadata.';
-        $ds->format = 'info:fedora/fedora-system:FedoraRELSExt-1.0';
-        $ds->mimetype = 'application/rdf+xml';
+        $ds = $this->object->constructDatastream('RELS-EXT', INIT_DS_CONTROL_GROUP);
+        $ds->label = INIT_DS_LABEL;
+        $ds->format = INIT_DS_FORMAT;
+        $ds->mimetype = INIT_DS_MIME;
         $this->new = TRUE;
       }
 
@@ -577,7 +605,7 @@ class FedoraRelsExt extends FedoraRelationships {
    *   The object for the relationship that is being created.
    * @param int $type
    *   What the attribute type should be. One of the defined literals beginning
-   *   with RELS_TYPE_.
+   *   with RELS_TYPE_. Defaults to RELS_TYPE_URI.
    */
   public function add($predicate_uri, $predicate, $object, $type = RELS_TYPE_URI) {
     $this->initializeDatastream();
@@ -596,15 +624,16 @@ class FedoraRelsExt extends FedoraRelationships {
    *   The predicate tag to filter removed results by.
    * @param string $object
    *   The object for the relationship to filter by.
-   * @param boolean $literal
-   *   Defines if the $object is a literal or not.
+   * @param int $type
+   *   What the attribute type should be. One of the defined literals beginning
+   *   with RELS_TYPE_. Defaults to RELS_TYPE_URI.
    *
    * @return boolean
    *   TRUE if relationships were removed, FALSE otherwise.
    */
-  public function remove($predicate_uri = NULL, $predicate = NULL, $object = NULL, $literal = FALSE) {
+  public function remove($predicate_uri = NULL, $predicate = NULL, $object = NULL, $type = RELS_TYPE_URI) {
     $this->initializeDatastream();
-    $return = parent::internalRemove($this->object->id, $predicate_uri, $predicate, $object, $literal);
+    $return = parent::internalRemove($this->object->id, $predicate_uri, $predicate, $object, $type);
 
     return $return;
   }
@@ -702,10 +731,10 @@ class FedoraRelsInt extends FedoraRelationships {
         $ds = $this->aboutDs->parent['RELS-INT'];
       }
       else {
-        $ds = $this->aboutDs->parent->constructDatastream('RELS-INT', 'X');
-        $ds->label = 'Fedora Relationship Metadata.';
-        $ds->format = 'info:fedora/fedora-system:FedoraRELSInt-1.0';
-        $ds->mimetype = 'application/rdf+xml';
+        $ds = $this->aboutDs->parent->constructDatastream('RELS-INT', INIT_DS_CONTROL_GROUP);
+        $ds->label = INIT_FEDORA_DS_LABEL;
+        $ds->format = INIT_DS_FORMAT;
+        $ds->mimetype = INIT_DS_MIME;
         $this->new = TRUE;
       }
       $this->datastream = $ds;
@@ -725,7 +754,7 @@ class FedoraRelsInt extends FedoraRelationships {
    *   The object for the relationship that is being created.
    * @param int $type
    *   What the attribute type should be. One of the defined literals beginning
-   *   with RELS_TYPE_.
+   *   with RELS_TYPE_. Defaults to RELS_TYPE_URI.
    */
   public function add($predicate_uri, $predicate, $object, $type = RELS_TYPE_URI) {
     $this->initializeDatastream();
@@ -744,8 +773,9 @@ class FedoraRelsInt extends FedoraRelationships {
    *   The predicate tag to filter removed results by.
    * @param string $object
    *   The object for the relationship to filter by.
-   * @param string $type
-   *   Specifies if the object is a literal or if not, what the atttribute type should be.
+   * @param int $type
+   *   What the attribute type should be. One of the defined literals beginning
+   *   with RELS_TYPE_. Defaults to RELS_TYPE_URI.
    *
    * @return boolean
    *   TRUE if relationships were removed, FALSE otherwise.
@@ -772,7 +802,7 @@ class FedoraRelsInt extends FedoraRelationships {
    *   The object for the relationship to filter by.
    * @param int $type
    *   What the attribute type should be. One of the defined literals beginning
-   *   with RELS_TYPE_.
+   *   with RELS_TYPE_. Defaults to RELS_TYPE_URI.
    *
    * @return array
    *   This returns an indexed array with all the matching relationships. The

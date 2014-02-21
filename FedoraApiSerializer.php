@@ -5,6 +5,8 @@
  * something more easily dealt with in PHP.
  */
 
+define("RDF_NAMESPACE", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+
 /**
  * A class to Serialize the XML responses from Fedora into PHP arrays.
  */
@@ -340,7 +342,7 @@ class FedoraApiSerializer {
       $parent = $element->parentNode;
 
       // Remove the 'info:fedora/' from the subject.
-      $subject = $parent->getAttributeNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'about');
+      $subject = $parent->getAttributeNS(RDF_NAMESPACE, 'about');
       $subject = explode('/', $subject);
       unset($subject[0]);
       $subject = implode('/', $subject);
@@ -355,8 +357,8 @@ class FedoraApiSerializer {
       $relationship['predicate'] = $predicate;
 
       // This section parses the object.
-      if ($element->hasAttributeNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'resource')) {
-        $attrib = $element->getAttributeNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'resource');
+      if ($element->hasAttributeNS(RDF_NAMESPACE, 'resource')) {
+        $attrib = $element->getAttributeNS(RDF_NAMESPACE, 'resource');
         $attrib = explode('/', $attrib);
         unset($attrib[0]);
         $attrib = implode('/', $attrib);
