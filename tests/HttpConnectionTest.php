@@ -3,17 +3,28 @@ require_once "HttpConnection.php";
 
 class HttpConnectionTest extends PHPUnit_Framework_TestCase {
 
+  protected function setUp() {
+    $this->xml = <<<foo
+<woo>
+  <test>
+    <xml></xml>
+  </test>
+</woo>
+
+foo;
+  }
+
   function testGet() {
     $connection = new CurlConnection();
-    $page = $connection->getRequest('http://jenkins.discoverygarden.ca:8080/xml.xml');
-    $this->assertEquals("<woo><test><xml/></test></woo>\n", $page['content']);
+    $page = $connection->getRequest('http://discoverygarden.ca/testfiles/woo.xml');
+    $this->assertEquals($this->xml, $page['content']);
   }
 
   function testGetFile() {
     $connection = new CurlConnection();
     $file = tempnam(sys_get_temp_dir(),'test');
-    $page = $connection->getRequest('http://jenkins.discoverygarden.ca:8080/xml.xml', FALSE, $file);
-    $this->assertEquals("<woo><test><xml/></test></woo>\n", file_get_contents($file));
+    $page = $connection->getRequest('http://discoverygarden.ca/testfiles/woo.xml', FALSE, $file);
+    $this->assertEquals($this->xml, file_get_contents($file));
     unlink($file);
   }
 
