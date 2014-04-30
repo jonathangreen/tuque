@@ -1,31 +1,39 @@
+# Tuque [![Build Status](https://travis-ci.org/Islandora/tuque.png?branch=1.x)](https://travis-ci.org/Islandora/tuque)
 
-SUMMARY
--------
+## Introduction
 
-Current build status:
-[![Build Status](https://travis-ci.org/Islandora/tuque.png?branch=1.x)](https://travis-ci.org/Islandora/tuque)
+This is the API that Islandora uses to communicate with Fedora Commons.
 
-CI Server:
-http://jenkins.discoverygarden.ca
+Additional documentation can be found [here](https://github.com/Islandora/islandora/wiki/Build%2C-Access%2C-Modify-and-Delete-Fedora-objects-with-the-Tuque-interface).
 
-REQUIREMENTS
-------------
+## Requirements
 
-PHP 5.3+
+* PHP 5.3+
 
-INSTALLATION
-------------
+## Installation
 
-CONFIGURATION
--------------
+Tuque is expected to be in one of two paths:
 
-Additional Documentation:
-http://jenkins.discoverygarden.ca/job/Tuque/API_Documentation/?
+ * sites/all/libraries/tuque (libraries directory may need to be created)
+ * islandora_folder/libraries/tuque
 
-TROUBLESHOOTING
----------------
+## Troubleshooting/Issues
 
-F.A.Q.
-------
+Having problems or solved a problem? Check out the Islandora google groups for a solution.
 
-https://github.com/Islandora/islandora/wiki/Build,-Access,-Modify-and-Delete-Fedora-objects-with-the-Tuque-interface
+* [Islandora Group](https://groups.google.com/forum/?hl=en&fromgroups#!forum/islandora)
+* [Islandora Dev Group](https://groups.google.com/forum/?hl=en&fromgroups#!forum/islandora-dev)
+
+## Maintainers/Sponsors
+
+Current maintainers:
+
+* [William Panting](https://github.com/willtp87)
+
+## Development
+
+If you would like to contribute to this module, please check out our helpful [Documentation for Developers](https://github.com/Islandora/islandora/wiki#wiki-documentation-for-developers) info, as well as our [Developers](http://islandora.ca/developers) section on the Islandora.ca site.
+
+## License
+
+[GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)
