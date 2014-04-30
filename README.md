@@ -2,13 +2,11 @@
 
 ## Introduction
 
-This is the API that Islandora uses to communicat with Fedora Commons.
+This is the API that Islandora uses to communicate with Fedora Commons.
 
 Additional documentation can be found [here](https://github.com/Islandora/islandora/wiki/Build%2C-Access%2C-Modify-and-Delete-Fedora-objects-with-the-Tuque-interface).
 
 ## Requirements
-
-This module requires the following modules/libraries:
 
 * PHP 5.3+
 
@@ -18,10 +16,6 @@ Tuque is expected to be in one of two paths:
 
  * sites/all/libraries/tuque (libraries directory may need to be created)
  * islandora_folder/libraries/tuque
-
-## Configuration
-
-N/A
 
 ## Troubleshooting/Issues
 
