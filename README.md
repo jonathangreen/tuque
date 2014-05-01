@@ -2,9 +2,7 @@
 
 ## Introduction
 
-This is the API that Islandora uses to communicate with Fedora Commons.
-
-Additional documentation can be found [here](https://github.com/Islandora/islandora/wiki/Build%2C-Access%2C-Modify-and-Delete-Fedora-objects-with-the-Tuque-interface).
+This is the [API](https://github.com/Islandora/islandora/wiki/Working-With-Fedora-Objects-Programmatically-Via-Tuque) that Islandora uses to communicate with Fedora Commons.
 
 ## Requirements
 
