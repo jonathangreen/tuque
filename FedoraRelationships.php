@@ -49,7 +49,7 @@ abstract class FedoraRelationships extends MagicProperty {
   protected $new = FALSE;
 
   /**
-   * Wether or not to auto-commit RELS.
+   * Whether or not to auto-commit RELS.
    *
    * @var bool
    *
