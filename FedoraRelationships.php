@@ -136,7 +136,7 @@ abstract class FedoraRelationships extends MagicProperty {
   }
 
   /**
-   * Initialize the datastrem that we are using. We use this function to
+   * Initialize the datastream that we are using. We use this function to
    * delay this as long as possible, in case it never has to be called.
    */
   abstract protected function initializeDatastream();
@@ -580,7 +580,7 @@ class FedoraRelsExt extends FedoraRelationships {
   }
 
   /**
-   * Initialize the datastrem that we are using. We use this function to
+   * Initialize the datastream that we are using. We use this function to
    * delay this as long as possible, in case it never has to be called.
    */
   protected function initializeDatastream() {
