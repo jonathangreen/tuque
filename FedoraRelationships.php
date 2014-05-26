@@ -39,7 +39,7 @@ require_once 'MagicProperty.php';
  *
  * @todo potentially we should validate the predicate URI
  */
-class FedoraRelationships extends MagicProperty {
+abstract class FedoraRelationships extends MagicProperty {
 
   /**
    * Wheather or not the DS has yet to be ingested.
@@ -49,7 +49,7 @@ class FedoraRelationships extends MagicProperty {
   protected $new = FALSE;
 
   /**
-   * Wheather or not to auto-commit RELS.
+   * Whether or not to auto-commit RELS.
    *
    * @var bool
    *
@@ -123,6 +123,7 @@ class FedoraRelationships extends MagicProperty {
         }
         // Set cache if unsetting autoCommit.
         else if ($value == FALSE) {
+          $this->initializeDatastream();
           $this->domCache = $this->getDom();
           $this->nonMagicAutoCommit = $value;
         }
@@ -133,6 +134,13 @@ class FedoraRelationships extends MagicProperty {
         break;
     }
   }
+
+  /**
+   * Initialize the datastream that we are using. We use this function to
+   * delay this as long as possible, in case it never has to be called.
+   */
+  abstract protected function initializeDatastream();
+
   /**
    * Add a new namespace to the relationship xml. Doing this before adding new
    * predicates with different URIs makes the XML look a little prettier.
@@ -247,7 +255,7 @@ class FedoraRelationships extends MagicProperty {
    *
    * This updates the associated datastreams content, or the cache if
    * autocommit is disabled.
-   * 
+   *
    * @param DOMDocument $document
    *   The DOMDocument to save.
    */
@@ -572,7 +580,7 @@ class FedoraRelsExt extends FedoraRelationships {
   }
 
   /**
-   * Initialize the datastrem that we are using. We use this function to
+   * Initialize the datastream that we are using. We use this function to
    * delay this as long as possible, in case it never has to be called.
    */
   protected function initializeDatastream() {
