@@ -1250,6 +1250,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
         $this->datastreamHistory[0] = $this->datastreamInfo;
       }
     }
+    $this->parent->refresh();
   }
 
   /**
