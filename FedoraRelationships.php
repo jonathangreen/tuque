@@ -381,7 +381,7 @@ abstract class FedoraRelationships extends MagicProperty {
         $xpath .= '/pred_uri:' . $predicate;
       }
       else {
-        $xpath .= '/' . $predicate;
+        $xpath .= "/*[local-name()='{$predicate}']";
       }
     }
 
