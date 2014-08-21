@@ -153,4 +153,28 @@ abstract class MagicProperty {
       return $this->$generalmethod('unset',NULL);
     }
   }
+
+  /**
+   * Test if a property appears to be magical.
+   *
+   * @param string $name
+   *   The name of a property to test.
+   *
+   * @return bool
+   *   TRUE if the property appears to be magically implemented; otherwise,
+   *   FALSE.
+   */
+  protected function propertyIsMagical($name) {
+    $generalmethod = $this->getGeneralMagicPropertyMethodName($name);
+    if (method_exists($this, $generalmethod)) {
+      return TRUE;
+    }
+    $ops = array('set', 'isset', 'unset', 'get');
+    foreach ($ops as $op) {
+      if (method_exists($this, "{$generalmethod}{$op}")) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
 }
