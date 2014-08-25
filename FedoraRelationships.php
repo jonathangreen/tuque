@@ -839,6 +839,14 @@ class FedoraRelsInt extends FedoraRelationships {
    *   @endcode
    */
   public function get($predicate_uri = NULL, $predicate = NULL, $object = NULL, $type = RELS_TYPE_URI) {
+    // XXX: Attempting to initialized RELS-INT without writing it (as happens
+    // with get() calls across different datastreams leads to multiple RELS-INT
+    // datastreams being constructed... Should one then attempt to make
+    // adjustments to more than one, each tries to write their own datastream.
+    // By avoiding "initializing", we can avoid this issue.
+    if ($this->datastream === NULL) {
+      return array();
+    }
     $this->initializeDatastream();
     return parent::internalGet("{$this->aboutDs->parent->id}/{$this->aboutDs->id}", $predicate_uri, $predicate, $object, $type);
   }
