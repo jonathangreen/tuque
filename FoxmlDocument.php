@@ -164,7 +164,7 @@ class FoxmlDocument extends DOMDocument {
     $content = $this->createDatastreamContentElement();
     $xml_dom = new DOMDocument();
     if (!$xml_dom->loadXML($ds->content)) {
-      throw new RepositoryXmlError("{$ds->id} on {$ds->parent->id} contains invalid XML");
+      throw new RepositoryXmlError("{$ds->id} on {$ds->parent->id} contains invalid XML", NULL, NULL);
     }
     $child = $this->importNode($xml_dom->documentElement, TRUE);
     $version_node = $this->root->appendChild($datastream)->appendChild($version);
