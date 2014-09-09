@@ -844,7 +844,7 @@ class FedoraRelsInt extends FedoraRelationships {
     // datastreams being constructed... Should one then attempt to make
     // modifications to more than one, each tries to write their own datastream.
     // By avoiding "initializing", we avoid this issue.
-    if ($this->datastream === NULL) {
+    if (!isset($this->aboutDs->parent['RELS-INT'])) {
       return array();
     }
     $this->initializeDatastream();
