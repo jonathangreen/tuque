@@ -846,14 +846,13 @@ class FedoraObject extends AbstractFedoraObject {
           "Copied datastream from {$ds->parent->id}.",
       );
       $temp = tempnam(sys_get_temp_dir(), 'tuque');
-      $return = $ds->getContent($temp);
-      if ($return === TRUE) {
-        $type = 'file';
-        $content = $temp;
-      }
-      else {
+      if ($ds->controlGroup == 'E' || $ds->controlGroup == 'R' || $ds->getContent($temp) !== TRUE) {
         $type = 'url';
         $content = $ds->content;
+      }
+      else {
+        $type = 'file';
+        $content = $temp;
       }
       $dsinfo = $this->repository->api->m->addDatastream($this->id, $ds->id, $type, $content, $params);
       unlink($temp);
