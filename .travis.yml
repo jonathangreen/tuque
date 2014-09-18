@@ -6,7 +6,7 @@ php:
 env:
   - FEDORA_VERSION="3.6.2"
   - FEDORA_VERSION="3.7.0"
-# broken right now, should be fixed
+# broken right now, should be fixed.
 #  - FEDORA_VERSION="3.5"
 before_script:
   - mysql -u root -e "create database fedora;"
