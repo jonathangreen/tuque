@@ -16,14 +16,14 @@ foo;
 
   function testGet() {
     $connection = new CurlConnection();
-    $page = $connection->getRequest('http://discoverygarden.ca/testfiles/woo.xml');
+    $page = $connection->getRequest('http://office.discoverygarden.ca/testfiles/woo.xml');
     $this->assertEquals($this->xml, $page['content']);
   }
 
   function testGetFile() {
     $connection = new CurlConnection();
     $file = tempnam(sys_get_temp_dir(),'test');
-    $page = $connection->getRequest('http://discoverygarden.ca/testfiles/woo.xml', FALSE, $file);
+    $page = $connection->getRequest('http://office.discoverygarden.ca/testfiles/woo.xml', FALSE, $file);
     $this->assertEquals($this->xml, file_get_contents($file));
     unlink($file);
   }
