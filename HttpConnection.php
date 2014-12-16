@@ -421,6 +421,7 @@ class CurlConnection extends HttpConnection {
 
       $response = array();
       $response['status'] = $info['http_code'];
+      $http_error_string = '';
       if ($file == NULL) {
         $response['headers'] = substr($curl_response, 0, $info['header_size'] - 1);
         $response['content'] = substr($curl_response, $info['header_size']);
