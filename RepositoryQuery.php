@@ -26,7 +26,7 @@ class RepositoryQuery {
    * Parse the passed in Sparql XML string into a more easily usable format.
    *
    * @param string $sparql
-   *   A string containing Sparql result XML. Currently only handles pure Sparql XML, but not Sparql_W3C
+   *   A string containing Sparql result XML.
    *
    * @return array
    *   Indexed (numerical) array, containing a number of associative arrays,
@@ -62,9 +62,7 @@ class RepositoryQuery {
           $val['type'] = 'pid';
         }
         else {
-          // @TODO Should avoid storing not bound variables/elements?, means those 
-          // with attribute bound="false". Standard SPARQL_W3C does not return unbound variables,
-          // but implementing this on current results could break existing code.
+          //deal with any other types
           $val['type'] = 'literal';
           $val['value'] = (string) $xmlReader->readInnerXML();
         }
