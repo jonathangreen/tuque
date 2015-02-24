@@ -35,36 +35,42 @@ class RepositoryQuery {
    *   off, to facilitate their use as PIDs.
    */
   public static function parseSparqlResults($sparql) {
-    // Load the results into a SimpleXMLElement.
-    $doc = new SimpleXMLElement($sparql, 0, FALSE, self::SIMPLE_XML_NAMESPACE);
-
+    // Load the results into a XMLReader Object.
+    $xmlReader = new XMLReader();
+    $xmlReader->xml($sparql);
+    
     // Storage.
     $results = array();
     // Build the results.
-    foreach ($doc->results->children() as $result) {
-      // Built a single result.
-      $r = array();
-      foreach ($result->children() as $element) {
+    while ($xmlReader->read()) {
+      if ($xmlReader->localName === 'result') {
+        if ($xmlReader->nodeType == XMLReader::ELEMENT) {
+          // Initialize a single result.
+          $r = array();
+        }
+        elseif ($xmlReader->nodeType == XMLReader::END_ELEMENT) {
+          // Add result to results
+          $results[] = $r;
+        }
+      }
+      elseif ($xmlReader->nodeType == XMLReader::ELEMENT && $xmlReader->depth == 3) {
         $val = array();
-
-        $attrs = $element->attributes();
-        if (!empty($attrs['uri'])) {
-          $val['value'] = self::pidUriToBarePid((string) $attrs['uri']);
-          $val['uri'] = (string) $attrs['uri'];
+        $uri = $xmlReader->getAttribute('uri');
+        if ($uri !== NULL) {
+          $val['value'] = self::pidUriToBarePid($uri);
+          $val['uri'] = (string) $uri;
           $val['type'] = 'pid';
         }
         else {
+          //deal with any other types
           $val['type'] = 'literal';
-          $val['value'] = (string) $element;
+          $val['value'] = (string) $xmlReader->readInnerXML();
         }
-
-        // Map the name to the value in the array.
-        $r[$element->getName()] = $val;
+        $r[$xmlReader->localName] = $val;
       }
-
-      // Add the single result to the set to return.
-      $results[] = $r;
     }
+
+    $xmlReader->close();
     return $results;
   }
 
