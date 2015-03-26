@@ -343,6 +343,8 @@ abstract class FedoraRelationships extends MagicProperty {
   /**
    * This function is used to create an xpath expression based on the input.
    *
+   * @remarks FedoraRelationships::getXpathResults can have a predicate without
+   *   a predicate_uri. This is potentially dangerous behaviour.
    * @param DOMXPath $xpath_object
    *   The current xpath object.
    * @param string $subject
