@@ -218,6 +218,10 @@ class ObjectTest extends PHPUnit_Framework_TestCase {
   public function testObjectModelsAdd() {
     $this->object->models = array('router:killah', 'jon:is:great');
     $this->assertEquals(array('router:killah', 'jon:is:great', 'fedora-system:FedoraObject-3.0'), $this->object->models);
+    $this->object->models = array('new:model');
+    $this->assertEquals(array('new:model', 'fedora-system:FedoraObject-3.0'), $this->object->models);
+    $this->object->models = 'string:model';
+    $this->assertEquals(array('string:model', 'fedora-system:FedoraObject-3.0'), $this->object->models);
   }
 
   public function testDatastreamMutation() {
