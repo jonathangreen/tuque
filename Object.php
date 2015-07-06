@@ -431,6 +431,9 @@ abstract class AbstractFedoraObject extends AbstractObject {
             $this->relationships->add(FEDORA_MODEL_URI, 'hasModel', $model);
           }
         }
+        foreach (array_diff($this->models, $models) as $model) {
+          $this->relationships->remove(FEDORA_MODEL_URI, 'hasModel', $model);
+        }
         break;
 
       case 'unset':
