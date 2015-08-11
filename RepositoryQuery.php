@@ -64,7 +64,7 @@ class RepositoryQuery {
         else {
           //deal with any other types
           $val['type'] = 'literal';
-          $val['value'] = (string) $xmlReader->readInnerXML();
+          $val['value'] = (string) $xmlReader->readString();
         }
         $r[$xmlReader->localName] = $val;
       }
