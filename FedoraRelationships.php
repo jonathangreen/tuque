@@ -375,7 +375,13 @@ abstract class FedoraRelationships extends MagicProperty {
     }
 
     if ($predicate == NULL) {
-      $xpath .= '/*';
+      if ($predicate_uri != NULL) {
+        $xpath_object->registerNamespace('pred_uri', $predicate_uri);
+        $xpath .= '/pred_uri:*';
+      }
+      else {
+        $xpath .= '/*';
+      }
     }
     else {
       if ($predicate_uri != NULL) {
