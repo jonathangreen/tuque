@@ -655,8 +655,8 @@ class CurlConnection extends HttpConnection {
       case 'file':
         $fh = fopen($file, 'r');
         $size = filesize($file);
-        // Determine if this is 32-bit PHP (based on the integer size).
-        if (PHP_INT_SIZE === 4) {
+        // Determine if this is Windows, plus 32-bit PHP (based on the integer size).
+        if (($this->isWindows()) && (PHP_INT_SIZE === 4)) {
           // Retrieve the file size as a string.
           $size = $this->filesize_php32bit($file);
           if ($size !== FALSE) {
