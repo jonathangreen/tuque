@@ -32,5 +32,5 @@ Example:
 * Does this change require any other modifications to be made to the repository (ie. Regeneration activity, etc.)? 
 * Could this change impact execution of existing code?
 
-# Interest parties
+# Interested parties
 Tag (@ mention) interested parties or, if unsure, @Islandora/7-x-1-x-committers
