@@ -653,6 +653,7 @@ class CurlConnection extends HttpConnection {
         break;
 
       case 'file':
+        clearstatcache(TRUE, $file);
         $fh = fopen($file, 'r');
         $size = filesize($file);
         // Determine if this is Windows, plus 32-bit PHP (based on the integer size).
