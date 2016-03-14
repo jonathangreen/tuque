@@ -559,7 +559,7 @@ class NewFedoraObject extends AbstractFedoraObject {
     if (!isset($this->datastreams[$ds->id])) {
       // The datastream does not already belong to this object, aka was created
       // by this object.
-      if ($ds->parent != $this) {
+      if ($ds->parent !== $this) {
         // Create a NewFedoraDatastream copy.
         $this->createNewDatastreamCopy($ds);
       }
