@@ -204,8 +204,8 @@ class DatastreamTest extends PHPUnit_Framework_TestCase {
 
   public function testContentSetUrl() {
     $temp = tempnam(sys_get_temp_dir(), 'tuque');
-    $this->ds->setContentFromUrl('http://office.discoverygarden.ca/testfiles/test.png');
-    $actual = file_get_contents('http://office.discoverygarden.ca/testfiles/test.png');
+    $this->ds->setContentFromUrl(TEST_PNG_URL);
+    $actual = file_get_contents(TEST_PNG_URL);
     $this->assertEquals($actual, $this->ds->content);
     $this->ds->getContent($temp);
     $this->assertEquals($actual, file_get_contents($temp));
@@ -243,7 +243,6 @@ class DatastreamTest extends PHPUnit_Framework_TestCase {
   }
 
   public function testContentXFromUrl() {
-    $url = 'http://office.discoverygarden.ca/testfiles/woo.xml';
     $data = <<<foo
 <woo>
   <test>
@@ -251,7 +250,7 @@ class DatastreamTest extends PHPUnit_Framework_TestCase {
   </test>
 </woo>
 foo;
-    $this->x->setContentFromUrl($url);
+    $this->x->setContentFromUrl(TEST_XML_URL);
     $newds = new FedoraDatastream($this->testDsidX, $this->object, $this->repository);
     $this->assertEquals($data, trim($newds->content));
   }
