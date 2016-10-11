@@ -7,7 +7,7 @@
 
 /**
  * This abstract class allows us to implement PHP magic properties by defining
- * a private method in the class that entends it. It attemtps to make the magic
+ * a private method in the class that extends it. It attempts to make the magic
  * properties behave as much like normal PHP properties as possible.
  *
  * This code lets the user define a new method that will be called when a
@@ -52,8 +52,8 @@ abstract class MagicProperty {
 
   /**
    * This implements the PHP __get function which is utilized for reading data
-   * from inaccessible properties. It wraps it by calling the appropriatly named
-   * method in the inherteting class.
+   * from inaccessible properties. It wraps it by calling the appropriately named
+   * method in the inheriting class.
    * http://php.net/manual/en/language.oop5.overloading.php
    *
    * @param string $name
@@ -87,7 +87,7 @@ abstract class MagicProperty {
   /**
    * This implements the PHP __isset function which is utilized for testing if
    * data in inaccessable properties is set. This function calls the
-   * approprietly named method in the inhereting class.
+   * appropriately named method in the inheriting class.
    * http://php.net/manual/en/language.oop5.overloading.php
    *
    * @param string $name
