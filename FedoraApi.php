@@ -777,13 +777,16 @@ class FedoraApiM {
    *   - context: The export context, which determines how datastream URLs and
    *     content are represented. Options: public (default), migrate, archive.
    *   - encoding: The preferred encoding of the exported XML.
+   * @param string $file
+   *   An optional writable filename to which to download the export.
    *
    * @throws RepositoryException
    *
-   * @return string
-   *   A string containing the requested XML.
+   * @return string|bool
+   *   If $file was provided, boolean TRUE; otherwise, a string containing
+   *   the response.
    */
-  public function export($pid, $params = array()) {
+  public function export($pid, $params = array(), $file = NULL) {
     $pid = urlencode($pid);
     $request = "/objects/$pid/export";
     $separator = '?';
@@ -792,8 +795,8 @@ class FedoraApiM {
     $this->connection->addParamArray($request, $separator, $params, 'format');
     $this->connection->addParamArray($request, $separator, $params, 'encoding');
 
-    $response = $this->connection->getRequest($request);
-    $response = $this->serializer->export($response);
+    $response = $this->connection->getRequest($request, FALSE, $file);
+    $response = $this->serializer->export($response, $file);
     return $response;
   }
 
@@ -964,20 +967,23 @@ class FedoraApiM {
    *
    * @param string $pid
    *   Persistent identifier of the digital object.
+   * @param string $file
+   *   An optional writable filename to which to download the FOXML.
    *
    * @throws RepositoryException
    *
-   * @return string
-   *   A string containing the objects foxml
+   * @return string|bool
+   *   If $file was provided, boolean TRUE; otherwise, a string containing
+   *   the objects FOXML.
    *
    * @see FedoraApiM::export
    */
-  public function getObjectXml($pid) {
+  public function getObjectXml($pid, $file = NULL) {
     $pid = urlencode($pid);
 
     $request = "/objects/{$pid}/objectXML";
-    $response = $this->connection->getRequest($request);
-    $response = $this->serializer->getObjectXml($response);
+    $response = $this->connection->getRequest($request, FALSE, $file);
+    $response = $this->serializer->getObjectXml($response, $file);
     return $response;
   }
 

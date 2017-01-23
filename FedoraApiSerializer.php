@@ -286,8 +286,10 @@ class FedoraApiSerializer {
   /**
    * Serializes the data returned in FedoraApiM::export()
    */
-  public function export($request) {
-    return $request['content'];
+  public function export($request, $file = NULL) {
+    return $file ?
+      TRUE :
+      $request['content'];
   }
 
   /**
@@ -323,8 +325,10 @@ class FedoraApiSerializer {
   /**
    * Serializes the data returned in FedoraApiM::getObjectXml()
    */
-  public function getObjectXml($request) {
-    return $request['content'];
+  public function getObjectXml($request, $file = NULL) {
+    return $file ?
+      TRUE :
+      $request['content'];
   }
 
   /**
