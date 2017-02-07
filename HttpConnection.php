@@ -443,7 +443,7 @@ class CurlConnection extends HttpConnection {
    * @return array
    *   Array has keys: (status, headers, content).
    */
- protected function doCurlRequest($file = NULL) {
+ protected function doCurlRequest($file = NULL, $file_handle = NULL) {
     $remaining_attempts = 3;
     while ($remaining_attempts > 0) {
       $curl_response = curl_exec(self::$curlContext);
@@ -476,6 +476,9 @@ class CurlConnection extends HttpConnection {
       }
       $blocked = $info['http_code'] == 409;
       $remaining_attempts = $blocked ? --$remaining_attempts : 0;
+      if (!is_null($file_handle)) {
+        rewind($file_handle);
+      }
     }
     // Throw an exception if this isn't a 2XX response.
     $success = preg_match("/^2/", $info['http_code']);
@@ -689,7 +692,7 @@ class CurlConnection extends HttpConnection {
     // Ugly substitute for a try catch finally block.
     $exception = NULL;
     try {
-      $results = $this->doCurlRequest();
+      $results = isset($fh) ? $this->doCurlRequest(NULL, $fh) : $this->doCurlRequest(NULL);
     } catch (HttpConnectionException $e) {
       $exception = $e;
     }

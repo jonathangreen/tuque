@@ -331,7 +331,7 @@ foo;
    * open references to the same object.  This should be investigated.
    *
    * @expectedException        RepositoryException
-   * @expectedExceptionCode 500
+   * @expectedExceptionCode 409
    */
   public function testLocking() {
     $ds1 = new FedoraDatastream($this->testDsid, $this->object, $this->repository);
