@@ -7,7 +7,9 @@ require_once "FedoraRelationships.php";
  * @todo remove any calls to StringEqualsXmlString because it uses the
  *  domdocument cannonicalization function that doesn't work properly on cent
  */
-class FedoraRelationshipsTest extends PHPUnit_Framework_TestCase {
+use \PHPUnit\Framework\TestCase;
+
+class FedoraRelationshipsTest extends TestCase {
 
   function testAutoCommit() {
     $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);

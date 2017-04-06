@@ -9,7 +9,9 @@ require_once 'FedoraApiSerializer.php';
 require_once 'TestHelpers.php';
 require_once 'FedoraDate.php';
 
-class FedoraApiIngestTest extends PHPUnit_Framework_TestCase {
+use \PHPUnit\Framework\TestCase;
+
+class FedoraApiIngestTest extends TestCase {
   protected $pids = array();
   protected $files = array();
 
@@ -230,7 +232,7 @@ FOXML;
 }
 
 
-class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase {
+class FedoraApiFindObjectsTest extends TestCase {
 
   public $apim;
   public $apia;

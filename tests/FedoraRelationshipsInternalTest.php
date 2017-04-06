@@ -1,7 +1,9 @@
 <?php
 require_once "FedoraRelationships.php";
 
-class FedoraRelationshipsInternalTest extends PHPUnit_Framework_TestCase {
+use \PHPUnit\Framework\TestCase;
+
+class FedoraRelationshipsInternalTest extends TestCase {
 
   function setUp() {
     $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);

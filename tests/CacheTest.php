@@ -1,7 +1,9 @@
 <?php
 require_once "Cache.php";
 
-class SimpleCacheTest extends PHPUnit_Framework_TestCase {
+use \PHPUnit\Framework\TestCase;
+
+class SimpleCacheTest extends TestCase {
 
   function testAdd() {
     SimpleCache::resetCache();

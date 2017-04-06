@@ -1,7 +1,9 @@
 <?php
 require_once "FedoraDate.php";
 
-class FedoraDateTest extends PHPUnit_Framework_TestCase {
+use \PHPUnit\Framework\TestCase;
+
+class FedoraDateTest extends TestCase {
 
   function testToString() {
     $date = new FedoraDate("2012-03-13T19:15:07.529Z");

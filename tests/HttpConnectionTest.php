@@ -1,7 +1,9 @@
 <?php
 require_once "HttpConnection.php";
 
-class HttpConnectionTest extends PHPUnit_Framework_TestCase {
+use \PHPUnit\Framework\TestCase;
+
+class HttpConnectionTest extends TestCase {
 
   protected function setUp() {
     $this->xml = <<<foo

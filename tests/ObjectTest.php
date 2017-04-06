@@ -7,7 +7,9 @@ require_once 'Repository.php';
 require_once 'Cache.php';
 require_once 'TestHelpers.php';
 
-class ObjectTest extends PHPUnit_Framework_TestCase {
+use \PHPUnit\Framework\TestCase;
+
+class ObjectTest extends TestCase {
 
   protected function setUp() {
     $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
