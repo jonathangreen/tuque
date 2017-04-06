@@ -9,6 +9,7 @@ require_once 'Cache.php';
 require_once 'TestHelpers.php';
 
 use \PHPUnit\Framework\TestCase;
+use \PHPUnit\Framework\Error;
 
 class NewDatastreamTest extends TestCase {
 
@@ -35,7 +36,7 @@ class NewDatastreamTest extends TestCase {
   }
 
   /**
-   * @expectedException PHPUnit_Framework_Error
+   * @expectedException Error
    */
   public function testConstructor() {
     $x = new NewFedoraDatastream('foo', 'zap', $this->object, $this->repository);
@@ -53,14 +54,14 @@ class NewDatastreamTest extends TestCase {
   }
 
   /**
-   * @expectedException PHPUnit_Framework_Error
+   * @expectedException Error
    */
   public function testUnsetControlGroup() {
     unset($this->x->controlGroup);
   }
 
   /**
-   * @expectedException PHPUnit_Framework_Error
+   * @expectedException Error
    */
   public function testSetControlGroup() {
     $this->x->controlGroup = 'M';
