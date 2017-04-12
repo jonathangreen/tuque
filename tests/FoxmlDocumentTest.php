@@ -8,7 +8,9 @@ require_once 'Cache.php';
 require_once 'TestHelpers.php';
 require_once 'FoxmlDocument.php';
 
-class FoxmlDocumentTest extends PHPUnit_Framework_TestCase {
+use \PHPUnit\Framework\TestCase;
+
+class FoxmlDocumentTest extends TestCase {
 
   protected function setUp() {
     $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);

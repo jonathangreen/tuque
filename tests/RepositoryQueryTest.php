@@ -8,7 +8,9 @@ require_once 'TestHelpers.php';
 require_once 'RepositoryConnection.php';
 require_once 'FedoraApi.php';
 
-class RepositoryQueryTest extends PHPUnit_Framework_TestCase {
+use \PHPUnit\Framework\TestCase;
+
+class RepositoryQueryTest extends TestCase {
 
   protected function setUp() {
     $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);

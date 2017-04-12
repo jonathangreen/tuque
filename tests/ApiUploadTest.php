@@ -1,7 +1,9 @@
 <?php
 require_once 'TestHelpers.php';
 
-class UploadTest extends PHPUnit_Framework_TestCase {
+use \PHPUnit\Framework\TestCase;
+
+class UploadTest extends TestCase {
 
   protected function setUp() {
     $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
