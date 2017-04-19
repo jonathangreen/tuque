@@ -1,25 +1,30 @@
 <?php
 
-class FedoraTestHelpers {
-  static function randomString($length) {
-    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $string = '';
+namespace Islandora\Tuque\Tests;
 
-    for ($p = 0; $p < $length; $p++) {
-        $string .= $characters[mt_rand(0, (strlen($characters)-1))];
+class TestHelpers
+{
+    public static function randomString($length)
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $string = '';
+
+        for ($p = 0; $p < $length; $p++) {
+            $string .= $characters[mt_rand(0, (strlen($characters)-1))];
+        }
+
+        return $string;
     }
 
-    return $string;
-  }
+    public static function randomCharString($length)
+    {
+        $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $string = '';
 
-  static function randomCharString($length) {
-    $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $string = '';
+        for ($p = 0; $p < $length; $p++) {
+            $string .= $characters[mt_rand(0, (strlen($characters)-1))];
+        }
 
-    for ($p = 0; $p < $length; $p++) {
-        $string .= $characters[mt_rand(0, (strlen($characters)-1))];
+        return $string;
     }
-
-    return $string;
-  }
 }

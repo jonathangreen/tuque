@@ -1,56 +1,67 @@
 <?php
-require_once 'TestHelpers.php';
 
+namespace Islandora\Tuque\Tests;
+
+use Islandora\Tuque\Api\FedoraApi;
+use Islandora\Tuque\Cache\SimpleCache;
+use Islandora\Tuque\Connection\RepositoryConnection;
+use Islandora\Tuque\Repository\FedoraRepository;
 use \PHPUnit\Framework\TestCase;
 
-class UploadTest extends TestCase {
+class ApiUploadTest extends TestCase
+{
+    protected $api;
+    protected $repository;
 
-  protected function setUp() {
-    $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
-    $this->api = new FedoraApi($connection);
+    public function testUploadString()
+    {
+        $this->markTestIncomplete();
+        $filepath = getcwd() . '/tests/test_data/test.png';
+        $return = $this->api->m->upload('string', 'string string string');
+        print_r($return);
+    }
 
-    $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
-    $this->api = new FedoraApi($connection);
-    $cache = new SimpleCache();
-    $this->repository = new FedoraRepository($this->api, $cache);
-  }
+    public function testManagedAdd()
+    {
+        $string1 = TestHelpers::randomString(10);
+        $string2 = TestHelpers::randomString(10);
+        $testPid = "$string1:$string2";
 
-  public function testUploadString() {
-    $this->markTestIncomplete();
-    $filepath = getcwd() . '/tests/test_data/test.png';
-    $return = $this->api->m->upload('string', 'string string string');
-    print_r($return);
-  }
+        $object = $this->repository->constructObject($testPid);
+        $ds = $object->constructDatastream('test1', 'M');
+        $filepath = getcwd() . '/tests/test_data/test.png';
+        $ds->setContentFromFile($filepath);
+        $ds->mimetype = 'image/png';
+        $object->ingestDatastream($ds);
+        $ds = $object->constructDatastream('test2', 'M');
+        $filepath = getcwd() . '/tests/test_data/test.png';
+        $ds->setContentFromString('this is a test... test test test');
+        $ds->mimetype = 'text/plain';
+        $object->ingestDatastream($ds);
+        $this->repository->ingestObject($object);
 
-  public function testManagedAdd() {
-    $string1 = FedoraTestHelpers::randomString(10);
-    $string2 = FedoraTestHelpers::randomString(10);
-    $testPid = "$string1:$string2";
+        $cache = new SimpleCache();
+        $repository = new FedoraRepository($this->api, $cache);
 
-    $object = $this->repository->constructObject($testPid);
-    $ds = $object->constructDatastream('test1', 'M');
-    $filepath = getcwd() . '/tests/test_data/test.png';
-    $ds->setContentFromFile($filepath);
-    $ds->mimetype = 'image/png';
-    $object->ingestDatastream($ds);
-    $ds = $object->constructDatastream('test2', 'M');
-    $filepath = getcwd() . '/tests/test_data/test.png';
-    $ds->setContentFromString('this is a test... test test test');
-    $ds->mimetype = 'text/plain';
-    $object->ingestDatastream($ds);
-    $this->repository->ingestObject($object);
+        $object = $repository->getObject($testPid);
+        $this->assertTrue(isset($object['test1']));
+        $this->assertTrue(isset($object['test2']));
 
-    $cache = new SimpleCache();
-    $repository = new FedoraRepository($this->api, $cache);
+        $this->assertEquals('M', $object['test1']->controlGroup);
+        $this->assertEquals('M', $object['test2']->controlGroup);
 
-    $object = $repository->getObject($testPid);
-    $this->assertTrue(isset($object['test1']));
-    $this->assertTrue(isset($object['test2']));
+        $this->assertEquals(file_get_contents($filepath), $object['test1']->content);
+        $this->assertEquals('this is a test... test test test', $object['test2']->content);
+    }
 
-    $this->assertEquals('M', $object['test1']->controlGroup);
-    $this->assertEquals('M', $object['test2']->controlGroup);
+    protected function setUp()
+    {
+        $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+        $this->api = new FedoraApi($connection);
 
-    $this->assertEquals(file_get_contents($filepath), $object['test1']->content);
-    $this->assertEquals('this is a test... test test test', $object['test2']->content);
-  }
+        $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+        $this->api = new FedoraApi($connection);
+        $cache = new SimpleCache();
+        $this->repository = new FedoraRepository($this->api, $cache);
+    }
 }

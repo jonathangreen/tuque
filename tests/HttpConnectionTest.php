@@ -1,12 +1,16 @@
 <?php
-require_once "HttpConnection.php";
 
+namespace Islandora\Tuque\Tests;
+
+use Islandora\Tuque\Connection\CurlConnection;
 use \PHPUnit\Framework\TestCase;
 
-class HttpConnectionTest extends TestCase {
+class HttpConnectionTest extends TestCase
+{
 
-  protected function setUp() {
-    $this->xml = <<<foo
+    protected function setUp()
+    {
+        $this->xml = <<<foo
 <woo>
   <test>
     <xml></xml>
@@ -14,20 +18,21 @@ class HttpConnectionTest extends TestCase {
 </woo>
 
 foo;
-  }
+    }
 
-  function testGet() {
-    $connection = new CurlConnection();
-    $page = $connection->getRequest(TEST_XML_URL);
-    $this->assertEquals($this->xml, $page['content']);
-  }
+    function testGet()
+    {
+        $connection = new CurlConnection();
+        $page = $connection->getRequest(TEST_XML_URL);
+        $this->assertEquals($this->xml, $page['content']);
+    }
 
-  function testGetFile() {
-    $connection = new CurlConnection();
-    $file = tempnam(sys_get_temp_dir(),'test');
-    $page = $connection->getRequest(TEST_XML_URL, FALSE, $file);
-    $this->assertEquals($this->xml, file_get_contents($file));
-    unlink($file);
-  }
-
+    function testGetFile()
+    {
+        $connection = new CurlConnection();
+        $file = tempnam(sys_get_temp_dir(), 'test');
+        $page = $connection->getRequest(TEST_XML_URL, false, $file);
+        $this->assertEquals($this->xml, file_get_contents($file));
+        unlink($file);
+    }
 }
