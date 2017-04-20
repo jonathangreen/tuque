@@ -2,7 +2,7 @@
 
 [![Minimum PHP Version](https://img.shields.io/badge/php-%3E%3D%205.5-8892BF.svg?style=flat-square)](https://php.net/)
 [![Build Status](https://travis-ci.org/jonathangreen/tuque.png?branch=master)](https://travis-ci.org/jonathangreen/tuque)
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0))
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 [![codecov](https://codecov.io/gh/jonathangreen/tuque/branch/master/graph/badge.svg)](https://codecov.io/gh/jonathangreen/tuque)
 
 ## Introduction
@@ -11,7 +11,7 @@ This is the [API](https://github.com/Islandora/islandora/wiki/Working-With-Fedor
 
 ## Requirements
 
-* PHP 5.3+
+* PHP 5.5+
 
 ## Configuration
 
