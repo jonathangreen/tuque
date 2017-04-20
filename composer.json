@@ -1,12 +1,23 @@
 {
-  "name": "islandora/tuque",
-  "description": "A PHP API for connecting to the Fedora Commons repository software.",
-  "homepage": "http://islandora.ca",
+  "name": "jonathangreen/tuque",
+  "description": "A PHP API for connecting to the Fedora Commons 3.x repository software.",
+  "homepage": "http://github.com/jonathangreen/tuque",
   "license": "GPLv3",
+  "type": "library",
+  "keywords": ["fedora","fedora commons","fcrepo"],
+  "authors": [
+    {
+      "name": "Jonathan Green",
+      "email": "jonathan@razzard.com",
+      "role": "Maintainer"
+    }
+  ],
   "require": {
-    "php": ">=5.3.0",
-    "lib-curl": "*",
-    "lib-libxml": "*"
+    "php": ">=5.5.0",
+    "ext-curl": "*",
+    "ext-xml": "*",
+    "ext-xsl": "*",
+    "ext-mbstring": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "^4.8.35",
