@@ -125,8 +125,8 @@ class FedoraRepository extends AbstractRepository
     protected function getUuid()
     {
         $bytes = openssl_random_pseudo_bytes(2);
-        $add_mask = $this->convertHexToBin('4000');
-        $negate_mask = $this->convertHexToBin('C000');
+        $add_mask = hex2bin('4000');
+        $negate_mask = hex2bin('C000');
         // Make start with 11.
         $manipulated_bytes = $bytes | $negate_mask;
         // Make start with 01.
@@ -143,39 +143,6 @@ class FedoraRepository extends AbstractRepository
             $hex_string_10,
             bin2hex(openssl_random_pseudo_bytes(6))
         );
-    }
-
-    /**
-     * Will convert a hexadecimal string into a representative byte string.
-     *
-     * @note
-     *   This method can be eliminated in PHP >= 5.4.
-     *   http://php.net/manual/en/function.hex2bin.php#110973
-     *
-     * @param string $hex
-     *   A string representation of a hexadecimal number.
-     *
-     * @return string
-     *   A byte string holding the bits indicated by the hex string.
-     */
-    protected function convertHexToBin($hex)
-    {
-        $length_of_hex = strlen($hex);
-        $byte_string = "";
-        $byte_counter = 0;
-        while ($byte_counter < $length_of_hex) {
-            $current_hex_byte = substr($hex, $byte_counter, 2);
-            $current_binary_byte = pack("H*", $current_hex_byte);
-
-            if ($byte_counter == 0) {
-                $byte_string = $current_binary_byte;
-            } else {
-                $byte_string .= $current_binary_byte;
-            }
-            $byte_counter += 2;
-        }
-
-        return $byte_string;
     }
 
     /**
