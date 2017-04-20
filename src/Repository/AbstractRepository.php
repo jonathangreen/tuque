@@ -10,8 +10,9 @@ use Islandora\Tuque\Object\NewFedoraObject;
  *
  * This can be used to override the implementation of the Repository.
  */
-abstract class AbstractRepository extends MagicProperty
+abstract class AbstractRepository
 {
+    use MagicProperty;
 
     /**
      * This method is a factory that will return a new repositoryobject object

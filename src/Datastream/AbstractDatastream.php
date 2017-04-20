@@ -8,8 +8,9 @@ use Islandora\Tuque\Date\FedoraDate;
 /**
  * This abstract class can be overriden by anything implementing a datastream.
  */
-abstract class AbstractDatastream extends MagicProperty
+abstract class AbstractDatastream
 {
+    use MagicProperty;
 
     /**
      * This will set the state of the datastream to deleted.

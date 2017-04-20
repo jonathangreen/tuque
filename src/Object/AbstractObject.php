@@ -34,8 +34,9 @@ use IteratorAggregate;
  *
  * @endcode
  */
-abstract class AbstractObject extends MagicProperty implements Countable, ArrayAccess, IteratorAggregate
+abstract class AbstractObject implements Countable, ArrayAccess, IteratorAggregate
 {
+    use MagicProperty;
 
     /**
      * The label for this object. Fedora limits the label to be 255 characters.

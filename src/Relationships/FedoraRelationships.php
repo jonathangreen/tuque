@@ -42,8 +42,9 @@ define("RELS_TYPE_FULL_URI", 5);
  *
  * @todo potentially we should validate the predicate URI
  */
-abstract class FedoraRelationships extends MagicProperty
+abstract class FedoraRelationships
 {
+    use MagicProperty;
 
     /**
      * Whether or not the DS has yet to be ingested.

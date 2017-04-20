@@ -36,7 +36,7 @@ namespace Islandora\Tuque\MagicProperty;
  * print($test->myExample);
  * @endcode
  */
-abstract class MagicProperty
+trait MagicProperty
 {
 
     /**
