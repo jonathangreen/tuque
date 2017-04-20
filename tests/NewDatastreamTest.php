@@ -25,7 +25,7 @@ class NewDatastreamTest extends PHPUnit_Framework_TestCase
         $string1 = TestHelpers::randomString(10);
         $string2 = TestHelpers::randomString(10);
         $this->testPid = "$string1:$string2";
-        $this->api->m->ingest(array('pid' => $this->testPid));
+        $this->api->m->ingest(['pid' => $this->testPid]);
         $this->object = new FedoraObject($this->testPid, $this->repository);
         $this->x = new NewFedoraDatastream('one', 'X', $this->object, $this->repository);
         $this->m = new NewFedoraDatastream('two', 'M', $this->object, $this->repository);

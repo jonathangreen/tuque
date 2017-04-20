@@ -179,7 +179,7 @@ trait MagicProperty
         if (method_exists($this, $generalmethod)) {
             return true;
         }
-        $ops = array('set', 'isset', 'unset', 'get');
+        $ops = ['set', 'isset', 'unset', 'get'];
         foreach ($ops as $op) {
             if (method_exists($this, "{$generalmethod}{$op}")) {
                 return true;

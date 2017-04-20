@@ -13,8 +13,8 @@ use PHPUnit_Framework_TestCase;
 
 class FedoraApiIngestTest extends PHPUnit_Framework_TestCase
 {
-    protected $pids = array();
-    protected $files = array();
+    protected $pids = [];
+    protected $files = [];
 
     protected function setUp()
     {
@@ -84,7 +84,7 @@ class FedoraApiIngestTest extends PHPUnit_Framework_TestCase
         $string1 = TestHelpers::randomString(10);
         $string2 = TestHelpers::randomString(10);
         $expected_pid = "$string1:$string2";
-        $actual_pid = $this->apim->ingest(array('pid' => $expected_pid));
+        $actual_pid = $this->apim->ingest(['pid' => $expected_pid]);
         $this->pids[] = $actual_pid;
         $this->assertEquals($expected_pid, $actual_pid);
         $results = $this->apia->findObjects('query', "pid=$expected_pid");
@@ -115,10 +115,10 @@ class FedoraApiIngestTest extends PHPUnit_Framework_TestCase
 </foxml:digitalObject>
 FOXML;
 
-        $actual_pid = $this->apim->ingest(array('string' => $foxml));
+        $actual_pid = $this->apim->ingest(['string' => $foxml]);
         $this->pids[] = $actual_pid;
         $this->assertEquals($expected_pid, $actual_pid);
-        $results = $this->apia->findObjects('query', "pid=$expected_pid", null, array('pid', 'label'));
+        $results = $this->apia->findObjects('query', "pid=$expected_pid", null, ['pid', 'label']);
         $this->assertEquals(1, count($results['results']));
         $this->assertEquals($expected_pid, $results['results'][0]['pid']);
         $this->assertEquals($expected_label, $results['results'][0]['label']);
@@ -149,10 +149,10 @@ FOXML;
         file_put_contents($file_name, $foxml);
         $this->files[] = $file_name;
 
-        $actual_pid = $this->apim->ingest(array('file' => $file_name));
+        $actual_pid = $this->apim->ingest(['file' => $file_name]);
         $this->pids[] = $actual_pid;
         $this->assertEquals($expected_pid, $actual_pid);
-        $results = $this->apia->findObjects('query', "pid=$expected_pid", null, array('pid', 'label'));
+        $results = $this->apia->findObjects('query', "pid=$expected_pid", null, ['pid', 'label']);
         $this->assertEquals(1, count($results['results']));
         $this->assertEquals($expected_pid, $results['results'][0]['pid']);
         $this->assertEquals($expected_label, $results['results'][0]['label']);
@@ -164,9 +164,9 @@ FOXML;
         $string2 = TestHelpers::randomString(10);
         $pid = "$string1:$string2";
         $expected_label = TestHelpers::randomString(15);
-        $pid = $this->apim->ingest(array('pid' => $pid, 'label' => $expected_label));
+        $pid = $this->apim->ingest(['pid' => $pid, 'label' => $expected_label]);
         $this->pids[] = $pid;
-        $results = $this->apia->findObjects('query', "pid=$pid", null, array('pid', 'label'));
+        $results = $this->apia->findObjects('query', "pid=$pid", null, ['pid', 'label']);
         $this->assertEquals(1, count($results['results']));
         $this->assertEquals($pid, $results['results'][0]['pid']);
         $this->assertEquals($expected_label, $results['results'][0]['label']);
@@ -178,7 +178,7 @@ FOXML;
         $string2 = TestHelpers::randomString(10);
         $pid = "$string1:$string2";
         $expected_log_message = TestHelpers::randomString(15);
-        $pid = $this->apim->ingest(array('pid' => $pid, 'logMessage' => $expected_log_message));
+        $pid = $this->apim->ingest(['pid' => $pid, 'logMessage' => $expected_log_message]);
         $this->pids[] = $pid;
 
         // Check the audit trail.
@@ -196,7 +196,7 @@ FOXML;
     public function testIngestNamespace()
     {
         $expected_namespace = TestHelpers::randomString(10);
-        $pid = $this->apim->ingest(array('namespace' => $expected_namespace));
+        $pid = $this->apim->ingest(['namespace' => $expected_namespace]);
         $this->pids[] = $pid;
         $pid_parts = explode(':', $pid);
         $this->assertEquals($expected_namespace, $pid_parts[0]);
@@ -212,9 +212,9 @@ FOXML;
         $string2 = TestHelpers::randomString(10);
         $pid = "$string1:$string2";
         $expected_owner = TestHelpers::randomString(15);
-        $pid = $this->apim->ingest(array('pid' => $pid, 'ownerId' => $expected_owner));
+        $pid = $this->apim->ingest(['pid' => $pid, 'ownerId' => $expected_owner]);
         $this->pids[] = $pid;
-        $results = $this->apia->findObjects('query', "pid=$pid", null, array('pid', 'ownerId'));
+        $results = $this->apia->findObjects('query', "pid=$pid", null, ['pid', 'ownerId']);
         $this->assertEquals(1, count($results['results']));
         $this->assertEquals($pid, $results['results'][0]['pid']);
         $this->assertEquals($expected_owner, $results['results'][0]['ownerId']);
@@ -232,7 +232,7 @@ FOXML;
         $string2 = TestHelpers::randomString(10);
         $expected_pid = "$string1:$string2";
 
-        $actual_pid = $this->apim->ingest(array('string' => $foxml));
+        $actual_pid = $this->apim->ingest(['string' => $foxml]);
         $this->pids[] = $actual_pid;
         $this->assertEquals($expected_pid, $actual_pid);
     }

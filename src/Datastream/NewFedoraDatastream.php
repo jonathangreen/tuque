@@ -62,10 +62,10 @@ class NewFedoraDatastream extends AbstractFedoraDatastream
         $this->datastreamInfo['dsChecksumType'] = 'DISABLED';
         $this->datastreamInfo['dsChecksum'] = 'none';
         $this->datastreamInfo['dsLogMessage'] = '';
-        $this->datastreamInfo['content'] = array(
+        $this->datastreamInfo['content'] = [
         'type' => 'string',
         'content' => ' '
-        );
+        ];
     }
 
     /**

@@ -41,19 +41,19 @@ class RepositoryQuery
         $xmlReader->xml($sparql);
 
         // Storage.
-        $results = array();
+        $results = [];
         // Build the results.
         while ($xmlReader->read()) {
             if ($xmlReader->localName === 'result') {
                 if ($xmlReader->nodeType == XMLReader::ELEMENT) {
                     // Initialize a single result.
-                    $r = array();
+                    $r = [];
                 } elseif ($xmlReader->nodeType == XMLReader::END_ELEMENT) {
                     // Add result to results
                     $results[] = $r;
                 }
             } elseif ($xmlReader->nodeType == XMLReader::ELEMENT && $xmlReader->depth == 3) {
-                $val = array();
+                $val = [];
                 $uri = $xmlReader->getAttribute('uri');
                 if ($uri !== null) {
                     $val['value'] = self::pidUriToBarePid($uri);

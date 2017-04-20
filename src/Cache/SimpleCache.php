@@ -15,8 +15,8 @@ class SimpleCache extends AbstractCache
 {
     const CACHESIZE = 100;
 
-    protected static $cache = array();
-    protected static $entries = array();
+    protected static $cache = [];
+    protected static $entries = [];
     protected static $size = SimpleCache::CACHESIZE;
 
     /**
@@ -32,8 +32,8 @@ class SimpleCache extends AbstractCache
         if ($size > self::$size) {
             self::$size = $size;
         } else {
-            self::$cache = array();
-            self::$entries = array();
+            self::$cache = [];
+            self::$entries = [];
             self::$size = $size;
         }
     }
@@ -43,8 +43,8 @@ class SimpleCache extends AbstractCache
      */
     public static function resetCache()
     {
-        self::$cache = array();
-        self::$entries = array();
+        self::$cache = [];
+        self::$entries = [];
         self::$size = self::CACHESIZE;
     }
 

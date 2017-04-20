@@ -26,7 +26,7 @@ class DatastreamTest extends PHPUnit_Framework_TestCase
         $string1 = TestHelpers::randomString(10);
         $string2 = TestHelpers::randomString(10);
         $this->testPid = "$string1:$string2";
-        $this->api->m->ingest(array('pid' => $this->testPid));
+        $this->api->m->ingest(['pid' => $this->testPid]);
 
         // create a DSID
         $this->testDsid = TestHelpers::randomCharString(10);
@@ -34,10 +34,10 @@ class DatastreamTest extends PHPUnit_Framework_TestCase
         $this->testDsidE = TestHelpers::randomCharString(10);
         $this->testDsidX = TestHelpers::randomCharString(10);
         $this->testDsContents = '<test><xml/></test>';
-        $this->api->m->addDatastream($this->testPid, $this->testDsid, 'string', $this->testDsContents, array('controlGroup' => 'M'));
-        $this->api->m->addDatastream($this->testPid, $this->testDsidR, 'url', 'http://test.com.fop', array('controlGroup' => 'R'));
-        $this->api->m->addDatastream($this->testPid, $this->testDsidE, 'url', 'http://test.com.fop', array('controlGroup' => 'E'));
-        $this->api->m->addDatastream($this->testPid, $this->testDsidX, 'string', $this->testDsContents, array('controlGroup' => 'X'));
+        $this->api->m->addDatastream($this->testPid, $this->testDsid, 'string', $this->testDsContents, ['controlGroup' => 'M']);
+        $this->api->m->addDatastream($this->testPid, $this->testDsidR, 'url', 'http://test.com.fop', ['controlGroup' => 'R']);
+        $this->api->m->addDatastream($this->testPid, $this->testDsidE, 'url', 'http://test.com.fop', ['controlGroup' => 'E']);
+        $this->api->m->addDatastream($this->testPid, $this->testDsidX, 'string', $this->testDsContents, ['controlGroup' => 'X']);
         $this->object = new FedoraObject($this->testPid, $this->repository);
         $this->ds = new FedoraDatastream($this->testDsid, $this->object, $this->repository);
         $this->e = new FedoraDatastream($this->testDsidE, $this->object, $this->repository);
@@ -171,7 +171,7 @@ class DatastreamTest extends PHPUnit_Framework_TestCase
 
     public function testChecksum()
     {
-        foreach (array('MD5', 'SHA-1', 'SHA-256', 'SHA-384', 'SHA-512') as $algorithm) {
+        foreach (['MD5', 'SHA-1', 'SHA-256', 'SHA-384', 'SHA-512'] as $algorithm) {
             $this->ds->checksumType = $algorithm;
             $this->assertTrue(isset($this->ds->checksum));
             $this->assertTrue(isset($this->ds->checksumType));
@@ -321,7 +321,7 @@ foo;
         $this->ds->state = 'D';
         $this->assertEquals(2, count($this->ds));
 
-        $state = array(0 => 'D', 1 => 'A');
+        $state = [0 => 'D', 1 => 'A'];
 
         foreach ($this->ds as $key => $version) {
             $this->assertEquals($state[$key], $version->state);

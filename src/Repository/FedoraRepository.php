@@ -95,7 +95,7 @@ class FedoraRepository extends AbstractRepository
      */
     public function getNextIdentifier($namespace = null, $create_uuid = false, $number_of_identifiers = 1)
     {
-        $pids = array();
+        $pids = [];
 
         if ($create_uuid) {
             if (is_null($namespace)) {
@@ -199,7 +199,7 @@ class FedoraRepository extends AbstractRepository
 
         $dom = new FoxmlDocument($object);
         $xml = $dom->saveXml();
-        $id = $this->api->m->ingest(array('string' => $xml, 'logMessage' => $object->logMessage));
+        $id = $this->api->m->ingest(['string' => $xml, 'logMessage' => $object->logMessage]);
         $object = new $this->objectClass($id, $this);
         $this->cache->set($id, $object);
         return $object;

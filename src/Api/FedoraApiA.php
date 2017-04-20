@@ -208,7 +208,7 @@ class FedoraApiA
      *    )
      *    @endcode
      */
-    public function findObjects($type, $query, $max_results = null, $display_fields = array('pid', 'title'))
+    public function findObjects($type, $query, $max_results = null, $display_fields = ['pid', 'title'])
     {
         $request = "/objects";
         $separator = '?';

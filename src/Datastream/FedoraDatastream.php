@@ -105,7 +105,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
         if (!$this->forceUpdate) {
             $args = array_merge(
                 $args,
-                array('lastModifiedDate' => (string)$this->createdDate)
+                ['lastModifiedDate' => (string)$this->createdDate]
             );
         }
         $this->datastreamInfo = parent::modifyDatastream($args);
@@ -180,7 +180,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
             case 'set':
                 $state = $this->validateState($value);
                 if ($state !== false) {
-                    $this->modifyDatastream(array('dsState' => $state));
+                    $this->modifyDatastream(['dsState' => $state]);
                 } else {
                     trigger_error(
                         "$value is not a valid value for the datastream->state property.",
@@ -224,16 +224,16 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
 
             case 'set':
                 $this->modifyDatastream(
-                    array(
+                    [
                         'dsLabel' => function_exists('mb_substr') ?
                         mb_substr($value, 0, 255) :
                         substr($value, 0, 255)
-                    )
+                    ]
                 );
                 break;
 
             case 'unset':
-                $this->modifyDatastream(array('dsLabel' => ''));
+                $this->modifyDatastream(['dsLabel' => '']);
                 break;
         }
         return null;
@@ -260,7 +260,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
 
             case 'set':
                 if ($this->validateVersionable($value)) {
-                    $this->modifyDatastream(array('versionable' => $value));
+                    $this->modifyDatastream(['versionable' => $value]);
                 } else {
                     trigger_error(
                         "Datastream->versionable must be a boolean.",
@@ -298,7 +298,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
 
             case 'set':
                 if ($this->validateMimetype($value)) {
-                    $this->modifyDatastream(array('mimeType' => $value));
+                    $this->modifyDatastream(['mimeType' => $value]);
                 } else {
                     trigger_error("Invalid mimetype.", E_USER_WARNING);
                 }
@@ -338,11 +338,11 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
                 break;
 
             case 'set':
-                $this->modifyDatastream(array('formatURI' => $value));
+                $this->modifyDatastream(['formatURI' => $value]);
                 break;
 
             case 'unset':
-                $this->modifyDatastream(array('formatURI' => ''));
+                $this->modifyDatastream(['formatURI' => '']);
                 break;
         }
         return null;
@@ -437,7 +437,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
             case 'set':
                 $type = $this->validateChecksumType($value);
                 if ($type) {
-                    $this->modifyDatastream(array('checksumType' => $type));
+                    $this->modifyDatastream(['checksumType' => $type]);
                 } else {
                     trigger_error(
                         "$value is not a valid value for the datastream->checksumType property.",
@@ -447,7 +447,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
                 break;
 
             case 'unset':
-                $this->modifyDatastream(array('checksumType' => 'DISABLED'));
+                $this->modifyDatastream(['checksumType' => 'DISABLED']);
                 break;
         }
         return null;
@@ -501,7 +501,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
 
             case 'set':
                 if ($this->controlGroup == 'M' || $this->controlGroup == 'X') {
-                    $this->modifyDatastream(array('dsString' => $value));
+                    $this->modifyDatastream(['dsString' => $value]);
                 } else {
                     trigger_error(
                         "Cannot set content of a {$this->controlGroup} datastream, please use datastream->url.",
@@ -512,7 +512,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
 
             case 'unset':
                 if ($this->controlGroup == 'M' || $this->controlGroup == 'X') {
-                    $this->modifyDatastream(array('dsString' => ''));
+                    $this->modifyDatastream(['dsString' => '']);
                 } else {
                     trigger_error(
                         "Cannot unset content of a {$this->controlGroup} datastream, please use datastream->url.",
@@ -555,7 +555,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
 
             case 'set':
                 if ($this->controlGroup == 'E' || $this->controlGroup == 'R') {
-                    $this->modifyDatastream(array('dsLocation' => $value));
+                    $this->modifyDatastream(['dsLocation' => $value]);
                 } else {
                     trigger_error(
                         "Cannot set url of a {$this->controlGroup} datastream, please use datastream->content.",
@@ -598,11 +598,11 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
                 break;
 
             case 'set':
-                $this->modifyDatastream(array('dsLogMessage' => $value));
+                $this->modifyDatastream(['dsLogMessage' => $value]);
                 break;
 
             case 'unset':
-                $this->modifyDatastream(array('dsLogMessage' => ''));
+                $this->modifyDatastream(['dsLogMessage' => '']);
                 break;
         }
         return null;
@@ -620,7 +620,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
             );
             return;
         }
-        $this->modifyDatastream(array('dsFile' => $file));
+        $this->modifyDatastream(['dsFile' => $file]);
     }
 
     /**
@@ -638,7 +638,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
             );
             return;
         }
-        $this->modifyDatastream(array('dsLocation' => $url));
+        $this->modifyDatastream(['dsLocation' => $url]);
     }
 
     /**
@@ -653,7 +653,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
             );
             return;
         }
-        $this->modifyDatastream(array('dsString' => $string));
+        $this->modifyDatastream(['dsString' => $string]);
     }
 
     /**
@@ -726,7 +726,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
     public function getIterator()
     {
         $this->populateDatastreamHistory();
-        $history = array();
+        $history = [];
         foreach ($this->datastreamHistory as $key => $value) {
             $history[$key] = new $this->fedoraDatastreamVersionClass(
                 $this->id,

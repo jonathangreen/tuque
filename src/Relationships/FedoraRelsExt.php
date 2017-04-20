@@ -16,11 +16,11 @@ class FedoraRelsExt extends FedoraRelationships
     {
         $this->object = $object;
 
-        $namespaces = array(
+        $namespaces = [
             'fedora' => FEDORA_RELS_EXT_URI,
             'fedora-model' => FEDORA_MODEL_URI,
             'islandora' => ISLANDORA_RELS_EXT_URI,
-        );
+        ];
 
         parent::__construct($namespaces);
     }

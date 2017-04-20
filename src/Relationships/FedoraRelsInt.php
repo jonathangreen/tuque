@@ -19,9 +19,9 @@ class FedoraRelsInt extends FedoraRelationships
     {
         $this->aboutDs = $datastream;
 
-        $namespaces = array(
+        $namespaces = [
             'islandora' => ISLANDORA_RELS_INT_URI,
-        );
+        ];
 
         parent::__construct($namespaces);
     }
@@ -156,7 +156,7 @@ class FedoraRelsInt extends FedoraRelationships
         // modifications to more than one, each tries to write their own datastream.
         // By avoiding "initializing", we avoid this issue.
         if (!isset($this->aboutDs->parent['RELS-INT'])) {
-            return array();
+            return [];
         }
         $this->initializeDatastream();
         return parent::internalGet(

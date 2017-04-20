@@ -250,7 +250,7 @@ abstract class AbstractFedoraObject extends AbstractObject
     {
         switch ($function) {
             case 'get':
-                $models = array();
+                $models = [];
 
                 $rels_models = $this->relationships->get(FEDORA_MODEL_URI, 'hasModel');
 
@@ -270,7 +270,7 @@ abstract class AbstractFedoraObject extends AbstractObject
 
             case 'set':
                 if (!is_array($value)) {
-                    $models = array($value);
+                    $models = [$value];
                 } else {
                     $models = $value;
                 }

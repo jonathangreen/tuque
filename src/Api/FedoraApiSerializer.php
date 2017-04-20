@@ -109,7 +109,7 @@ class FedoraApiSerializer
      */
     protected function loadDomDocument($xml)
     {
-        set_error_handler(array($this, 'domDocumentExceptionHandler'));
+        set_error_handler([$this, 'domDocumentExceptionHandler']);
         $dom = new DOMDocument();
         $dom->loadXml($xml);
         restore_error_handler();
@@ -131,7 +131,7 @@ class FedoraApiSerializer
      * @return array|string
      *   An array representation of the XML.
      */
-    protected function flattenDocument($xml, $make_array = array())
+    protected function flattenDocument($xml, $make_array = [])
     {
         if (!is_object($xml)) {
             return '';
@@ -141,8 +141,8 @@ class FedoraApiSerializer
             return (string)$xml;
         }
 
-        $initialized = array();
-        $return = array();
+        $initialized = [];
+        $return = [];
 
         foreach ($xml->children() as $name => $child) {
             $value = $this->flattenDocument($child, $make_array);
@@ -154,7 +154,7 @@ class FedoraApiSerializer
                     $return[$name][] = $value;
                 } else {
                     $tmp = $return[$name];
-                    $return[$name] = array();
+                    $return[$name] = [];
                     $return[$name][] = $tmp;
                     $return[$name][] = $value;
                     $initialized[$name] = true;
@@ -189,9 +189,9 @@ class FedoraApiSerializer
     public function userAttributes($request)
     {
         $user_attributes = $this->loadSimpleXml($request['content']);
-        $data = array();
+        $data = [];
         foreach ($user_attributes->attribute as $attribute) {
-            $values = array();
+            $values = [];
             foreach ($attribute->value as $value) {
                 array_push($values, (string)$value);
             }
@@ -209,7 +209,7 @@ class FedoraApiSerializer
     public function findObjects($request)
     {
         $results = $this->loadSimpleXml($request['content']);
-        $data = array();
+        $data = [];
 
         if (isset($results->listSession)) {
             $data['session'] = $this->flattenDocument($results->listSession);
@@ -217,7 +217,7 @@ class FedoraApiSerializer
         if (isset($results->resultList)) {
             $data['results'] = $this->flattenDocument(
                 $results->resultList,
-                array('objectFields')
+                ['objectFields']
             );
         }
 
@@ -274,7 +274,7 @@ class FedoraApiSerializer
         $object_history = $this->loadSimpleXml($request['content']);
         $data = $this->flattenDocument(
             $object_history,
-            array('objectChangeDate')
+            ['objectChangeDate']
         );
         return $data;
     }
@@ -288,7 +288,7 @@ class FedoraApiSerializer
     public function getObjectProfile($request)
     {
         $result = $this->loadSimpleXml($request['content']);
-        $data = $this->flattenDocument($result, array('model'));
+        $data = $this->flattenDocument($result, ['model']);
         return $data;
     }
 
@@ -300,14 +300,14 @@ class FedoraApiSerializer
      */
     public function listDatastreams($request)
     {
-        $result = array();
+        $result = [];
         $datastreams = $this->loadSimpleXml($request['content']);
         // We can't use flattenDocument here, since everything is an attribute.
         foreach ($datastreams->datastream as $datastream) {
-            $result[(string)$datastream['dsid']] = array(
+            $result[(string)$datastream['dsid']] = [
                 'label' => (string)$datastream['label'],
                 'mimetype' => (string)$datastream['mimeType'],
-            );
+            ];
         }
         return $result;
     }
@@ -320,12 +320,12 @@ class FedoraApiSerializer
      */
     public function listMethods($request)
     {
-        $result = array();
+        $result = [];
         $object_methods = $this->loadSimpleXml($request['content']);
         // We can't use flattenDocument here because of the atrtibutes.
         if (isset($object_methods->sDef)) {
             foreach ($object_methods->sDef as $sdef) {
-                $methods = array();
+                $methods = [];
                 if (isset($sdef->method)) {
                     foreach ($sdef->method as $method) {
                         $methods[] = (string)$method['name'];
@@ -397,7 +397,7 @@ class FedoraApiSerializer
     public function getDatastreamHistory($request)
     {
         $result = $this->loadSimpleXml($request['content']);
-        $result = $this->flattenDocument($result, array('datastreamProfile'));
+        $result = $this->flattenDocument($result, ['datastreamProfile']);
 
         return $result;
     }
@@ -440,7 +440,7 @@ class FedoraApiSerializer
      */
     protected function getRelationship($element)
     {
-        $relationship = array();
+        $relationship = [];
         $parent = $element->parentNode;
 
         // Remove the 'info:fedora/' from the subject.
@@ -453,7 +453,7 @@ class FedoraApiSerializer
         // This section parses the predicate.
         $predicate = explode(':', $element->tagName);
         $predicate = count($predicate) == 1 ? $predicate[0] : $predicate[1];
-        $predicate = array('predicate' => $predicate);
+        $predicate = ['predicate' => $predicate];
         $predicate['uri'] = $element->namespaceURI;
         $predicate['alias'] = $element->lookupPrefix($predicate['uri']);
         $relationship['predicate'] = $predicate;
@@ -483,7 +483,7 @@ class FedoraApiSerializer
      */
     public function getRelationships($request)
     {
-        $relationships = array();
+        $relationships = [];
 
         $dom = $this->loadDomDocument($request['content']);
         $xpath = new DomXPath($dom);

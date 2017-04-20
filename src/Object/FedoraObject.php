@@ -57,16 +57,16 @@ class FedoraObject extends AbstractFedoraObject
     {
         if (!isset($this->datastreams)) {
             $datastreams = $this->repository->api->a->listDatastreams($this->id);
-            $this->datastreams = array();
+            $this->datastreams = [];
             foreach ($datastreams as $key => $value) {
                 $this->datastreams[$key] = new $this->fedoraDatastreamClass(
                     $key,
                     $this,
                     $this->repository,
-                    array(
+                    [
                         "dsLabel" => $value['label'],
                         "dsMIME" => $value['mimetype']
-                    )
+                    ]
                 );
             }
         }
@@ -122,7 +122,7 @@ class FedoraObject extends AbstractFedoraObject
     {
         if ($this->objectProfile['objState'] != $value) {
             parent::stateMagicProperty('set', $value);
-            $this->modifyObject(array('state' => $this->objectProfile['objState']));
+            $this->modifyObject(['state' => $this->objectProfile['objState']]);
         }
     }
 
@@ -133,10 +133,10 @@ class FedoraObject extends AbstractFedoraObject
     {
         if ($this->objectProfile['objLabel'] != $value) {
             $this->modifyObject(
-                array('label' => function_exists('mb_substr') ?
+                ['label' => function_exists('mb_substr') ?
                     mb_substr($value, 0, 255) :
                     substr($value, 0, 255)
-                )
+                ]
             );
             parent::labelMagicProperty('set', $value);
         }
@@ -148,7 +148,7 @@ class FedoraObject extends AbstractFedoraObject
     protected function ownerMagicPropertySet($value)
     {
         if ($this->objectProfile['objOwnerId'] != $value) {
-            $this->modifyObject(array('ownerId' => $value));
+            $this->modifyObject(['ownerId' => $value]);
             parent::ownerMagicProperty('set', $value);
         }
     }
@@ -207,7 +207,7 @@ class FedoraObject extends AbstractFedoraObject
     protected function logMessageMagicPropertySet($value)
     {
         if ($this->objectProfile['objLogMessage'] != $value) {
-            $this->modifyObject(array('logMessage' => $value));
+            $this->modifyObject(['logMessage' => $value]);
             parent::logMessageMagicProperty('set', $value);
         }
     }
@@ -227,7 +227,7 @@ class FedoraObject extends AbstractFedoraObject
     {
         $this->populateDatastreams();
         if (!isset($this->datastreams[$ds->id])) {
-            $params = array(
+            $params = [
                 'controlGroup' => $ds->controlGroup,
                 'dsLabel' => $ds->label,
                 'versionable' => $ds->versionable,
@@ -239,7 +239,7 @@ class FedoraObject extends AbstractFedoraObject
                 'logMessage' => ($ds instanceof NewFedoraObject) ?
                     $ds->logMessage:
                     "Copied datastream from {$ds->parent->id}.",
-            );
+            ];
             $temp = tempnam(sys_get_temp_dir(), 'tuque');
             if ($ds->controlGroup == 'E' || $ds->controlGroup == 'R' || $ds->getContent($temp) !== true) {
                 $type = 'url';
@@ -325,7 +325,7 @@ class FedoraObject extends AbstractFedoraObject
             $this->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOfCollection'),
             $this->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf')
         );
-        $collection_ids = array();
+        $collection_ids = [];
         foreach ($collections as $collection) {
             $collection_ids[] = $collection['object']['value'];
         }

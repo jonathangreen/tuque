@@ -83,7 +83,7 @@ abstract class HttpConnection
 
     public function __sleep()
     {
-        return array(
+        return [
             'url',
             'cookies',
             'username',
@@ -95,7 +95,7 @@ abstract class HttpConnection
             'userAgent',
             'reuseConnection',
             'sslVersion',
-        );
+        ];
     }
 
     /**

@@ -37,7 +37,7 @@ class CopyDatastreamTest extends PHPUnit_Framework_TestCase
         $string1 = TestHelpers::randomString(10);
         $string2 = TestHelpers::randomString(10);
         $this->testPid = "$string1:$string2";
-        $this->api->m->ingest(array('pid' => $this->testPid));
+        $this->api->m->ingest(['pid' => $this->testPid]);
 
 
         $string3 = TestHelpers::randomString(10);
@@ -56,7 +56,7 @@ class CopyDatastreamTest extends PHPUnit_Framework_TestCase
             $this->testDsid,
             'string',
             $this->testDsContents,
-            array('controlGroup' => 'M')
+            ['controlGroup' => 'M']
         );
         $this->object = new FedoraObject($this->testPid, $this->repository);
         $this->ds = new FedoraDatastream($this->testDsid, $this->object, $this->repository);
@@ -129,9 +129,9 @@ class CopyDatastreamTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($datastream->label, $new_label, 'New label accessible through object.');
         $object = $this->repository->ingestObject($this->new_object);
 
-        $this->scanProperties($this->object[$this->testDsid], $object[$this->testDsid], array(
+        $this->scanProperties($this->object[$this->testDsid], $object[$this->testDsid], [
         'label' => $new_label,
-        ));
+        ]);
     }
 
   /**
@@ -152,11 +152,11 @@ class CopyDatastreamTest extends PHPUnit_Framework_TestCase
    *   otherwise, relationships between the datastreams are assumed to be
    *   unique.
    */
-    protected function scanProperties(AbstractDatastream $alpha, AbstractDatastream $bravo, array $changed = array())
+    protected function scanProperties(AbstractDatastream $alpha, AbstractDatastream $bravo, array $changed = [])
     {
         $this->assertNotSame($alpha, $bravo, 'Datastreams being compared are not the same object.');
 
-        $properties = array(
+        $properties = [
         'id',
         'label',
         'controlGroup',
@@ -177,7 +177,7 @@ class CopyDatastreamTest extends PHPUnit_Framework_TestCase
         //'location',
         // Log message is not expected to be the same...
         //'logMessage',
-        );
+        ];
 
         $similar_properties = array_diff($properties, array_keys($changed));
 
@@ -194,7 +194,7 @@ class CopyDatastreamTest extends PHPUnit_Framework_TestCase
             }
         }
 
-        $gettable_control_groups = array('X', 'M');
+        $gettable_control_groups = ['X', 'M'];
         if (!array_key_exists('content', $changed)
         && in_array($alpha->controlGroup, $gettable_control_groups)
         && in_array($bravo->controlGroup, $gettable_control_groups)) {

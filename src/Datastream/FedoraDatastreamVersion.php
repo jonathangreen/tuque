@@ -141,7 +141,7 @@ class FedoraDatastreamVersion extends AbstractExistingFedoraDatastream
      */
     protected function urlMagicProperty($function, $value)
     {
-        if (in_array($this->controlGroup, array('R', 'E'))) {
+        if (in_array($this->controlGroup, ['R', 'E'])) {
             return $this->generalReadOnly(
                 'dsLocation',
                 false,

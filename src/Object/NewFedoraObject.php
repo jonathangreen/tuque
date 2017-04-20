@@ -19,12 +19,12 @@ class NewFedoraObject extends AbstractFedoraObject
      * An array of cached datastream objects.
      * @var array
      */
-    protected $datastreams = array();
+    protected $datastreams = [];
 
     public function __construct($id, FedoraRepository $repository)
     {
         parent::__construct($id, $repository);
-        $this->objectProfile = array();
+        $this->objectProfile = [];
         $this->objectProfile['objState'] = 'A';
         $this->objectProfile['objOwnerId'] = $this->repository->api->connection->username;
         $this->objectProfile['objLabel'] = '';
@@ -83,8 +83,8 @@ class NewFedoraObject extends AbstractFedoraObject
         $datastream = $this->constructDatastream($old_datastream->id, $old_datastream->controlGroup);
 
         // Copying the datastream particulars...
-        $properties = array('checksumType', 'checksum', 'format', 'mimetype', 'versionable', 'label', 'state');
-        if (in_array($old_datastream->controlGroup, array('R', 'E'))) {
+        $properties = ['checksumType', 'checksum', 'format', 'mimetype', 'versionable', 'label', 'state'];
+        if (in_array($old_datastream->controlGroup, ['R', 'E'])) {
             $properties[] = 'url';
         } else {
             // Get the content into a file, and add the file.

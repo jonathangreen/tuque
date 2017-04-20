@@ -59,7 +59,7 @@ class FedoraDate extends DateTime
         // PHP Date class loses information when serialized so we need to convert
         // it to a string and then reconstruct it.
         $this->serializedDate = (string)$this;
-        return array('serializedDate');
+        return ['serializedDate'];
     }
 
     /**

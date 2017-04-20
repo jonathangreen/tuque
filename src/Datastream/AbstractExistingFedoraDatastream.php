@@ -97,7 +97,7 @@ abstract class AbstractExistingFedoraDatastream extends AbstractFedoraDatastream
         return $this->repository->api->m->purgeDatastream(
             $this->parent->id,
             $this->id,
-            array('startDT' => $version, 'endDT' => $version)
+            ['startDT' => $version, 'endDT' => $version]
         );
     }
 }

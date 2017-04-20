@@ -217,7 +217,7 @@ class FedoraApiM
      *   If $file was provided, boolean TRUE; otherwise, a string containing
      *   the response.
      */
-    public function export($pid, $params = array(), $file = null)
+    public function export($pid, $params = [], $file = null)
     {
         $pid = urlencode($pid);
         $request = "/objects/$pid/export";
@@ -272,7 +272,7 @@ class FedoraApiM
      *   )
      *   @endcode
      */
-    public function getDatastream($pid, $dsid, $params = array())
+    public function getDatastream($pid, $dsid, $params = [])
     {
         $pid = urlencode($pid);
         $dsid = urlencode($dsid);
@@ -481,7 +481,7 @@ class FedoraApiM
      *   )
      *   @endcode
      */
-    public function getRelationships($pid, $relationship = array())
+    public function getRelationships($pid, $relationship = [])
     {
         $pid = urlencode($pid);
 
@@ -542,7 +542,7 @@ class FedoraApiM
      *   properly get set. https://jira.duraspace.org/browse/FCREPO-963. We should
      *   deal with this.
      */
-    public function ingest($params = array())
+    public function ingest($params = [])
     {
         $request = "/objects/";
         $separator = '?';
@@ -621,7 +621,7 @@ class FedoraApiM
      *
      * @see FedoraApiM::getDatastream
      */
-    public function modifyDatastream($pid, $dsid, $params = array())
+    public function modifyDatastream($pid, $dsid, $params = [])
     {
         $pid = urlencode($pid);
         $dsid = urlencode($dsid);
@@ -727,7 +727,7 @@ class FedoraApiM
      *   )
      *   @endcode
      */
-    public function purgeDatastream($pid, $dsid, $params = array())
+    public function purgeDatastream($pid, $dsid, $params = [])
     {
         $pid = urlencode($pid);
         $dsid = urlencode($dsid);

@@ -81,9 +81,9 @@ abstract class FedoraRelationships
      * An array of namespaces that is used in the document.
      * @var array
      */
-    protected $namespaces = array(
+    protected $namespaces = [
         'rdf' => RDF_URI,
-    );
+    ];
 
     /**
      * The constructor. This will usually be called by one of its subclasses.
@@ -223,7 +223,7 @@ abstract class FedoraRelationships
             return "\"$input\"";
         }
 
-        return 'concat("' . strtr($input, array('"' => "\", '\"', \"")) . '")';
+        return 'concat("' . strtr($input, ['"' => "\", '\"', \""]) . '")';
     }
 
     /**
@@ -323,7 +323,7 @@ abstract class FedoraRelationships
 
         $relationship = $document->createElementNS($predicate_uri, $predicate);
         $description->appendChild($relationship);
-        if (!in_array($type, array(RELS_TYPE_URI, RELS_TYPE_FULL_URI))) {
+        if (!in_array($type, [RELS_TYPE_URI, RELS_TYPE_FULL_URI])) {
             $relationship->nodeValue = $object;
         }
 
@@ -470,11 +470,11 @@ abstract class FedoraRelationships
         $xpath = $this->getXpath($document);
 
         $result_elements = $this->getXpathResults($xpath, $subject, $predicate_uri, $predicate, $object, $type);
-        $results = array();
+        $results = [];
         foreach ($result_elements as $element) {
-            $result = array();
+            $result = [];
 
-            $result['predicate'] = array();
+            $result['predicate'] = [];
             $result['predicate']['value'] = $element->localName;
             if (isset($element->prefix)) {
                 $result['predicate']['alias'] = $element->prefix;
@@ -483,7 +483,7 @@ abstract class FedoraRelationships
                 $result['predicate']['namespace'] = $element->namespaceURI;
             }
 
-            $object = array();
+            $object = [];
             if ($element->hasAttributeNS($this->namespaces['rdf'], 'resource')) {
                 $attrib = $element->getAttributeNS($this->namespaces['rdf'], 'resource');
                 $attrib_array = explode('/', $attrib);

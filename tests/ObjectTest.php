@@ -26,7 +26,7 @@ class ObjectTest extends PHPUnit_Framework_TestCase
         $string2 = TestHelpers::randomString(10);
         $this->testDsid = TestHelpers::randomCharString(10);
         $this->testPid = "$string1:$string2";
-        $this->api->m->ingest(array('pid' => $this->testPid));
+        $this->api->m->ingest(['pid' => $this->testPid]);
         $this->api->m->addDatastream($this->testPid, $this->testDsid, 'string', '<test> test </test>', null);
         $this->object = new FedoraObject($this->testPid, $repository);
     }
@@ -170,8 +170,8 @@ class ObjectTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($this->object['foo']);
         $this->assertEquals('DC', $this->object['DC']->id);
         foreach ($this->object as $id => $ds) {
-            $this->assertTrue(in_array($id, array('DC', $this->testDsid)));
-            $this->assertTrue(in_array($ds->id, array('DC', $this->testDsid)));
+            $this->assertTrue(in_array($id, ['DC', $this->testDsid]));
+            $this->assertTrue(in_array($ds->id, ['DC', $this->testDsid]));
         }
         $this->assertEquals("\n<test> test </test>\n", $this->object[$this->testDsid]->content);
     }
@@ -230,21 +230,21 @@ class ObjectTest extends PHPUnit_Framework_TestCase
     public function testObjectModels()
     {
         $models = $this->object->models;
-        $this->assertEquals(array('fedora-system:FedoraObject-3.0'), $models);
+        $this->assertEquals(['fedora-system:FedoraObject-3.0'], $models);
         $this->object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'pid:woot');
         $this->object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'pid:rofl');
         $models = $this->object->models;
-        $this->assertEquals(array('pid:woot', 'pid:rofl', 'fedora-system:FedoraObject-3.0'), $models);
+        $this->assertEquals(['pid:woot', 'pid:rofl', 'fedora-system:FedoraObject-3.0'], $models);
     }
 
     public function testObjectModelsAdd()
     {
-        $this->object->models = array('router:killah', 'jon:is:great');
-        $this->assertEquals(array('router:killah', 'jon:is:great', 'fedora-system:FedoraObject-3.0'), $this->object->models);
-        $this->object->models = array('new:model');
-        $this->assertEquals(array('new:model', 'fedora-system:FedoraObject-3.0'), $this->object->models);
+        $this->object->models = ['router:killah', 'jon:is:great'];
+        $this->assertEquals(['router:killah', 'jon:is:great', 'fedora-system:FedoraObject-3.0'], $this->object->models);
+        $this->object->models = ['new:model'];
+        $this->assertEquals(['new:model', 'fedora-system:FedoraObject-3.0'], $this->object->models);
         $this->object->models = 'string:model';
-        $this->assertEquals(array('string:model', 'fedora-system:FedoraObject-3.0'), $this->object->models);
+        $this->assertEquals(['string:model', 'fedora-system:FedoraObject-3.0'], $this->object->models);
     }
 
     public function testDatastreamMutation()

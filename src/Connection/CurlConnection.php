@@ -251,8 +251,8 @@ class CurlConnection extends HttpConnection
     {
         $remaining_attempts = 3;
         $http_error_string = '';
-        $response = array();
-        $info = array();
+        $response = [];
+        $info = [];
 
         while ($remaining_attempts > 0) {
             $curl_response = curl_exec(self::$curlContext);
@@ -314,9 +314,9 @@ class CurlConnection extends HttpConnection
         switch (strtolower($type)) {
             case 'string':
                 if ($content_type) {
-                    $headers = array("Content-Type: $content_type");
+                    $headers = ["Content-Type: $content_type"];
                 } else {
-                    $headers = array("Content-Type: text/plain");
+                    $headers = ["Content-Type: text/plain"];
                 }
                 curl_setopt(self::$curlContext, CURLOPT_HTTPHEADER, $headers);
                 curl_setopt(self::$curlContext, CURLOPT_POSTFIELDS, $data);
@@ -329,14 +329,14 @@ class CurlConnection extends HttpConnection
                         curl_setopt(
                             self::$curlContext,
                             CURLOPT_POSTFIELDS,
-                            array('file' => $cfile)
+                            ['file' => $cfile]
                         );
                     } else {
                         $cfile = new CURLFile($data);
                         curl_setopt(
                             self::$curlContext,
                             CURLOPT_POSTFIELDS,
-                            array('file' => $cfile)
+                            ['file' => $cfile]
                         );
                     }
                 } else {
@@ -344,20 +344,20 @@ class CurlConnection extends HttpConnection
                         curl_setopt(
                             self::$curlContext,
                             CURLOPT_POSTFIELDS,
-                            array('file' => "@$data;type=$content_type")
+                            ['file' => "@$data;type=$content_type"]
                         );
                     } else {
                         curl_setopt(
                             self::$curlContext,
                             CURLOPT_POSTFIELDS,
-                            array('file' => "@$data")
+                            ['file' => "@$data"]
                         );
                     }
                 }
                 break;
 
             case 'none':
-                curl_setopt(self::$curlContext, CURLOPT_POSTFIELDS, array());
+                curl_setopt(self::$curlContext, CURLOPT_POSTFIELDS, []);
                 break;
 
             default:
@@ -369,7 +369,7 @@ class CurlConnection extends HttpConnection
 
         // Ugly substitute for a try catch finally block.
         $exception = null;
-        $results = array();
+        $results = [];
         try {
             $results = $this->doCurlRequest();
         } catch (HttpConnectionException $e) {
@@ -378,7 +378,7 @@ class CurlConnection extends HttpConnection
 
         if ($this->reuseConnection) {
             curl_setopt(self::$curlContext, CURLOPT_POST, false);
-            curl_setopt(self::$curlContext, CURLOPT_HTTPHEADER, array());
+            curl_setopt(self::$curlContext, CURLOPT_HTTPHEADER, []);
         } else {
             $this->unallocateCurlContext();
         }
@@ -461,9 +461,9 @@ class CurlConnection extends HttpConnection
                         curl_setopt(
                             self::$curlContext,
                             CURLOPT_HTTPHEADER,
-                            array(
+                            [
                                 'Content-Length: ' . $size,
-                            )
+                            ]
                         );
                     }
                 } else {
@@ -484,7 +484,7 @@ class CurlConnection extends HttpConnection
         }
 
         // Ugly substitute for a try catch finally block.
-        $results = array();
+        $results = [];
         $exception = null;
         try {
             $results = isset($fh) ?
@@ -568,7 +568,7 @@ class CurlConnection extends HttpConnection
 
         // Ugly substitute for a try catch finally block.
         $exception = null;
-        $results = array();
+        $results = [];
         try {
             $results = $this->doCurlRequest($file);
         } catch (HttpConnectionException $e) {
@@ -606,7 +606,7 @@ class CurlConnection extends HttpConnection
 
         // Ugly substitute for a try catch finally block.
         $exception = null;
-        $results = array();
+        $results = [];
         try {
             $results = $this->doCurlRequest();
         } catch (HttpConnectionException $e) {
