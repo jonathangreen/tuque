@@ -123,7 +123,7 @@ class FedoraApiSerializer
      *
      * @param SimpleXmlElement|SimpleXMLElement[] $xml
      *   The SimpleXml element to be processed.
-     * @param array() $make_array
+     * @param array $make_array
      *   (optional) This parameter specifies tags that should become an array
      *   instead of an element in an array. This is used to get consistant values
      *   for things that are multivalued when there is only one value returned.

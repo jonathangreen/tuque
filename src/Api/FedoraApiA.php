@@ -44,7 +44,7 @@ class FedoraApiA
      *
      * @throws \Islandora\Tuque\Exception\RepositoryException
      *
-     * @return array()
+     * @return array
      *   An array describing the repository.
      *   @code
      *   Array
@@ -99,7 +99,7 @@ class FedoraApiA
      * with an unauthenticated (i.e. anonymous) user will throw
      * an 'HttpConnectionException' with the message 'Unauthorized'.
      *
-     * @return array()
+     * @return array
      *   Returns an array containing user attributes (i.e. fedoraRole).
      *    @code
      *    Array
@@ -164,7 +164,7 @@ class FedoraApiA
      *
      * @throws \Islandora\Tuque\Exception\RepositoryException
      *
-     * @return array()
+     * @return array
      *   The results are returned in an array key called 'results'. If there
      *   are more results that aren't returned then the search session information
      *   is contained in a key called 'session'. Note that it is possible for
@@ -249,7 +249,7 @@ class FedoraApiA
      *
      * @throws \Islandora\Tuque\Exception\RepositoryException
      *
-     * @return array()
+     * @return array
      *   The result format is the same as findObjects.
      *
      * @see FedoraApiA::findObjects
@@ -348,7 +348,7 @@ class FedoraApiA
      *
      * @throws \Islandora\Tuque\Exception\RepositoryException
      *
-     * @return array()
+     * @return array
      *   An array containing the different revisions of the object.
      *   @code
      *   Array
@@ -390,7 +390,7 @@ class FedoraApiA
      *
      * @throws \Islandora\Tuque\Exception\RepositoryException
      *
-     * @return array()
+     * @return array
      *   Returns information about the digital object.
      *   @code
      *   Array
@@ -440,7 +440,7 @@ class FedoraApiA
      *
      * @throws \Islandora\Tuque\Exception\RepositoryException
      *
-     * @return array()
+     * @return array
      *   An associative array with the dsid of the datastreams as the key and
      *   the mimetype and label as the value.
      *   @code
@@ -496,7 +496,7 @@ class FedoraApiA
      *
      * @throws \Islandora\Tuque\Exception\RepositoryException
      *
-     * @return array()
+     * @return array
      *   An array containing data about the methods that can be called. The result
      *   array is an associative array where the sdef pid is the key and the value
      *   is a indexed array of methods.

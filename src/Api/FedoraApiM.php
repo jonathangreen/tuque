@@ -56,7 +56,7 @@ class FedoraApiM
      *     The file name must be a full path.
      *   - url: A string containing the publically accessable URL that the
      *     datastream is located at.
-     * @param array() $params
+     * @param array $params
      *   (optional) An array that can have one or more of the following elements:
      *   - controlGroup: one of "X", "M", "R", or "E" (Inline *X*ML, *M*anaged
      *     Content, *R*edirect, or *E*xternal Referenced). Default: X.
@@ -76,7 +76,7 @@ class FedoraApiM
      *
      * @throws \Islandora\Tuque\Exception\RepositoryException
      *
-     * @return array()
+     * @return array
      *   Returns an array describing the new datastream. This is the same array
      *   returned by getDatastream. This may also contain an dsAltID key, that
      *   contains any alternate ids if any are specified.
@@ -248,7 +248,7 @@ class FedoraApiM
      *
      * @throws \Islandora\Tuque\Exception\RepositoryException
      *
-     * @return array()
+     * @return array
      *   An array containing information about the datastream. This may also
      *   contains a key dsAltID which contains alternate ids if any are specified.
      *   @code
