@@ -18,7 +18,11 @@ define("INIT_FEDORA_DS_LABEL", "Fedora Relationship Metadata.");
 define("INIT_DS_MIME", "application/rdf+xml");
 
 // This constant is being kept around for backwards compatibility.
-define("INIT_DS_CONTROL_GROUP", get_cfg_var('tuque.rels_ds_control_group') ? get_cfg_var('tuque.rels_ds_control_group') : 'X');
+define(
+    "INIT_DS_CONTROL_GROUP",
+    get_cfg_var('tuque.rels_ds_control_group') ?
+    get_cfg_var('tuque.rels_ds_control_group') : 'X'
+);
 
 define("RDF_URI", 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
 

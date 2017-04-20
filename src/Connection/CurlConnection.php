@@ -306,19 +306,11 @@ class CurlConnection extends HttpConnection
         return $response;
     }
 
-
-    /**
-     * {@inheritdoc}
-     */
-    public function patchRequest(
-        $url,
+    protected function postPatchRequest(
         $type = 'none',
         $data = null,
         $content_type = null
     ) {
-        $this->setupCurlContext($url);
-        curl_setopt(self::$curlContext, CURLOPT_CUSTOMREQUEST, 'PATCH');
-
         switch (strtolower($type)) {
             case 'string':
                 if ($content_type) {
@@ -401,6 +393,20 @@ class CurlConnection extends HttpConnection
     /**
      * {@inheritdoc}
      */
+    public function patchRequest(
+        $url,
+        $type = 'none',
+        $data = null,
+        $content_type = null
+    ) {
+        $this->setupCurlContext($url);
+        curl_setopt(self::$curlContext, CURLOPT_CUSTOMREQUEST, 'PATCH');
+        return $this->postPatchRequest($type, $data, $content_type);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function postRequest(
         $url,
         $type = 'none',
@@ -410,84 +416,7 @@ class CurlConnection extends HttpConnection
         $this->setupCurlContext($url);
         curl_setopt(self::$curlContext, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt(self::$curlContext, CURLOPT_POST, true);
-
-        switch (strtolower($type)) {
-            case 'string':
-                if ($content_type) {
-                    $headers = array("Content-Type: $content_type");
-                } else {
-                    $headers = array("Content-Type: text/plain");
-                }
-                curl_setopt(self::$curlContext, CURLOPT_HTTPHEADER, $headers);
-                curl_setopt(self::$curlContext, CURLOPT_POSTFIELDS, $data);
-                break;
-
-            case 'file':
-                if (version_compare(phpversion(), '5.5.0', '>=')) {
-                    if ($content_type) {
-                        $cfile = new CURLFile($data, $content_type, $data);
-                        curl_setopt(
-                            self::$curlContext,
-                            CURLOPT_POSTFIELDS,
-                            array('file' => $cfile)
-                        );
-                    } else {
-                        $cfile = new CURLFile($data);
-                        curl_setopt(
-                            self::$curlContext,
-                            CURLOPT_POSTFIELDS,
-                            array('file' => $cfile)
-                        );
-                    }
-                } else {
-                    if ($content_type) {
-                        curl_setopt(
-                            self::$curlContext,
-                            CURLOPT_POSTFIELDS,
-                            array('file' => "@$data;type=$content_type")
-                        );
-                    } else {
-                        curl_setopt(
-                            self::$curlContext,
-                            CURLOPT_POSTFIELDS,
-                            array('file' => "@$data")
-                        );
-                    }
-                }
-                break;
-
-            case 'none':
-                curl_setopt(self::$curlContext, CURLOPT_POSTFIELDS, array());
-                break;
-
-            default:
-                throw new HttpConnectionException(
-                    '$type must be: string, file. ' . "($type).",
-                    0
-                );
-        }
-
-        // Ugly substitute for a try catch finally block.
-        $exception = null;
-        $results = array();
-        try {
-            $results = $this->doCurlRequest();
-        } catch (HttpConnectionException $e) {
-            $exception = $e;
-        }
-
-        if ($this->reuseConnection) {
-            curl_setopt(self::$curlContext, CURLOPT_POST, false);
-            curl_setopt(self::$curlContext, CURLOPT_HTTPHEADER, array());
-        } else {
-            $this->unallocateCurlContext();
-        }
-
-        if ($exception) {
-            throw $exception;
-        }
-
-        return $results;
+        return $this->postPatchRequest($type, $data, $content_type);
     }
 
     /**

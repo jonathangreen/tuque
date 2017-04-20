@@ -9,12 +9,24 @@
     "lib-libxml": "*"
   },
   "require-dev": {
-    "phpunit/phpunit": "^6.1"
+    "phpunit/phpunit": "^6.1",
+    "squizlabs/php_codesniffer": "^2.8",
+    "sebastian/phpcpd": "^3.0"
   },
   "autoload": {
     "psr-4": {"Islandora\\Tuque\\": "src/"}
   },
   "autoload-dev": {
     "psr-4": { "Islandora\\Tuque\\Tests\\": "tests/" }
+  },
+  "scripts": {
+    "check": [
+      "phpcs --standard=PSR2 src",
+      "phpcpd --names *.php src"
+    ],
+    "test": [
+      "@check",
+      "phpunit"
+    ]
   }
 }
