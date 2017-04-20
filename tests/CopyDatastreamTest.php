@@ -10,9 +10,9 @@ use Islandora\Tuque\Datastream\FedoraDatastream;
 use Islandora\Tuque\Datastream\NewFedoraDatastream;
 use Islandora\Tuque\Object\FedoraObject;
 use Islandora\Tuque\Repository\FedoraRepository;
-use \PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase;
 
-class CopyDatastreamTest extends TestCase
+class CopyDatastreamTest extends PHPUnit_Framework_TestCase
 {
     protected $api;
     protected $repository;

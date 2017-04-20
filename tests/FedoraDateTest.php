@@ -3,9 +3,9 @@
 namespace Islandora\Tuque\Tests;
 
 use Islandora\Tuque\Date\FedoraDate;
-use \PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase;
 
-class FedoraDateTest extends TestCase
+class FedoraDateTest extends PHPUnit_Framework_TestCase
 {
 
     function testToString()

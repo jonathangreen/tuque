@@ -6,9 +6,9 @@ use Islandora\Tuque\Api\FedoraApi;
 use Islandora\Tuque\Cache\SimpleCache;
 use Islandora\Tuque\Connection\RepositoryConnection;
 use Islandora\Tuque\Repository\FedoraRepository;
-use \PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase;
 
-class FedoraRelationshipsInternalTest extends TestCase
+class FedoraRelationshipsInternalTest extends PHPUnit_Framework_TestCase
 {
 
     function setUp()

@@ -3,9 +3,9 @@
 namespace Islandora\Tuque\Tests;
 
 use Islandora\Tuque\Connection\CurlConnection;
-use \PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase;
 
-class HttpConnectionTest extends TestCase
+class HttpConnectionTest extends PHPUnit_Framework_TestCase
 {
 
     protected function setUp()

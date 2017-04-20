@@ -9,9 +9,9 @@ use Islandora\Tuque\Api\FedoraApiM;
 use Islandora\Tuque\Api\FedoraApiSerializer;
 use Islandora\Tuque\Connection\RepositoryConnection;
 use Islandora\Tuque\Exception\RepositoryException;
-use \PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase;
 
-class FedoraApiIngestTest extends TestCase
+class FedoraApiIngestTest extends PHPUnit_Framework_TestCase
 {
     protected $pids = array();
     protected $files = array();

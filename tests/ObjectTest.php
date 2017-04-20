@@ -9,9 +9,9 @@ use Islandora\Tuque\Datastream\FedoraDatastream;
 use Islandora\Tuque\Datastream\NewFedoraDatastream;
 use Islandora\Tuque\Object\FedoraObject;
 use Islandora\Tuque\Repository\FedoraRepository;
-use \PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase;
 
-class ObjectTest extends TestCase
+class ObjectTest extends PHPUnit_Framework_TestCase
 {
 
     protected function setUp()

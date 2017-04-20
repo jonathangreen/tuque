@@ -10,9 +10,9 @@ use Islandora\Tuque\Date\FedoraDate;
 use Islandora\Tuque\Exception\RepositoryException;
 use Islandora\Tuque\Object\FedoraObject;
 use Islandora\Tuque\Repository\FedoraRepository;
-use \PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase;
 
-class DatastreamTest extends TestCase
+class DatastreamTest extends PHPUnit_Framework_TestCase
 {
 
     protected function setUp()

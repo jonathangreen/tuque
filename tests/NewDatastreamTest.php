@@ -8,16 +8,10 @@ use Islandora\Tuque\Connection\RepositoryConnection;
 use Islandora\Tuque\Datastream\NewFedoraDatastream;
 use Islandora\Tuque\Object\FedoraObject;
 use Islandora\Tuque\Repository\FedoraRepository;
-use \PHPUnit\Framework\TestCase;
-use \PHPUnit\Framework\Error\Error;
+use PHPUnit_Framework_TestCase;
+use PHPUnit_Framework_Error;
 
-// XXX: PHPUnit6 moved the location of the Error class.
-// This can be dropped when we drop support for PHP < 7.0 in our testing.
-if (class_exists('\PHPUnit\Framework\Error\Error', true)) {
-    class_alias('\PHPUnit\Framework\Error\Error', 'PHPUnit_Framework_Error');
-}
-
-class NewDatastreamTest extends TestCase
+class NewDatastreamTest extends PHPUnit_Framework_TestCase
 {
 
     protected function setUp()

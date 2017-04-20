@@ -3,15 +3,14 @@
 namespace Islandora\Tuque\Tests;
 
 use DOMDocument;
-use DOMXPath;
 use Islandora\Tuque\Api\FedoraApiA;
 use Islandora\Tuque\Api\FedoraApiM;
 use Islandora\Tuque\Api\FedoraApiSerializer;
 use Islandora\Tuque\Connection\RepositoryConnection;
 use Islandora\Tuque\Exception\RepositoryException;
-use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase;
 
-class FedoraApiFindObjectsTest extends TestCase
+class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase
 {
 
     public $apim;

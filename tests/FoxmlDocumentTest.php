@@ -8,9 +8,9 @@ use Islandora\Tuque\Connection\RepositoryConnection;
 use Islandora\Tuque\Datastream\FedoraDatastream;
 use Islandora\Tuque\Object\FedoraObject;
 use Islandora\Tuque\Repository\FedoraRepository;
-use \PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase;
 
-class FoxmlDocumentTest extends TestCase
+class FoxmlDocumentTest extends PHPUnit_Framework_TestCase
 {
 
     protected function setUp()

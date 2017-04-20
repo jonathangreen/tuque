@@ -3,9 +3,9 @@
 namespace Islandora\Tuque\Tests;
 
 use Islandora\Tuque\Cache\SimpleCache;
-use \PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase;
 
-class CacheTest extends TestCase
+class CacheTest extends PHPUnit_Framework_TestCase
 {
 
     public function testAdd()

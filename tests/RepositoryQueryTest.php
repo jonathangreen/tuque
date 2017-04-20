@@ -6,9 +6,9 @@ use Islandora\Tuque\Api\FedoraApi;
 use Islandora\Tuque\Cache\SimpleCache;
 use Islandora\Tuque\Connection\RepositoryConnection;
 use Islandora\Tuque\Repository\FedoraRepository;
-use \PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_TestCase;
 
-class RepositoryQueryTest extends TestCase
+class RepositoryQueryTest extends PHPUnit_Framework_TestCase
 {
 
     protected function setUp()
