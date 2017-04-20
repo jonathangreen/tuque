@@ -367,24 +367,15 @@ class CurlConnection extends HttpConnection
                 );
         }
 
-        // Ugly substitute for a try catch finally block.
-        $exception = null;
-        $results = [];
         try {
             $results = $this->doCurlRequest();
-        } catch (HttpConnectionException $e) {
-            $exception = $e;
-        }
-
-        if ($this->reuseConnection) {
-            curl_setopt(self::$curlContext, CURLOPT_POST, false);
-            curl_setopt(self::$curlContext, CURLOPT_HTTPHEADER, []);
-        } else {
-            $this->unallocateCurlContext();
-        }
-
-        if ($exception) {
-            throw $exception;
+        } finally {
+            if ($this->reuseConnection) {
+                curl_setopt(self::$curlContext, CURLOPT_POST, false);
+                curl_setopt(self::$curlContext, CURLOPT_HTTPHEADER, []);
+            } else {
+                $this->unallocateCurlContext();
+            }
         }
 
         return $results;
@@ -483,34 +474,18 @@ class CurlConnection extends HttpConnection
                 );
         }
 
-        // Ugly substitute for a try catch finally block.
-        $results = [];
-        $exception = null;
         try {
             $results = isset($fh) ?
                 $this->doCurlRequest(null, $fh) :
                 $this->doCurlRequest(null);
-        } catch (HttpConnectionException $e) {
-            $exception = $e;
-        }
-
-        if ($this->reuseConnection) {
-            //curl_setopt(self::$curlContext, CURLOPT_PUT, FALSE);
-            //curl_setopt(self::$curlContext, CURLOPT_INFILE, 'default');
-            //curl_setopt(self::$curlContext, CURLOPT_CUSTOMREQUEST, FALSE);
-            // We can't unallocate put requests becuase CURLOPT_INFILE can't be undone
-            // this is ugly, but it gets the job done for now.
+        } finally {
+            // NOTE: We can't un-allocate put requests becuase CURLOPT_INFILE
+            // can't be undone this is ugly, but it gets the job done for now.
             $this->unallocateCurlContext();
-        } else {
-            $this->unallocateCurlContext();
-        }
 
-        if (isset($fh)) {
-            fclose($fh);
-        }
-
-        if ($exception) {
-            throw $exception;
+            if (isset($fh)) {
+                fclose($fh);
+            }
         }
 
         return $results;
@@ -566,30 +541,21 @@ class CurlConnection extends HttpConnection
             curl_setopt(self::$curlContext, CURLOPT_HEADER, false);
         }
 
-        // Ugly substitute for a try catch finally block.
-        $exception = null;
-        $results = [];
         try {
             $results = $this->doCurlRequest($file);
-        } catch (HttpConnectionException $e) {
-            $exception = $e;
-        }
+        } finally {
+            if ($this->reuseConnection) {
+                curl_setopt(self::$curlContext, CURLOPT_HTTPGET, false);
+                curl_setopt(self::$curlContext, CURLOPT_NOBODY, false);
+                curl_setopt(self::$curlContext, CURLOPT_HEADER, false);
+            } else {
+                $this->unallocateCurlContext();
+            }
 
-        if ($this->reuseConnection) {
-            curl_setopt(self::$curlContext, CURLOPT_HTTPGET, false);
-            curl_setopt(self::$curlContext, CURLOPT_NOBODY, false);
-            curl_setopt(self::$curlContext, CURLOPT_HEADER, false);
-        } else {
-            $this->unallocateCurlContext();
-        }
-
-        if ($file) {
-            fclose($file);
-            curl_setopt(self::$curlContext, CURLOPT_FILE, $stdout);
-        }
-
-        if ($exception) {
-            throw $exception;
+            if ($file) {
+                fclose($file);
+                curl_setopt(self::$curlContext, CURLOPT_FILE, $stdout);
+            }
         }
 
         return $results;
@@ -604,23 +570,14 @@ class CurlConnection extends HttpConnection
 
         curl_setopt(self::$curlContext, CURLOPT_CUSTOMREQUEST, 'DELETE');
 
-        // Ugly substitute for a try catch finally block.
-        $exception = null;
-        $results = [];
         try {
             $results = $this->doCurlRequest();
-        } catch (HttpConnectionException $e) {
-            $exception = $e;
-        }
-
-        if ($this->reuseConnection) {
-            curl_setopt(self::$curlContext, CURLOPT_CUSTOMREQUEST, null);
-        } else {
-            $this->unallocateCurlContext();
-        }
-
-        if ($exception) {
-            throw $exception;
+        } finally {
+            if ($this->reuseConnection) {
+                curl_setopt(self::$curlContext, CURLOPT_CUSTOMREQUEST, null);
+            } else {
+                $this->unallocateCurlContext();
+            }
         }
 
         return $results;
