@@ -9,9 +9,9 @@
     "lib-libxml": "*"
   },
   "require-dev": {
-    "phpunit/phpunit": ">=4.8.35|>=5.4.3.,<=5.0",
-    "squizlabs/php_codesniffer": "^2.8",
-    "sebastian/phpcpd": "^3.0"
+    "phpunit/phpunit": "*",
+    "squizlabs/php_codesniffer": "*",
+    "sebastian/phpcpd": "*"
   },
   "autoload": {
     "psr-4": {"Islandora\\Tuque\\": "src/"}
