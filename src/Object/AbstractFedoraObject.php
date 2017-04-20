@@ -173,9 +173,7 @@ abstract class AbstractFedoraObject extends AbstractObject
                 break;
 
             case 'set':
-                $this->objectProfile['objLabel'] = function_exists('mb_substr')
-                    ? mb_substr($value, 0, 255)
-                    : substr($value, 0, 255);
+                $this->objectProfile['objLabel'] = mb_substr($value, 0, 255);
                 break;
 
             case 'unset':

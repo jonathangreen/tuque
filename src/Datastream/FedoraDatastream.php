@@ -225,9 +225,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
             case 'set':
                 $this->modifyDatastream(
                     [
-                        'dsLabel' => function_exists('mb_substr') ?
-                        mb_substr($value, 0, 255) :
-                        substr($value, 0, 255)
+                        'dsLabel' => mb_substr($value, 0, 255)
                     ]
                 );
                 break;

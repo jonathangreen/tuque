@@ -201,9 +201,7 @@ class NewFedoraDatastream extends AbstractFedoraDatastream
                 break;
 
             case 'set':
-                $this->datastreamInfo['dsLabel'] =
-                function_exists('mb_substr') ?
-                mb_substr($value, 0, 255) : substr($value, 0, 255);
+                $this->datastreamInfo['dsLabel'] = mb_substr($value, 0, 255);
                 break;
 
             case 'unset':

@@ -132,12 +132,7 @@ class FedoraObject extends AbstractFedoraObject
     protected function labelMagicPropertySet($value)
     {
         if ($this->objectProfile['objLabel'] != $value) {
-            $this->modifyObject(
-                ['label' => function_exists('mb_substr') ?
-                    mb_substr($value, 0, 255) :
-                    substr($value, 0, 255)
-                ]
-            );
+            $this->modifyObject(['label' => mb_substr($value, 0, 255)]);
             parent::labelMagicProperty('set', $value);
         }
     }
