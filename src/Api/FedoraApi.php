@@ -2,6 +2,7 @@
 
 namespace Islandora\Tuque\Api;
 
+use Islandora\Tuque\Connection\HttpConnection;
 use Islandora\Tuque\Connection\RepositoryConnection;
 
 /**
@@ -33,7 +34,7 @@ class FedoraApi
      *   (Optional) If one isn't provided a default will be used.
      */
     public function __construct(
-        RepositoryConnection $connection = null,
+        HttpConnection $connection = null,
         FedoraApiSerializer $serializer = null
     ) {
         if (!$connection) {

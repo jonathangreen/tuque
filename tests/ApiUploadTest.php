@@ -4,7 +4,7 @@ namespace Islandora\Tuque\Tests;
 
 use Islandora\Tuque\Api\FedoraApi;
 use Islandora\Tuque\Cache\SimpleCache;
-use Islandora\Tuque\Connection\RepositoryConnection;
+use Islandora\Tuque\Connection\GuzzleConnection;
 use Islandora\Tuque\Repository\FedoraRepository;
 use PHPUnit_Framework_TestCase;
 
@@ -56,10 +56,10 @@ class ApiUploadTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+        $connection = new GuzzleConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
         $this->api = new FedoraApi($connection);
 
-        $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+        $connection = new GuzzleConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
         $this->api = new FedoraApi($connection);
         $cache = new SimpleCache();
         $this->repository = new FedoraRepository($this->api, $cache);

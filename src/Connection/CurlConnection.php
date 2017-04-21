@@ -323,37 +323,16 @@ class CurlConnection extends HttpConnection
                 break;
 
             case 'file':
-                if (version_compare(phpversion(), '5.5.0', '>=')) {
-                    if ($content_type) {
-                        $cfile = new CURLFile($data, $content_type, $data);
-                        curl_setopt(
-                            self::$curlContext,
-                            CURLOPT_POSTFIELDS,
-                            ['file' => $cfile]
-                        );
-                    } else {
-                        $cfile = new CURLFile($data);
-                        curl_setopt(
-                            self::$curlContext,
-                            CURLOPT_POSTFIELDS,
-                            ['file' => $cfile]
-                        );
-                    }
+                if ($content_type) {
+                    $cFile = new CURLFile($data, $content_type, $data);
                 } else {
-                    if ($content_type) {
-                        curl_setopt(
-                            self::$curlContext,
-                            CURLOPT_POSTFIELDS,
-                            ['file' => "@$data;type=$content_type"]
-                        );
-                    } else {
-                        curl_setopt(
-                            self::$curlContext,
-                            CURLOPT_POSTFIELDS,
-                            ['file' => "@$data"]
-                        );
-                    }
+                    $cFile = new CURLFile($data);
                 }
+                curl_setopt(
+                    self::$curlContext,
+                    CURLOPT_POSTFIELDS,
+                    ['file' => $cFile]
+                );
                 break;
 
             case 'none':
@@ -494,7 +473,7 @@ class CurlConnection extends HttpConnection
     /**
      * {@inheritdoc}
      */
-    public function getRequest($url, $headers_only = false, $file = null)
+    public function getRequest($url, $file = false)
     {
         // Need this as before we were opening a new file pointer for std for each
         // request. When the ulimit was reached this would make things blow up.
@@ -505,13 +484,8 @@ class CurlConnection extends HttpConnection
         }
         $this->setupCurlContext($url);
 
-        if ($headers_only) {
-            curl_setopt(self::$curlContext, CURLOPT_NOBODY, true);
-            curl_setopt(self::$curlContext, CURLOPT_HEADER, true);
-        } else {
-            curl_setopt(self::$curlContext, CURLOPT_CUSTOMREQUEST, 'GET');
-            curl_setopt(self::$curlContext, CURLOPT_HTTPGET, true);
-        }
+        curl_setopt(self::$curlContext, CURLOPT_CUSTOMREQUEST, 'GET');
+        curl_setopt(self::$curlContext, CURLOPT_HTTPGET, true);
 
         if ($file) {
             $file_original_path = $file;

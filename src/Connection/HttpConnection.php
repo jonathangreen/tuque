@@ -163,24 +163,14 @@ abstract class HttpConnection
      * @param string $url
      *   The URL to post the request to. Should start with the
      *   protocol. For example: http://.
-     * @param boolean $headers_only
-     *   This will cause curl to only return the HTTP headers.
      * @param string|bool $file
      *   A file to output the content of request to. If this is set then headers
      *   are not returned and the 'content' and 'headers' keys of the return isn't
      *   set.
-     *
-     * @throws \Islandora\Tuque\Exception\HttpConnectionException
-     *
      * @return array
-     *   Associative array containing:
-     *   * $return['status'] = The HTTP status code
-     *   * $return['headers'] = The HTTP headers of the reply
-     *   * $return['content'] = The body of the HTTP reply
      */
     abstract public function getRequest(
         $url,
-        $headers_only = false,
         $file = false
     );
 

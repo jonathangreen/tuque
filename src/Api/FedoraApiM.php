@@ -2,6 +2,7 @@
 
 namespace Islandora\Tuque\Api;
 
+use Islandora\Tuque\Connection\HttpConnection;
 use Islandora\Tuque\Connection\RepositoryConnection;
 use Islandora\Tuque\Exception\RepositoryBadArgumentException;
 
@@ -19,14 +20,14 @@ class FedoraApiM
     /**
      * Constructor for the new FedoraApiM object.
      *
-     * @param RepositoryConnection $connection
+     * @param HttpConnection $connection
      *   Takes the Repository Connection object for the Repository this API
      *   should connect to.
      * @param FedoraApiSerializer $serializer
      *   Takes the serializer object to that will be used to serialize the XML
      *   Fedora returns.
      */
-    public function __construct(RepositoryConnection $connection, FedoraApiSerializer $serializer)
+    public function __construct(HttpConnection $connection, FedoraApiSerializer $serializer)
     {
         $this->connection = $connection;
         $this->serializer = $serializer;
@@ -227,7 +228,7 @@ class FedoraApiM
         $this->connection->addParamArray($request, $separator, $params, 'format');
         $this->connection->addParamArray($request, $separator, $params, 'encoding');
 
-        $response = $this->connection->getRequest($request, false, $file);
+        $response = $this->connection->getRequest($request, $file);
         $response = $this->serializer->export($response, $file);
         return $response;
     }
@@ -418,7 +419,7 @@ class FedoraApiM
         $pid = urlencode($pid);
 
         $request = "/objects/{$pid}/objectXML";
-        $response = $this->connection->getRequest($request, false, $file);
+        $response = $this->connection->getRequest($request, $file);
         $response = $this->serializer->getObjectXml($response, $file);
         return $response;
     }

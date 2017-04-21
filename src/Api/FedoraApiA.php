@@ -2,6 +2,8 @@
 
 namespace Islandora\Tuque\Api;
 
+use Islandora\Tuque\Connection\GuzzleConnection;
+use Islandora\Tuque\Connection\HttpConnection;
 use Islandora\Tuque\Connection\RepositoryConnection;
 use Islandora\Tuque\Exception\RepositoryBadArgumentException;
 
@@ -22,14 +24,14 @@ class FedoraApiA
     /**
      * Constructor for the new FedoraApiA object.
      *
-     * @param RepositoryConnection $connection
+     * @param HttpConnection $connection
      *   Takes the Repository Connection object for the Repository this API
      *   should connect to.
      * @param FedoraApiSerializer $serializer
      *   Takes the serializer object to that will be used to serialize the XML
      *   Fedora returns.
      */
-    public function __construct(RepositoryConnection $connection, FedoraApiSerializer $serializer)
+    public function __construct(HttpConnection $connection, FedoraApiSerializer $serializer)
     {
         $this->connection = $connection;
         $this->serializer = $serializer;
@@ -298,7 +300,7 @@ class FedoraApiA
 
         $this->connection->addParam($request, $separator, 'asOfDateTime', $as_of_date_time);
 
-        $response = $this->connection->getRequest($request, false, $file);
+        $response = $this->connection->getRequest($request, $file);
         $response = $this->serializer->getDatastreamDissemination($response, $file);
         return $response;
     }

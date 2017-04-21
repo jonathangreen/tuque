@@ -2,6 +2,7 @@
 
 namespace Islandora\Tuque\Query;
 
+use Islandora\Tuque\Connection\HttpConnection;
 use Islandora\Tuque\Connection\RepositoryConnection;
 use XMLReader;
 
@@ -17,7 +18,7 @@ class RepositoryQuery
      * @param RepositoryConnection $connection
      *   The connection to connect to the RI with.
      */
-    public function __construct(RepositoryConnection $connection)
+    public function __construct(HttpConnection $connection)
     {
         $this->connection = $connection;
     }

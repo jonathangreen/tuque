@@ -7,7 +7,7 @@ use DOMXPath;
 use Islandora\Tuque\Api\FedoraApiA;
 use Islandora\Tuque\Api\FedoraApiM;
 use Islandora\Tuque\Api\FedoraApiSerializer;
-use Islandora\Tuque\Connection\RepositoryConnection;
+use Islandora\Tuque\Connection\GuzzleConnection;
 use Islandora\Tuque\Exception\RepositoryException;
 use PHPUnit_Framework_TestCase;
 
@@ -18,7 +18,7 @@ class FedoraApiIngestTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+        $this->connection = new GuzzleConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
         $this->serializer = new FedoraApiSerializer();
 
         $this->apim = new FedoraApiM($this->connection, $this->serializer);

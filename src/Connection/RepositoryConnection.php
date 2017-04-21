@@ -120,14 +120,10 @@ class RepositoryConnection extends CurlConnection implements RepositoryConfigInt
     /**
      * {@inheritdoc}
      */
-    public function getRequest($url, $headers_only = false, $file = null)
+    public function getRequest($url, $file = false)
     {
         try {
-            return parent::getRequest(
-                $this->buildUrl($url),
-                $headers_only,
-                $file
-            );
+            return parent::getRequest($this->buildUrl($url), $file);
         } catch (HttpConnectionException $e) {
             return $this->parseFedoraExceptions($e);
         }

@@ -11,7 +11,7 @@ namespace Islandora\Tuque\Tests;
  */
 use Islandora\Tuque\Api\FedoraApi;
 use Islandora\Tuque\Cache\SimpleCache;
-use Islandora\Tuque\Connection\RepositoryConnection;
+use Islandora\Tuque\Connection\GuzzleConnection;
 use Islandora\Tuque\Repository\FedoraRepository;
 use PHPUnit_Framework_TestCase;
 
@@ -20,7 +20,7 @@ class FedoraRelationshipsTest extends PHPUnit_Framework_TestCase
 
     function testAutoCommit()
     {
-        $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+        $connection = new GuzzleConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
         $this->api = new FedoraApi($connection);
         $cache = new SimpleCache();
         $repository = new FedoraRepository($this->api, $cache);
@@ -48,7 +48,7 @@ class FedoraRelationshipsTest extends PHPUnit_Framework_TestCase
 
     function testRelationshipDescription()
     {
-        $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+        $connection = new GuzzleConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
         $this->api = new FedoraApi($connection);
         $cache = new SimpleCache();
         $repository = new FedoraRepository($this->api, $cache);
@@ -78,7 +78,7 @@ class FedoraRelationshipsTest extends PHPUnit_Framework_TestCase
   </description>
 </RDF>
 XML;
-        $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+        $connection = new GuzzleConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
         $this->api = new FedoraApi($connection);
         $cache = new SimpleCache();
         $repository = new FedoraRepository($this->api, $cache);
@@ -104,7 +104,7 @@ XML;
   </rdf:Description>
 </rdf:RDF>
 XML;
-        $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+        $connection = new GuzzleConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
         $this->api = new FedoraApi($connection);
         $cache = new SimpleCache();
         $repository = new FedoraRepository($this->api, $cache);
@@ -131,7 +131,7 @@ XML;
 
 XML;
 
-        $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+        $connection = new GuzzleConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
         $this->api = new FedoraApi($connection);
         $cache = new SimpleCache();
         $repository = new FedoraRepository($this->api, $cache);
