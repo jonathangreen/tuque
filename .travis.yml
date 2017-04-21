@@ -4,6 +4,11 @@ php:
   - 5.6
   - 7.0
   - 7.1
+dist: trusty
+branches:
+  only:
+  - master
+  - stable
 env:
   - FEDORA_VERSION="3.8.1"
 before_script:
