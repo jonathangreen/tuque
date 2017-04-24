@@ -3,12 +3,15 @@
 namespace Islandora\Tuque\Connection;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use Islandora\Tuque\Config\RepositoryConfigInterface;
+use Islandora\Tuque\Exception\RepositoryException;
 use Psr\Http\Message\ResponseInterface;
 
 class GuzzleConnection extends HttpConnection implements RepositoryConfigInterface
 {
     protected $client;
+    protected $url;
 
     public function __construct(
         $url,
@@ -22,6 +25,10 @@ class GuzzleConnection extends HttpConnection implements RepositoryConfigInterfa
             'base_uri' => $url,
             'auth' => [$username, $password]
         ]);
+
+        $this->url = $url;
+        $this->password = $password;
+        $this->username = $username;
     }
 
     protected function translateResponse(ResponseInterface $response, $full = true)
@@ -37,7 +44,7 @@ class GuzzleConnection extends HttpConnection implements RepositoryConfigInterfa
         return $return;
     }
 
-    protected function request(
+    protected function putPatchRequest(
         $verb,
         $url,
         $type = 'none',
@@ -64,7 +71,7 @@ class GuzzleConnection extends HttpConnection implements RepositoryConfigInterfa
             $options['headers'] = ['Content-Type' => $content_type];
         }
 
-        $response = $this->client->request($verb, $url, $options);
+        $response = $this->request($verb, $url, $options);
         return $this->translateResponse($response);
     }
 
@@ -84,12 +91,12 @@ class GuzzleConnection extends HttpConnection implements RepositoryConfigInterfa
             } else {
                 $options['headers'] = ['Content-Type' => $content_type];
             }
-            $response = $this->client->request('POST', $url, $options);
+            $response = $this->request('POST', $url, $options);
             return $this->translateResponse($response);
         } elseif ($type == 'file') {
             $headers = [];
             if ($content_type !== null) {
-                $headers[] = ['Content-Type' => $content_type];
+                $headers = ['Content-Type' => $content_type];
             }
             $response = $this->client->request('POST', $url, [
                 'multipart' => [
@@ -103,7 +110,7 @@ class GuzzleConnection extends HttpConnection implements RepositoryConfigInterfa
             ]);
             return $this->translateResponse($response);
         } else {
-            $response = $this->client->request('POST', $url);
+            $response = $this->request('POST', $url);
             return $this->translateResponse($response);
         }
     }
@@ -114,13 +121,13 @@ class GuzzleConnection extends HttpConnection implements RepositoryConfigInterfa
         $data = null,
         $content_type = null
     ) {
-        return $this->request('PATCH', $url, $type, $data, $content_type);
+        return $this->putPatchRequest('PATCH', $url, $type, $data, $content_type);
     }
 
 
     public function putRequest($url, $type = 'none', $data = null)
     {
-        return $this->request('PUT', $url, $type, $data);
+        return $this->putPatchRequest('PUT', $url, $type, $data);
     }
 
     public function getRequest(
@@ -135,14 +142,14 @@ class GuzzleConnection extends HttpConnection implements RepositoryConfigInterfa
             $options['sink'] = $file;
         }
 
-        $response = $this->client->get($url, $options);
+        $response = $this->request('GET', $url, $options);
         return $this->translateResponse($response);
     }
 
     public function deleteRequest($url)
     {
         $url = ltrim($url, "/");
-        $response = $this->client->delete($url);
+        $response = $this->request('DELETE', $url);
         return $this->translateResponse($response);
     }
 
@@ -196,5 +203,27 @@ class GuzzleConnection extends HttpConnection implements RepositoryConfigInterfa
             $request .= "{$separator}{$name}={$parameter}";
             $separator = '&';
         }
+    }
+
+    protected function request($verb, $url, $args = [])
+    {
+        try {
+            return $this->client->request($verb, $url, $args);
+        } catch (ClientException $e) {
+            throw new RepositoryException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    public function __sleep()
+    {
+        return ['url', 'username', 'password'];
+    }
+
+    public function __wakeup()
+    {
+        $this->client = new Client([
+            'base_uri' => $this->url,
+            'auth' => [$this->username, $this->password]
+        ]);
     }
 }
