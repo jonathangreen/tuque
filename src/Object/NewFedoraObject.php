@@ -24,9 +24,10 @@ class NewFedoraObject extends AbstractFedoraObject
     public function __construct($id, FedoraRepository $repository)
     {
         parent::__construct($id, $repository);
+        $options = $this->repository->api->guzzleClient->getConfig();
         $this->objectProfile = [];
         $this->objectProfile['objState'] = 'A';
-        $this->objectProfile['objOwnerId'] = $this->repository->api->connection->username;
+        $this->objectProfile['objOwnerId'] = $options['auth'][0];
         $this->objectProfile['objLabel'] = '';
         $this->objectProfile['objLogMessage'] = '';
     }

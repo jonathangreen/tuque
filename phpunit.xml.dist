@@ -11,7 +11,7 @@
          syntaxCheck="false"
 >
   <php>
-    <const name="FEDORAURL" value="http://localhost:8080/fedora"/>
+    <const name="FEDORAURL" value="http://localhost:8080/fedora/"/>
     <const name="FEDORAUSER" value="fedoraAdmin"/>
     <const name="FEDORAPASS" value="fedoraAdmin"/>
     <const name="TEST_PNG_URL" value="http://islandora.ca/testfiles/tuque/test.png"/>

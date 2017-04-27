@@ -2,8 +2,7 @@
 
 namespace Islandora\Tuque\Api;
 
-use GuzzleHttp\Exception\ServerException;
-use Islandora\Tuque\Connection\GuzzleConnection;
+use GuzzleHttp\Client;
 
 /**
  * This class implements the Fedora API-M interface. This is a light wrapper
@@ -15,20 +14,23 @@ use Islandora\Tuque\Connection\GuzzleConnection;
  */
 class FedoraApiM
 {
+    protected $serializer;
+    protected $guzzleClient;
+    protected $guzzleOptions;
 
     /**
      * Constructor for the new FedoraApiM object.
      *
-     * @param GuzzleConnection $connection
+     * @param Client $guzzleClient
      *   Takes the Repository Connection object for the Repository this API
      *   should connect to.
      * @param FedoraApiSerializer $serializer
      *   Takes the serializer object to that will be used to serialize the XML
      *   Fedora returns.
      */
-    public function __construct(GuzzleConnection $connection, FedoraApiSerializer $serializer)
+    public function __construct(Client $guzzleClient, FedoraApiSerializer $serializer)
     {
-        $this->connection = $connection;
+        $this->guzzleClient = $guzzleClient;
         $this->serializer = $serializer;
     }
 
@@ -122,7 +124,7 @@ class FedoraApiM
             ]];
         }
 
-        $response = $this->connection->postRequest($url, $options);
+        $response = $this->guzzleClient->request('post', $url, $options);
         $response = $this->serializer->addDatastream($response);
         return $response;
     }
@@ -157,7 +159,7 @@ class FedoraApiM
         $pid = urlencode($pid);
         $url = "objects/$pid/relationships/new";
         $options = ['query' => $relationship + ['isLiteral' => $is_literal, 'datatype' => $datatype]];
-        $response = $this->connection->postRequest($url, $options);
+        $response = $this->guzzleClient->request('post', $url, $options);
         $response = $this->serializer->addRelationship($response);
         return $response;
     }
@@ -198,7 +200,7 @@ class FedoraApiM
             $options['sink'] = $file;
         }
 
-        $response = $this->connection->getRequest($url, $options);
+        $response = $this->guzzleClient->request('get', $url, $options);
         $response = $this->serializer->export($response, $file);
         return $response;
     }
@@ -250,7 +252,7 @@ class FedoraApiM
         $url = "objects/$pid/datastreams/$dsid";
         $options = ['query' => ['format' => 'xml'] + $params];
 
-        $response = $this->connection->getRequest($url, $options);
+        $response = $this->guzzleClient->request('get', $url, $options);
         $response = $this->serializer->getDatastream($response);
         return $response;
     }
@@ -318,7 +320,7 @@ class FedoraApiM
         $url = "objects/{$pid}/datastreams/{$dsid}/history";
         $options = ['query' => ['format' => 'xml']];
 
-        $response = $this->connection->getRequest($url, $options);
+        $response = $this->guzzleClient->request('get', $url, $options);
         $response = $this->serializer->getDatastreamHistory($response);
 
         return $response;
@@ -356,7 +358,7 @@ class FedoraApiM
             'numPIDs' => $numpids
         ]];
 
-        $response = $this->connection->postRequest($url, $options);
+        $response = $this->guzzleClient->request('post', $url, $options);
         $response = $this->serializer->getNextPid($response);
         return $response;
     }
@@ -385,7 +387,7 @@ class FedoraApiM
         if ($file) {
             $options['sink'] = $file;
         }
-        $response = $this->connection->getRequest($url, $options);
+        $response = $this->guzzleClient->request('get', $url, $options);
         $response = $this->serializer->getObjectXml($response, $file);
         return $response;
     }
@@ -454,7 +456,7 @@ class FedoraApiM
         $url = "objects/$pid/relationships";
         $options = ['query' => ['format' => 'xml'] + $relationship];
 
-        $response = $this->connection->getRequest($url, $options);
+        $response = $this->guzzleClient->request('get', $url, $options);
         $response = $this->serializer->getRelationships($response);
         return $response;
     }
@@ -532,7 +534,7 @@ class FedoraApiM
         unset($params['file']);
         $options['query'] = $params;
 
-        $response = $this->connection->postRequest($url, $options);
+        $response = $this->guzzleClient->request('post', $url, $options);
         $response = $this->serializer->ingest($response);
         return $response;
     }
@@ -594,7 +596,7 @@ class FedoraApiM
         unset($params['dsString']);
         $options['query'] = $params;
 
-        $response = $this->connection->putRequest($url, $options);
+        $response = $this->guzzleClient->request('put', $url, $options);
         $response = $this->serializer->modifyDatastream($response);
 
         return $response;
@@ -625,7 +627,7 @@ class FedoraApiM
         $pid = urlencode($pid);
         $url = "objects/$pid";
         $options = ['query' => $params];
-        $response = $this->connection->putRequest($url, $options);
+        $response = $this->guzzleClient->request('put', $url, $options);
         $response = $this->serializer->modifyObject($response);
         return $response;
     }
@@ -666,7 +668,7 @@ class FedoraApiM
         $url = "objects/$pid/datastreams/$dsid";
         $options = ['query' => $params];
 
-        $response = $this->connection->deleteRequest($url, $options);
+        $response = $this->guzzleClient->request('delete', $url, $options);
         $response = $this->serializer->purgeDatastream($response);
         return $response;
     }
@@ -689,7 +691,7 @@ class FedoraApiM
         $pid = urlencode($pid);
         $url = "objects/{$pid}";
         $options = ['query' => ['logMessage' => $log_message]];
-        $response = $this->connection->deleteRequest($url, $options);
+        $response = $this->guzzleClient->request('delete', $url, $options);
         $response = $this->serializer->purgeObject($response);
         return $response;
     }
@@ -735,7 +737,7 @@ class FedoraApiM
         $url = "objects/{$pid}/validate";
         $options = ['asOfDateTime' => $as_of_date_time];
 
-        $response = $this->connection->getRequest($url, $options);
+        $response = $this->guzzleClient->request('get', $url, $options);
         $response = $this->serializer->validate($response);
         return $response;
     }
@@ -757,8 +759,19 @@ class FedoraApiM
             'contents' => fopen($file, 'r')
         ]]];
 
-        $response = $this->connection->postRequest($url, $options);
+        $response = $this->guzzleClient->request('post', $url, $options);
         $response = $this->serializer->upload($response);
         return $response;
+    }
+
+    public function __sleep()
+    {
+        $this->guzzleOptions = $this->guzzleClient->getConfig();
+        return ['guzzleOptions', '$serializer'];
+    }
+
+    public function __wakeup()
+    {
+        $this->guzzleClient = new Client($this->guzzleOptions);
     }
 }

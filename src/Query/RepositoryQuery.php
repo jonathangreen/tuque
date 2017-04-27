@@ -2,24 +2,25 @@
 
 namespace Islandora\Tuque\Query;
 
-use Islandora\Tuque\Connection\GuzzleConnection;
+use GuzzleHttp\Client;
+use Islandora\Tuque\Util\RequestHelper;
 use XMLReader;
 
 class RepositoryQuery
 {
 
-    public $connection;
+    protected $guzzleClient;
     const SIMPLE_XML_NAMESPACE = "http://www.w3.org/2001/sw/DataAccess/rf1/result";
 
     /**
      * Construct a new RI object.
      *
-     * @param GuzzleConnection $connection
+     * @param Client $guzzleClient
      *   The connection to connect to the RI with.
      */
-    public function __construct(GuzzleConnection $connection)
+    public function __construct(Client $guzzleClient)
     {
-        $this->connection = $connection;
+        $this->guzzleClient = $guzzleClient;
     }
 
     /**
@@ -103,7 +104,7 @@ class RepositoryQuery
             $options['query']['limit'] = $limit;
         }
 
-        $result = $this->connection->getRequest($url, $options);
+        $result = RequestHelper::request($this->guzzleClient, 'get', $url, $options);
         return (string) $result->getBody();
     }
 

@@ -5,8 +5,9 @@ namespace Islandora\Tuque\Tests;
 use DOMDocument;
 use DOMXPath;
 use Islandora\Tuque\Api\FedoraApi;
+use Islandora\Tuque\Api\FedoraApiSerializer;
 use Islandora\Tuque\Cache\SimpleCache;
-use Islandora\Tuque\Connection\GuzzleConnection;
+use GuzzleHttp\Client;
 use Islandora\Tuque\Datastream\FedoraDatastream;
 use Islandora\Tuque\Datastream\NewFedoraDatastream;
 use Islandora\Tuque\Repository\FedoraRepository;
@@ -16,8 +17,8 @@ class NewObjectTest extends ObjectTest
 
     protected function setUp()
     {
-        $connection = new GuzzleConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
-        $this->api = new FedoraApi($connection);
+        $guzzle = new Client(['base_uri' => FEDORAURL,'auth' => [FEDORAUSER, FEDORAPASS]]);
+        $this->api = new FedoraApi($guzzle, new FedoraApiSerializer());
         $cache = new SimpleCache();
         $repository = new FedoraRepository($this->api, $cache);
 

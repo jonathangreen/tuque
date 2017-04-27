@@ -59,7 +59,7 @@ class FedoraRepository extends AbstractRepository
     {
         $this->api = $api;
         $this->cache = $cache;
-        $this->ri = new $this->queryClass($this->api->connection);
+        $this->ri = new $this->queryClass($this->api->guzzleClient);
     }
 
     /**
