@@ -561,8 +561,6 @@ class FedoraApiM
      *     be one of: DEFAULT, DISABLED, MD5, SHA-1, SHA-256, SHA-384, SHA-512.
      *     If this parameter is given and no checksum is given the checksum will
      *     be computed.
-     *   - checksum:    the value of the checksum represented as a hexadecimal
-     *     string. This checksum must be computed by the algorithm defined above.
      *   - mimeType:    the MIME type of the content being added, this overrides
      *     the Content-Type request header.
      *   - logMessage: a message describing the activity being performed
@@ -580,56 +578,25 @@ class FedoraApiM
      */
     public function modifyDatastream($pid, $dsid, $params = [])
     {
-//        $pid = urlencode($pid);
-//        $dsid = urlencode($dsid);
-//        $url = "objects/{$pid}/datastreams/{$dsid}";
-//        $options = [];
-//
-//        if (isset($params['dsString'])) {
-//            $options['body'] = $params['dsString'];
-//            $options['headers'] = ['Content-Type' => 'text/plain'];
-//        } elseif (isset($params['dsFile'])) {
-//            $options['body'] = fopen($params['dsFile'], 'r');
-//            $options['headers'] = ['Content-Type' => 'application/octet-stream'];
-//        }
-//        unset($params['dsFile']);
-//        unset($params['dsString']);
-//        $options['query'] = $params;
-//
-//        $response = $this->connection->putRequest($url, $options);
-//        $response = $this->serializer->modifyDatastream($response);
-//
-//        return $response;
         $pid = urlencode($pid);
         $dsid = urlencode($dsid);
-        $request = "objects/{$pid}/datastreams/{$dsid}";
+        $url = "objects/{$pid}/datastreams/{$dsid}";
+        $options = [];
 
-        // Setup the file.
-        if (isset($params['dsFile'])) {
-            $type = 'file';
-            $data = $params['dsFile'];
-        } elseif (isset($params['dsString'])) {
-            $type = 'string';
-            $data = $params['dsString'];
-        } else {
-            $type = 'none';
-            $data = null;
-        }
-        unset($params['dsString']);
-        unset($params['dsFile']);
-        $options['query'] = $params;
-
-        if ($type == 'string') {
-            $options['body'] = $data;
+        if (isset($params['dsString'])) {
+            $options['body'] = $params['dsString'];
             $options['headers'] = ['Content-Type' => 'text/plain'];
-        } elseif ($type == 'file') {
-            $resource = fopen($data, 'r');
-            $options['body'] = $resource;
+        } elseif (isset($params['dsFile'])) {
+            $options['body'] = fopen($params['dsFile'], 'r');
             $options['headers'] = ['Content-Type' => 'application/octet-stream'];
         }
+        unset($params['dsFile']);
+        unset($params['dsString']);
+        $options['query'] = $params;
 
-        $response = $this->connection->putRequest($request, $options);
+        $response = $this->connection->putRequest($url, $options);
         $response = $this->serializer->modifyDatastream($response);
+
         return $response;
     }
 

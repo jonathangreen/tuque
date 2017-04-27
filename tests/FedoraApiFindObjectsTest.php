@@ -725,7 +725,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase
                                 break;
                         }
 
-                        $this->apim->modifyDatastream($pid, $dsid, ['checksumType' => $type, 'checksum' => $hash]);
+                        $this->apim->modifyDatastream($pid, $dsid, ['checksumType' => $type]);
                         $actual = $this->apim->getDatastream($pid, $dsid);
                         $this->assertEquals($hash, $actual['dsChecksum']);
                     }
