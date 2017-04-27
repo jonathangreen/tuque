@@ -513,15 +513,4 @@ class FedoraApiA
         $response = $this->serializer->listMethods($response);
         return $response;
     }
-
-    public function __sleep()
-    {
-        $this->guzzleOptions = $this->guzzleClient->getConfig();
-        return ['guzzleOptions', '$serializer'];
-    }
-
-    public function __wakeup()
-    {
-        $this->guzzleClient = new Client($this->guzzleOptions);
-    }
 }

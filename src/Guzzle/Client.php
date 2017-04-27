@@ -5,13 +5,15 @@ namespace Islandora\Tuque\Guzzle;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Client as GuzzleClient;
 use Islandora\Tuque\Exception\RepositoryException;
+use Serializable;
 
-class Client extends GuzzleClient
+class Client extends GuzzleClient implements Serializable
 {
-    protected $config;
+    private $savedConfig;
 
     public function __construct(array $config = [])
     {
+        $this->savedConfig = $config;
         parent::__construct($config);
     }
 
@@ -33,15 +35,14 @@ class Client extends GuzzleClient
         }
     }
 
-    public function __sleep()
+    public function serialize()
     {
-        $this->config = $this->getConfig();
-        return ['config'];
+        return serialize($this->savedConfig);
     }
 
-    public function __wakeup()
+    public function unserialize($serialized)
     {
-        parent::__construct($this->config);
+        $this->savedConfig = unserialize($serialized);
+        parent::__construct($this->savedConfig);
     }
-
 }

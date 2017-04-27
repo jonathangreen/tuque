@@ -763,15 +763,4 @@ class FedoraApiM
         $response = $this->serializer->upload($response);
         return $response;
     }
-
-    public function __sleep()
-    {
-        $this->guzzleOptions = $this->guzzleClient->getConfig();
-        return ['guzzleOptions', '$serializer'];
-    }
-
-    public function __wakeup()
-    {
-        $this->guzzleClient = new Client($this->guzzleOptions);
-    }
 }

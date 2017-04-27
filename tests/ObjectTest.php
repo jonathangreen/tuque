@@ -79,7 +79,6 @@ class ObjectTest extends PHPUnit_Framework_TestCase
 
     public function testObjectLabelSerialization()
     {
-        $this->markTestIncomplete();
         $this->assertEquals('', $this->object->label);
         $this->object->label = 'first';
         $this->assertEquals('first', $this->object->label);
