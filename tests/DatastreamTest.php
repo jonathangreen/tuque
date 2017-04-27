@@ -4,7 +4,7 @@ namespace Islandora\Tuque\Tests;
 
 use Islandora\Tuque\Api\FedoraApi;
 use Islandora\Tuque\Cache\SimpleCache;
-use GuzzleHttp\Client;
+use Islandora\Tuque\Guzzle\Client;
 use Islandora\Tuque\Datastream\FedoraDatastream;
 use Islandora\Tuque\Date\FedoraDate;
 use Islandora\Tuque\Exception\RepositoryException;

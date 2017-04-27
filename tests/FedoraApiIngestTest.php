@@ -7,7 +7,7 @@ use DOMXPath;
 use Islandora\Tuque\Api\FedoraApiA;
 use Islandora\Tuque\Api\FedoraApiM;
 use Islandora\Tuque\Api\FedoraApiSerializer;
-use GuzzleHttp\Client;
+use Islandora\Tuque\Guzzle\Client;
 use Islandora\Tuque\Exception\RepositoryException;
 use PHPUnit_Framework_TestCase;
 

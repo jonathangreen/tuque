@@ -5,7 +5,7 @@ namespace Islandora\Tuque\Tests;
 use Islandora\Tuque\Api\FedoraApi;
 use Islandora\Tuque\Api\FedoraApiSerializer;
 use Islandora\Tuque\Cache\SimpleCache;
-use GuzzleHttp\Client;
+use Islandora\Tuque\Guzzle\Client;
 use Islandora\Tuque\Datastream\NewFedoraDatastream;
 use Islandora\Tuque\Object\FedoraObject;
 use Islandora\Tuque\Repository\FedoraRepository;

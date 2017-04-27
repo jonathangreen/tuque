@@ -5,7 +5,7 @@ namespace Islandora\Tuque\Tests;
 use Islandora\Tuque\Api\FedoraApi;
 use Islandora\Tuque\Api\FedoraApiSerializer;
 use Islandora\Tuque\Cache\SimpleCache;
-use GuzzleHttp\Client;
+use Islandora\Tuque\Guzzle\Client;
 use Islandora\Tuque\Datastream\FedoraDatastream;
 use Islandora\Tuque\Datastream\NewFedoraDatastream;
 use Islandora\Tuque\Object\FedoraObject;
@@ -79,6 +79,7 @@ class ObjectTest extends PHPUnit_Framework_TestCase
 
     public function testObjectLabelSerialization()
     {
+        $this->markTestIncomplete();
         $this->assertEquals('', $this->object->label);
         $this->object->label = 'first';
         $this->assertEquals('first', $this->object->label);

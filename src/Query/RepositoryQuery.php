@@ -3,7 +3,6 @@
 namespace Islandora\Tuque\Query;
 
 use GuzzleHttp\Client;
-use Islandora\Tuque\Util\RequestHelper;
 use XMLReader;
 
 class RepositoryQuery
@@ -104,7 +103,7 @@ class RepositoryQuery
             $options['query']['limit'] = $limit;
         }
 
-        $result = RequestHelper::request($this->guzzleClient, 'get', $url, $options);
+        $result = $this->guzzleClient->request('get', $url, $options);
         return (string) $result->getBody();
     }
 

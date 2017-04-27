@@ -12,7 +12,7 @@ namespace Islandora\Tuque\Tests;
 use Islandora\Tuque\Api\FedoraApi;
 use Islandora\Tuque\Api\FedoraApiSerializer;
 use Islandora\Tuque\Cache\SimpleCache;
-use GuzzleHttp\Client;
+use Islandora\Tuque\Guzzle\Client;
 use Islandora\Tuque\Repository\FedoraRepository;
 use PHPUnit_Framework_TestCase;
 

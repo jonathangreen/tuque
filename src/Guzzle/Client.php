@@ -35,6 +35,7 @@ class Client extends GuzzleClient
 
     public function __sleep()
     {
+        $this->config = $this->getConfig();
         return ['config'];
     }
 
