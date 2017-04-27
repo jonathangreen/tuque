@@ -175,7 +175,7 @@ class FedoraApiSerializer
      */
     public function describeRepository($request)
     {
-        $repository = $this->loadSimpleXml($request['content']);
+        $repository = $this->loadSimpleXml((string) $request->getBody());
         $data = $this->flattenDocument($repository);
         return $data;
     }
@@ -188,7 +188,7 @@ class FedoraApiSerializer
      */
     public function userAttributes($request)
     {
-        $user_attributes = $this->loadSimpleXml($request['content']);
+        $user_attributes = $this->loadSimpleXml((string) $request->getBody());
         $data = [];
         foreach ($user_attributes->attribute as $attribute) {
             $values = [];
@@ -208,7 +208,7 @@ class FedoraApiSerializer
      */
     public function findObjects($request)
     {
-        $results = $this->loadSimpleXml($request['content']);
+        $results = $this->loadSimpleXml((string) $request->getBody());
         $data = [];
 
         if (isset($results->listSession)) {
@@ -248,7 +248,7 @@ class FedoraApiSerializer
         if ($file) {
             return true;
         } else {
-            return $request['content'];
+            return (string) $request->getBody();
         }
     }
 
@@ -260,7 +260,7 @@ class FedoraApiSerializer
      */
     public function getDissemination($request)
     {
-        return $request['content'];
+        return (string) $request->getBody();
     }
 
     /**
@@ -271,7 +271,7 @@ class FedoraApiSerializer
      */
     public function getObjectHistory($request)
     {
-        $object_history = $this->loadSimpleXml($request['content']);
+        $object_history = $this->loadSimpleXml((string) $request->getBody());
         $data = $this->flattenDocument(
             $object_history,
             ['objectChangeDate']
@@ -287,7 +287,7 @@ class FedoraApiSerializer
      */
     public function getObjectProfile($request)
     {
-        $result = $this->loadSimpleXml($request['content']);
+        $result = $this->loadSimpleXml((string) $request->getBody());
         $data = $this->flattenDocument($result, ['model']);
         return $data;
     }
@@ -301,7 +301,7 @@ class FedoraApiSerializer
     public function listDatastreams($request)
     {
         $result = [];
-        $datastreams = $this->loadSimpleXml($request['content']);
+        $datastreams = $this->loadSimpleXml((string) $request->getBody());
         // We can't use flattenDocument here, since everything is an attribute.
         foreach ($datastreams->datastream as $datastream) {
             $result[(string)$datastream['dsid']] = [
@@ -321,7 +321,7 @@ class FedoraApiSerializer
     public function listMethods($request)
     {
         $result = [];
-        $object_methods = $this->loadSimpleXml($request['content']);
+        $object_methods = $this->loadSimpleXml((string) $request->getBody());
         // We can't use flattenDocument here because of the atrtibutes.
         if (isset($object_methods->sDef)) {
             foreach ($object_methods->sDef as $sdef) {
@@ -371,7 +371,7 @@ class FedoraApiSerializer
     {
         return $file ?
             true :
-            $request['content'];
+            (string) $request->getBody();
     }
 
     /**
@@ -383,7 +383,7 @@ class FedoraApiSerializer
      */
     public function getDatastream($request)
     {
-        $result = $this->loadSimpleXml($request['content']);
+        $result = $this->loadSimpleXml((string) $request->getBody());
         $data = $this->flattenDocument($result);
         return $data;
     }
@@ -396,7 +396,7 @@ class FedoraApiSerializer
      */
     public function getDatastreamHistory($request)
     {
-        $result = $this->loadSimpleXml($request['content']);
+        $result = $this->loadSimpleXml((string) $request->getBody());
         $result = $this->flattenDocument($result, ['datastreamProfile']);
 
         return $result;
@@ -410,7 +410,7 @@ class FedoraApiSerializer
      */
     public function getNextPid($request)
     {
-        $result = $this->loadSimpleXml($request['content']);
+        $result = $this->loadSimpleXml((string) $request->getBody());
         $result = $this->flattenDocument($result);
         $result = $result['pid'];
 
@@ -429,7 +429,7 @@ class FedoraApiSerializer
     {
         return $file ?
             true :
-            $request['content'];
+            (string) $request->getBody();
     }
 
     /**
@@ -485,7 +485,7 @@ class FedoraApiSerializer
     {
         $relationships = [];
 
-        $dom = $this->loadDomDocument($request['content']);
+        $dom = $this->loadDomDocument((string) $request->getBody());
         $xpath = new DomXPath($dom);
         $results = $xpath->query('/rdf:RDF/rdf:Description/*');
 
@@ -504,7 +504,7 @@ class FedoraApiSerializer
      */
     public function ingest($request)
     {
-        return $request['content'];
+        return (string) $request->getBody();
     }
 
     /**
@@ -515,7 +515,7 @@ class FedoraApiSerializer
      */
     public function modifyDatastream($request)
     {
-        $result = $this->loadSimpleXml($request['content']);
+        $result = $this->loadSimpleXml((string) $request->getBody());
         return $this->flattenDocument($result);
     }
 
@@ -527,7 +527,7 @@ class FedoraApiSerializer
      */
     public function modifyObject($request)
     {
-        return $request['content'];
+        return (string) $request->getBody();
     }
 
     /**
@@ -538,7 +538,7 @@ class FedoraApiSerializer
      */
     public function purgeDatastream($request)
     {
-        return json_decode($request['content']);
+        return json_decode((string) $request->getBody());
     }
 
     /**
@@ -549,7 +549,7 @@ class FedoraApiSerializer
      */
     public function purgeObject($request)
     {
-        return $request['content'];
+        return (string) $request->getBody();
     }
 
     /**
@@ -560,7 +560,7 @@ class FedoraApiSerializer
      */
     public function validate($request)
     {
-        $result = $this->loadSimpleXml($request['content']);
+        $result = $this->loadSimpleXml((string) $request->getBody());
         $doc = $this->flattenDocument($result);
         $doc['valid'] = (string)$result['valid'] == "true" ? true : false;
         return $doc;
@@ -574,6 +574,6 @@ class FedoraApiSerializer
      */
     public function upload($request)
     {
-        return $request['content'];
+        return (string) $request->getBody();
     }
 }

@@ -7,7 +7,7 @@ use DOMXPath;
 use Islandora\Tuque\Api\FedoraApiA;
 use Islandora\Tuque\Api\FedoraApiM;
 use Islandora\Tuque\Api\FedoraApiSerializer;
-use Islandora\Tuque\Connection\RepositoryConnection;
+use Islandora\Tuque\Guzzle\Client;
 use Islandora\Tuque\Exception\RepositoryException;
 use PHPUnit_Framework_TestCase;
 
@@ -15,14 +15,15 @@ class FedoraApiIngestTest extends PHPUnit_Framework_TestCase
 {
     protected $pids = [];
     protected $files = [];
+    protected $guzzle;
 
     protected function setUp()
     {
-        $this->connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+        $this->guzzle = new Client(['base_uri' => FEDORAURL,'auth' => [FEDORAUSER, FEDORAPASS]]);
         $this->serializer = new FedoraApiSerializer();
 
-        $this->apim = new FedoraApiM($this->connection, $this->serializer);
-        $this->apia = new FedoraApiA($this->connection, $this->serializer);
+        $this->apim = new FedoraApiM($this->guzzle, $this->serializer);
+        $this->apia = new FedoraApiA($this->guzzle, $this->serializer);
     }
 
     protected function tearDown()

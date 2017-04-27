@@ -2,8 +2,7 @@
 
 namespace Islandora\Tuque\Api;
 
-use Islandora\Tuque\Connection\RepositoryConnection;
-use Islandora\Tuque\Exception\RepositoryBadArgumentException;
+use GuzzleHttp\Client;
 
 /**
  * This class implements the Fedora API-A interface. This is a light wrapper
@@ -15,23 +14,23 @@ use Islandora\Tuque\Exception\RepositoryBadArgumentException;
  */
 class FedoraApiA
 {
-
-    protected $connection;
     protected $serializer;
+    protected $guzzleClient;
+    protected $guzzleOptions;
 
     /**
      * Constructor for the new FedoraApiA object.
      *
-     * @param RepositoryConnection $connection
+     * @param Client $guzzleClient
      *   Takes the Repository Connection object for the Repository this API
      *   should connect to.
      * @param FedoraApiSerializer $serializer
      *   Takes the serializer object to that will be used to serialize the XML
      *   Fedora returns.
      */
-    public function __construct(RepositoryConnection $connection, FedoraApiSerializer $serializer)
+    public function __construct(Client $guzzleClient, FedoraApiSerializer $serializer)
     {
-        $this->connection = $connection;
+        $this->guzzleClient = $guzzleClient;
         $this->serializer = $serializer;
     }
 
@@ -82,12 +81,10 @@ class FedoraApiA
     public function describeRepository()
     {
         // This is weird and undocumented, but its what the web client does.
-        $request = "/describe";
-        $separator = '?';
+        $url = "describe";
+        $options = ['query' => ['xml' => 'true']];
 
-        $this->connection->addParam($request, $separator, 'xml', 'true');
-
-        $response = $this->connection->getRequest($request);
+        $response = $this->guzzleClient->request('get', $url, $options);
         $response = $this->serializer->describeRepository($response);
         return $response;
     }
@@ -117,12 +114,10 @@ class FedoraApiA
      */
     public function userAttributes()
     {
-        $request = "/user";
-        $separator = '?';
+        $url = "user";
+        $options = ['query' => ['xml' => 'true']];
 
-        $this->connection->addParam($request, $separator, 'xml', 'true');
-
-        $response = $this->connection->getRequest($request);
+        $response = $this->guzzleClient->request('get', $url, $options);
         $response = $this->serializer->userAttributes($response);
         return $response;
     }
@@ -210,33 +205,28 @@ class FedoraApiA
      */
     public function findObjects($type, $query, $max_results = null, $display_fields = ['pid', 'title'])
     {
-        $request = "/objects";
-        $separator = '?';
-
-        $this->connection->addParam($request, $separator, 'resultFormat', 'xml');
+        $url = "objects";
+        $options = ['query' => [
+            'resultFormat' => 'xml',
+            'maxResults' => $max_results
+        ]];
 
         switch ($type) {
             case 'terms':
-                $this->connection->addParam($request, $separator, 'terms', $query);
+                $options['query']['terms'] = $query;
                 break;
-
             case 'query':
-                $this->connection->addParam($request, $separator, 'query', $query);
+                $options['query']['query'] = $query;
                 break;
-
-            default:
-                throw new RepositoryBadArgumentException('$type must be either: terms or query.');
         }
-
-        $this->connection->addParam($request, $separator, 'maxResults', $max_results);
 
         if (is_array($display_fields)) {
             foreach ($display_fields as $display) {
-                $this->connection->addParam($request, $separator, $display, 'true');
+                $options['query'][$display] = 'true';
             }
         }
 
-        $response = $this->connection->getRequest($request);
+        $response = $this->guzzleClient->request('get', $url, $options);
         $response = $this->serializer->findObjects($response);
         return $response;
     }
@@ -256,14 +246,13 @@ class FedoraApiA
      */
     public function resumeFindObjects($session_token)
     {
-        $session_token = urlencode($session_token);
-        $request = "/objects";
-        $separator = '?';
+        $url = "objects";
+        $options = ['query' => [
+            'resultFormat' => 'xml',
+            'sessionToken' => $session_token
+        ]];
 
-        $this->connection->addParam($request, $separator, 'resultFormat', 'xml');
-        $this->connection->addParam($request, $separator, 'sessionToken', $session_token);
-
-        $response = $this->connection->getRequest($request);
+        $response = $this->guzzleClient->request('get', $url, $options);
         $response = $this->serializer->resumeFindObjects($response);
         return $response;
     }
@@ -292,13 +281,14 @@ class FedoraApiA
     {
         $pid = urlencode($pid);
         $dsid = urlencode($dsid);
-        $separator = '?';
+        $url = "objects/$pid/datastreams/$dsid/content";
+        $options = ['query' => ['asOfDateTime' => $as_of_date_time]];
 
-        $request = "/objects/$pid/datastreams/$dsid/content";
+        if ($file) {
+            $options['sink'] = $file;
+        }
 
-        $this->connection->addParam($request, $separator, 'asOfDateTime', $as_of_date_time);
-
-        $response = $this->connection->getRequest($request, false, $file);
+        $response = $this->guzzleClient->request('get', $url, $options);
         $response = $this->serializer->getDatastreamDissemination($response, $file);
         return $response;
     }
@@ -323,19 +313,16 @@ class FedoraApiA
     public function getDissemination($pid, $sdef_pid, $method, $method_parameters = null)
     {
         $pid = urlencode($pid);
-        $sdef_pid = urldecode($sdef_pid);
+        $sdef_pid = urlencode($sdef_pid);
         $method = urlencode($method);
-
-        $request = "/objects/$pid/methods/$sdef_pid/$method";
-        $separator = '?';
+        $url = "objects/$pid/methods/$sdef_pid/$method";
+        $options = [];
 
         if (isset($method_parameters) && is_array($method_parameters)) {
-            foreach ($method_parameters as $key => $value) {
-                $this->connection->addParam($request, $separator, $key, $value);
-            }
+            $options['query'] = $method_parameters;
         }
 
-        $response = $this->connection->getRequest($request);
+        $response = $this->guzzleClient->request('get', $url);
         $response = $this->serializer->getDissemination($response);
         return $response;
     }
@@ -368,12 +355,10 @@ class FedoraApiA
     public function getObjectHistory($pid)
     {
         $pid = urlencode($pid);
+        $url = "objects/$pid/versions";
+        $options = ['query' => ['format' => 'xml']];
 
-        $request = "/objects/$pid/versions";
-        $separator = '?';
-        $this->connection->addParam($request, $separator, 'format', 'xml');
-
-        $response = $this->connection->getRequest($request);
+        $response = $this->guzzleClient->request('get', $url, $options);
         $response = $this->serializer->getObjectHistory($response);
         return $response;
     }
@@ -416,14 +401,10 @@ class FedoraApiA
     public function getObjectProfile($pid, $as_of_date_time = null)
     {
         $pid = urlencode($pid);
+        $url = "objects/{$pid}";
+        $options = ['query' => ['format' => 'xml', 'asOfDateTime' => $as_of_date_time]];
 
-        $request = "/objects/{$pid}";
-        $separator = '?';
-
-        $this->connection->addParam($request, $separator, 'format', 'xml');
-        $this->connection->addParam($request, $separator, 'asOfDateTime', $as_of_date_time);
-
-        $response = $this->connection->getRequest($request);
+        $response = $this->guzzleClient->request('get', $url, $options);
         $response = $this->serializer->getObjectProfile($response);
         return $response;
     }
@@ -470,14 +451,10 @@ class FedoraApiA
     public function listDatastreams($pid, $as_of_date_time = null)
     {
         $pid = urlencode($pid);
+        $url = "objects/{$pid}/datastreams";
+        $options = ['query' => ['format' => 'xml', 'asOfDateTime' => $as_of_date_time]];
 
-        $request = "/objects/{$pid}/datastreams";
-        $separator = '?';
-
-        $this->connection->addParam($request, $separator, 'format', 'xml');
-        $this->connection->addParam($request, $separator, 'asOfDateTime', $as_of_date_time);
-
-        $response = $this->connection->getRequest($request);
+        $response = $this->guzzleClient->request('get', $url, $options);
         $response = $this->serializer->listDatastreams($response);
         return $response;
     }
@@ -529,14 +506,10 @@ class FedoraApiA
     {
         $pid = urlencode($pid);
         $sdef_pid = urlencode($sdef_pid);
+        $url = "objects/{$pid}/methods/{$sdef_pid}";
+        $options = ['query' => ['format' => 'xml', 'asOfDateTime' => $as_of_date_time]];
 
-        $request = "/objects/{$pid}/methods/{$sdef_pid}";
-        $separator = '?';
-
-        $this->connection->addParam($request, $separator, 'format', 'xml');
-        $this->connection->addParam($request, $separator, 'asOfDateTime', $as_of_date_time);
-
-        $response = $this->connection->getRequest($request);
+        $response = $this->guzzleClient->request('get', $url, $options);
         $response = $this->serializer->listMethods($response);
         return $response;
     }

@@ -223,11 +223,7 @@ class FedoraDatastream extends AbstractExistingFedoraDatastream implements Count
                 break;
 
             case 'set':
-                $this->modifyDatastream(
-                    [
-                        'dsLabel' => mb_substr($value, 0, 255)
-                    ]
-                );
+                $this->modifyDatastream(['dsLabel' => mb_substr($value, 0, 255)]);
                 break;
 
             case 'unset':

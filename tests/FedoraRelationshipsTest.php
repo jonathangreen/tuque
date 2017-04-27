@@ -10,8 +10,9 @@ namespace Islandora\Tuque\Tests;
  *  domdocument cannonicalization function that doesn't work properly on cent
  */
 use Islandora\Tuque\Api\FedoraApi;
+use Islandora\Tuque\Api\FedoraApiSerializer;
 use Islandora\Tuque\Cache\SimpleCache;
-use Islandora\Tuque\Connection\RepositoryConnection;
+use Islandora\Tuque\Guzzle\Client;
 use Islandora\Tuque\Repository\FedoraRepository;
 use PHPUnit_Framework_TestCase;
 
@@ -20,8 +21,8 @@ class FedoraRelationshipsTest extends PHPUnit_Framework_TestCase
 
     function testAutoCommit()
     {
-        $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
-        $this->api = new FedoraApi($connection);
+        $guzzle = new Client(['base_uri' => FEDORAURL,'auth' => [FEDORAUSER, FEDORAPASS]]);
+        $this->api = new FedoraApi($guzzle, new FedoraApiSerializer());
         $cache = new SimpleCache();
         $repository = new FedoraRepository($this->api, $cache);
         $object = $repository->constructObject("test:test");
@@ -48,8 +49,8 @@ class FedoraRelationshipsTest extends PHPUnit_Framework_TestCase
 
     function testRelationshipDescription()
     {
-        $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
-        $this->api = new FedoraApi($connection);
+        $guzzle = new Client(['base_uri' => FEDORAURL,'auth' => [FEDORAUSER, FEDORAPASS]]);
+        $this->api = new FedoraApi($guzzle, new FedoraApiSerializer());
         $cache = new SimpleCache();
         $repository = new FedoraRepository($this->api, $cache);
         $object = $repository->constructObject("test:test");
@@ -78,8 +79,8 @@ class FedoraRelationshipsTest extends PHPUnit_Framework_TestCase
   </description>
 </RDF>
 XML;
-        $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
-        $this->api = new FedoraApi($connection);
+        $guzzle = new Client(['base_uri' => FEDORAURL,'auth' => [FEDORAUSER, FEDORAPASS]]);
+        $this->api = new FedoraApi($guzzle, new FedoraApiSerializer());
         $cache = new SimpleCache();
         $repository = new FedoraRepository($this->api, $cache);
         $object = $repository->constructObject("test:test");
@@ -104,8 +105,8 @@ XML;
   </rdf:Description>
 </rdf:RDF>
 XML;
-        $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
-        $this->api = new FedoraApi($connection);
+        $guzzle = new Client(['base_uri' => FEDORAURL,'auth' => [FEDORAUSER, FEDORAPASS]]);
+        $this->api = new FedoraApi($guzzle, new FedoraApiSerializer());
         $cache = new SimpleCache();
         $repository = new FedoraRepository($this->api, $cache);
         $object = $repository->constructObject("islandora:479");
@@ -131,8 +132,8 @@ XML;
 
 XML;
 
-        $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
-        $this->api = new FedoraApi($connection);
+        $guzzle = new Client(['base_uri' => FEDORAURL,'auth' => [FEDORAUSER, FEDORAPASS]]);
+        $this->api = new FedoraApi($guzzle, new FedoraApiSerializer());
         $cache = new SimpleCache();
         $repository = new FedoraRepository($this->api, $cache);
         $object = $repository->constructObject("test:test");

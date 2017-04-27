@@ -6,7 +6,7 @@ use DOMDocument;
 use Islandora\Tuque\Api\FedoraApiA;
 use Islandora\Tuque\Api\FedoraApiM;
 use Islandora\Tuque\Api\FedoraApiSerializer;
-use Islandora\Tuque\Connection\RepositoryConnection;
+use Islandora\Tuque\Guzzle\Client;
 use Islandora\Tuque\Exception\RepositoryException;
 use PHPUnit_Framework_TestCase;
 
@@ -32,11 +32,11 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
+        $guzzle = new Client(['base_uri' => FEDORAURL,'auth' => [FEDORAUSER, FEDORAPASS]]);
         $serializer = new FedoraApiSerializer();
 
-        $this->apim = new FedoraApiM($connection, $serializer);
-        $this->apia = new FedoraApiA($connection, $serializer);
+        $this->apim = new FedoraApiM($guzzle, $serializer);
+        $this->apia = new FedoraApiA($guzzle, $serializer);
 
         if (self::$purge == false) {
             $this->fixtures = self::$saved;
@@ -725,7 +725,7 @@ class FedoraApiFindObjectsTest extends PHPUnit_Framework_TestCase
                                 break;
                         }
 
-                        $this->apim->modifyDatastream($pid, $dsid, ['checksumType' => $type, 'checksum' => $hash]);
+                        $this->apim->modifyDatastream($pid, $dsid, ['checksumType' => $type]);
                         $actual = $this->apim->getDatastream($pid, $dsid);
                         $this->assertEquals($hash, $actual['dsChecksum']);
                     }

@@ -3,8 +3,9 @@
 namespace Islandora\Tuque\Tests;
 
 use Islandora\Tuque\Api\FedoraApi;
+use Islandora\Tuque\Api\FedoraApiSerializer;
 use Islandora\Tuque\Cache\SimpleCache;
-use Islandora\Tuque\Connection\RepositoryConnection;
+use Islandora\Tuque\Guzzle\Client;
 use Islandora\Tuque\Object\FedoraObject;
 use Islandora\Tuque\Repository\FedoraRepository;
 use PHPUnit_Framework_TestCase;
@@ -14,8 +15,8 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $connection = new RepositoryConnection(FEDORAURL, FEDORAUSER, FEDORAPASS);
-        $this->api = new FedoraApi($connection);
+        $guzzle = new Client(['base_uri' => FEDORAURL,'auth' => [FEDORAUSER, FEDORAPASS]]);
+        $this->api = new FedoraApi($guzzle, new FedoraApiSerializer());
         $cache = new SimpleCache();
         $this->repository = new FedoraRepository($this->api, $cache);
     }
