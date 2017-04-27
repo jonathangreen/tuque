@@ -2,8 +2,7 @@
 
 namespace Islandora\Tuque\Query;
 
-use Islandora\Tuque\Connection\HttpConnection;
-use Islandora\Tuque\Connection\RepositoryConnection;
+use Islandora\Tuque\Connection\GuzzleConnection;
 use XMLReader;
 
 class RepositoryQuery
@@ -15,10 +14,10 @@ class RepositoryQuery
     /**
      * Construct a new RI object.
      *
-     * @param RepositoryConnection $connection
+     * @param GuzzleConnection $connection
      *   The connection to connect to the RI with.
      */
-    public function __construct(HttpConnection $connection)
+    public function __construct(GuzzleConnection $connection)
     {
         $this->connection = $connection;
     }
@@ -91,24 +90,21 @@ class RepositoryQuery
      */
     protected function internalQuery($query, $type = 'itql', $limit = -1, $format = 'Sparql')
     {
-        // Construct the query URL.
-        $url = '/risearch';
-        $seperator = '?';
+        $url = 'risearch';
+        $options = ['query' => [
+            'type' => 'tuples',
+            'flush' => 'true',
+            'format' => $format,
+            'lang' => $type,
+            'query' => $query,
+        ]];
 
-        $this->connection->addParam($url, $seperator, 'type', 'tuples');
-        $this->connection->addParam($url, $seperator, 'flush', true);
-        $this->connection->addParam($url, $seperator, 'format', $format);
-        $this->connection->addParam($url, $seperator, 'lang', $type);
-        $this->connection->addParam($url, $seperator, 'query', $query);
-
-        // Add limit if provided.
         if ($limit > 0) {
-            $this->connection->addParam($url, $seperator, 'limit', $limit);
+            $options['query']['limit'] = $limit;
         }
 
-        $result = $this->connection->getRequest($url);
-
-        return $result['content'];
+        $result = $this->connection->getRequest($url, $options);
+        return (string) $result->getBody();
     }
 
     /**

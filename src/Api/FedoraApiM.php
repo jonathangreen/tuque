@@ -2,9 +2,8 @@
 
 namespace Islandora\Tuque\Api;
 
-use Islandora\Tuque\Connection\HttpConnection;
-use Islandora\Tuque\Connection\RepositoryConnection;
-use Islandora\Tuque\Exception\RepositoryBadArgumentException;
+use GuzzleHttp\Exception\ServerException;
+use Islandora\Tuque\Connection\GuzzleConnection;
 
 /**
  * This class implements the Fedora API-M interface. This is a light wrapper
@@ -20,14 +19,14 @@ class FedoraApiM
     /**
      * Constructor for the new FedoraApiM object.
      *
-     * @param HttpConnection $connection
+     * @param GuzzleConnection $connection
      *   Takes the Repository Connection object for the Repository this API
      *   should connect to.
      * @param FedoraApiSerializer $serializer
      *   Takes the serializer object to that will be used to serialize the XML
      *   Fedora returns.
      */
-    public function __construct(HttpConnection $connection, FedoraApiSerializer $serializer)
+    public function __construct(GuzzleConnection $connection, FedoraApiSerializer $serializer)
     {
         $this->connection = $connection;
         $this->serializer = $serializer;
@@ -108,37 +107,22 @@ class FedoraApiM
     {
         $pid = urlencode($pid);
         $dsid = urlencode($dsid);
+        $url = "objects/$pid/datastreams/$dsid";
+        $options = ['query' => $params];
 
-        $request = "/objects/$pid/datastreams/$dsid";
-        $separator = '?';
-
-        switch (strtolower($type)) {
-            case 'file':
-            case 'string':
-                break;
-
-            case 'url':
-                $this->connection->addParam($request, $separator, 'dsLocation', $file);
-                $type = 'none';
-                break;
-
-            default:
-                throw new RepositoryBadArgumentException("Type must be one of: file, string, url. ($type)");
-                break;
+        if (strtolower($type) === 'url') {
+            $options['query']['dsLocation'] = $file;
+        } elseif (strtolower($type) == 'string') {
+            $options['headers'] = ['Content-Type' => 'text/plain'];
+            $options['body'] = $file;
+        } elseif (strtolower($type) == 'file') {
+            $options['multipart'] = [[
+                'name'     => 'file',
+                'contents' => fopen($file, 'r')
+            ]];
         }
 
-        $this->connection->addParamArray($request, $separator, $params, 'controlGroup');
-        $this->connection->addParamArray($request, $separator, $params, 'altIDs');
-        $this->connection->addParamArray($request, $separator, $params, 'dsLabel');
-        $this->connection->addParamArray($request, $separator, $params, 'versionable');
-        $this->connection->addParamArray($request, $separator, $params, 'dsState');
-        $this->connection->addParamArray($request, $separator, $params, 'formatURI');
-        $this->connection->addParamArray($request, $separator, $params, 'checksumType');
-        $this->connection->addParamArray($request, $separator, $params, 'checksum');
-        $this->connection->addParamArray($request, $separator, $params, 'mimeType');
-        $this->connection->addParamArray($request, $separator, $params, 'logMessage');
-
-        $response = $this->connection->postRequest($request, $type, $file);
+        $response = $this->connection->postRequest($url, $options);
         $response = $this->serializer->addDatastream($response);
         return $response;
     }
@@ -170,24 +154,10 @@ class FedoraApiM
      */
     public function addRelationship($pid, $relationship, $is_literal, $datatype = null)
     {
-        if (!isset($relationship['predicate'])) {
-            throw new RepositoryBadArgumentException('Relationship array must contain a predicate element');
-        }
-        if (!isset($relationship['object'])) {
-            throw new RepositoryBadArgumentException('Relationship array must contain a object element');
-        }
-
         $pid = urlencode($pid);
-        $request = "/objects/$pid/relationships/new";
-        $separator = '?';
-
-        $this->connection->addParamArray($request, $separator, $relationship, 'subject');
-        $this->connection->addParamArray($request, $separator, $relationship, 'predicate');
-        $this->connection->addParamArray($request, $separator, $relationship, 'object');
-        $this->connection->addParam($request, $separator, 'isLiteral', $is_literal);
-        $this->connection->addParam($request, $separator, 'datatype', $datatype);
-
-        $response = $this->connection->postRequest($request);
+        $url = "objects/$pid/relationships/new";
+        $options = ['query' => $relationship + ['isLiteral' => $is_literal, 'datatype' => $datatype]];
+        $response = $this->connection->postRequest($url, $options);
         $response = $this->serializer->addRelationship($response);
         return $response;
     }
@@ -221,14 +191,14 @@ class FedoraApiM
     public function export($pid, $params = [], $file = null)
     {
         $pid = urlencode($pid);
-        $request = "/objects/$pid/export";
-        $separator = '?';
+        $url = "objects/$pid/export";
+        $options = ['query' => $params];
 
-        $this->connection->addParamArray($request, $separator, $params, 'context');
-        $this->connection->addParamArray($request, $separator, $params, 'format');
-        $this->connection->addParamArray($request, $separator, $params, 'encoding');
+        if ($file) {
+            $options['sink'] = $file;
+        }
 
-        $response = $this->connection->getRequest($request, $file);
+        $response = $this->connection->getRequest($url, $options);
         $response = $this->serializer->export($response, $file);
         return $response;
     }
@@ -277,15 +247,10 @@ class FedoraApiM
     {
         $pid = urlencode($pid);
         $dsid = urlencode($dsid);
+        $url = "objects/$pid/datastreams/$dsid";
+        $options = ['query' => ['format' => 'xml'] + $params];
 
-        $request = "/objects/$pid/datastreams/$dsid";
-        $separator = '?';
-
-        $this->connection->addParam($request, $separator, 'format', 'xml');
-        $this->connection->addParamArray($request, $separator, $params, 'asOfDateTime');
-        $this->connection->addParamArray($request, $separator, $params, 'validateChecksum');
-
-        $response = $this->connection->getRequest($request);
+        $response = $this->connection->getRequest($url, $options);
         $response = $this->serializer->getDatastream($response);
         return $response;
     }
@@ -350,12 +315,10 @@ class FedoraApiM
     {
         $pid = urlencode($pid);
         $dsid = urlencode($dsid);
+        $url = "objects/{$pid}/datastreams/{$dsid}/history";
+        $options = ['query' => ['format' => 'xml']];
 
-        $request = "/objects/{$pid}/datastreams/{$dsid}/history";
-        $separator = '?';
-        $this->connection->addParam($request, $separator, 'format', 'xml');
-
-        $response = $this->connection->getRequest($request);
+        $response = $this->connection->getRequest($url, $options);
         $response = $this->serializer->getDatastreamHistory($response);
 
         return $response;
@@ -386,14 +349,14 @@ class FedoraApiM
      */
     public function getNextPid($namespace = null, $numpids = null)
     {
-        $request = "/objects/nextPID";
-        $separator = '?';
+        $url = "objects/nextPID";
+        $options = ['query' => [
+            'format' => 'xml',
+            'namespace' => $namespace,
+            'numPIDs' => $numpids
+        ]];
 
-        $this->connection->addParam($request, $separator, 'format', 'xml');
-        $this->connection->addParam($request, $separator, 'namespace', $namespace);
-        $this->connection->addParam($request, $separator, 'numPIDs', $numpids);
-
-        $response = $this->connection->postRequest($request, 'string', '');
+        $response = $this->connection->postRequest($url, $options);
         $response = $this->serializer->getNextPid($response);
         return $response;
     }
@@ -417,9 +380,12 @@ class FedoraApiM
     public function getObjectXml($pid, $file = null)
     {
         $pid = urlencode($pid);
-
-        $request = "/objects/{$pid}/objectXML";
-        $response = $this->connection->getRequest($request, $file);
+        $url = "objects/{$pid}/objectXML";
+        $options = [];
+        if ($file) {
+            $options['sink'] = $file;
+        }
+        $response = $this->connection->getRequest($url, $options);
         $response = $this->serializer->getObjectXml($response, $file);
         return $response;
     }
@@ -485,15 +451,10 @@ class FedoraApiM
     public function getRelationships($pid, $relationship = [])
     {
         $pid = urlencode($pid);
+        $url = "objects/$pid/relationships";
+        $options = ['query' => ['format' => 'xml'] + $relationship];
 
-        $request = "/objects/$pid/relationships";
-        $separator = "?";
-
-        $this->connection->addParam($request, $separator, 'format', 'xml');
-        $this->connection->addParamArray($request, $separator, $relationship, 'subject');
-        $this->connection->addParamArray($request, $separator, $relationship, 'predicate');
-
-        $response = $this->connection->getRequest($request);
+        $response = $this->connection->getRequest($url, $options);
         $response = $this->serializer->getRelationships($response);
         return $response;
     }
@@ -545,38 +506,33 @@ class FedoraApiM
      */
     public function ingest($params = [])
     {
-        $request = "/objects/";
-        $separator = '?';
+        $url = "objects/";
+        $options = [];
 
         if (isset($params['pid'])) {
             $pid = urlencode($params['pid']);
-            $request .= "$pid";
+            $url .= "$pid";
         } else {
-            $request .= "new";
+            $url .= "new";
         }
 
         if (isset($params['string'])) {
-            $type = 'string';
-            $data = $params['string'];
-            $content_type = 'text/xml';
+            $options['body'] = $params['string'];
+            $options['headers'] = ['Content-Type' => 'text/xml'];
         } elseif (isset($params['file'])) {
-            $type = 'file';
-            $data = $params['file'];
-            $content_type = 'text/xml';
-        } else {
-            $type = 'none';
-            $data = null;
-            $content_type = null;
+            $options['multipart'] = [[
+                'name' => 'file',
+                'contents' => fopen($params['file'], 'r'),
+                'headers' => ['Content-Type' => 'text/xml']
+            ]];
         }
 
-        $this->connection->addParamArray($request, $separator, $params, 'label');
-        $this->connection->addParamArray($request, $separator, $params, 'format');
-        $this->connection->addParamArray($request, $separator, $params, 'encoding');
-        $this->connection->addParamArray($request, $separator, $params, 'namespace');
-        $this->connection->addParamArray($request, $separator, $params, 'ownerId');
-        $this->connection->addParamArray($request, $separator, $params, 'logMessage');
+        unset($params['pid']);
+        unset($params['string']);
+        unset($params['file']);
+        $options['query'] = $params;
 
-        $response = $this->connection->postRequest($request, $type, $data, $content_type);
+        $response = $this->connection->postRequest($url, $options);
         $response = $this->serializer->ingest($response);
         return $response;
     }
@@ -624,11 +580,29 @@ class FedoraApiM
      */
     public function modifyDatastream($pid, $dsid, $params = [])
     {
+//        $pid = urlencode($pid);
+//        $dsid = urlencode($dsid);
+//        $url = "objects/{$pid}/datastreams/{$dsid}";
+//        $options = [];
+//
+//        if (isset($params['dsString'])) {
+//            $options['body'] = $params['dsString'];
+//            $options['headers'] = ['Content-Type' => 'text/plain'];
+//        } elseif (isset($params['dsFile'])) {
+//            $options['body'] = fopen($params['dsFile'], 'r');
+//            $options['headers'] = ['Content-Type' => 'application/octet-stream'];
+//        }
+//        unset($params['dsFile']);
+//        unset($params['dsString']);
+//        $options['query'] = $params;
+//
+//        $response = $this->connection->putRequest($url, $options);
+//        $response = $this->serializer->modifyDatastream($response);
+//
+//        return $response;
         $pid = urlencode($pid);
         $dsid = urlencode($dsid);
-
-        $request = "/objects/{$pid}/datastreams/{$dsid}";
-        $separator = '?';
+        $request = "objects/{$pid}/datastreams/{$dsid}";
 
         // Setup the file.
         if (isset($params['dsFile'])) {
@@ -637,28 +611,25 @@ class FedoraApiM
         } elseif (isset($params['dsString'])) {
             $type = 'string';
             $data = $params['dsString'];
-        } elseif (isset($params['dsLocation'])) {
-            $type = 'none';
-            $data = null;
-            $this->connection->addParamArray($request, $separator, $params, 'dsLocation');
         } else {
             $type = 'none';
             $data = null;
         }
+        unset($params['dsString']);
+        unset($params['dsFile']);
+        $options['query'] = $params;
 
-        $this->connection->addParamArray($request, $separator, $params, 'altIDs');
-        $this->connection->addParamArray($request, $separator, $params, 'dsLabel');
-        $this->connection->addParamArray($request, $separator, $params, 'versionable');
-        $this->connection->addParamArray($request, $separator, $params, 'dsState');
-        $this->connection->addParamArray($request, $separator, $params, 'formatURI');
-        $this->connection->addParamArray($request, $separator, $params, 'checksumType');
-        $this->connection->addParamArray($request, $separator, $params, 'mimeType');
-        $this->connection->addParamArray($request, $separator, $params, 'logMessage');
-        $this->connection->addParamArray($request, $separator, $params, 'lastModifiedDate');
+        if ($type == 'string') {
+            $options['body'] = $data;
+            $options['headers'] = ['Content-Type' => 'text/plain'];
+        } elseif ($type == 'file') {
+            $resource = fopen($data, 'r');
+            $options['body'] = $resource;
+            $options['headers'] = ['Content-Type' => 'application/octet-stream'];
+        }
 
-        $response = $this->connection->putRequest($request, $type, $data);
+        $response = $this->connection->putRequest($request, $options);
         $response = $this->serializer->modifyDatastream($response);
-
         return $response;
     }
 
@@ -685,16 +656,9 @@ class FedoraApiM
     public function modifyObject($pid, $params = null)
     {
         $pid = urlencode($pid);
-        $request = "/objects/$pid";
-        $separator = '?';
-
-        $this->connection->addParamArray($request, $separator, $params, 'label');
-        $this->connection->addParamArray($request, $separator, $params, 'ownerId');
-        $this->connection->addParamArray($request, $separator, $params, 'state');
-        $this->connection->addParamArray($request, $separator, $params, 'logMessage');
-        $this->connection->addParamArray($request, $separator, $params, 'lastModifiedDate');
-
-        $response = $this->connection->putRequest($request);
+        $url = "objects/$pid";
+        $options = ['query' => $params];
+        $response = $this->connection->putRequest($url, $options);
         $response = $this->serializer->modifyObject($response);
         return $response;
     }
@@ -732,14 +696,10 @@ class FedoraApiM
     {
         $pid = urlencode($pid);
         $dsid = urlencode($dsid);
-        $request = "/objects/$pid/datastreams/$dsid";
-        $separator = '?';
+        $url = "objects/$pid/datastreams/$dsid";
+        $options = ['query' => $params];
 
-        $this->connection->addParamArray($request, $separator, $params, 'startDT');
-        $this->connection->addParamArray($request, $separator, $params, 'endDT');
-        $this->connection->addParamArray($request, $separator, $params, 'logMessage');
-
-        $response = $this->connection->deleteRequest($request);
+        $response = $this->connection->deleteRequest($url, $options);
         $response = $this->serializer->purgeDatastream($response);
         return $response;
     }
@@ -760,12 +720,9 @@ class FedoraApiM
     public function purgeObject($pid, $log_message = null)
     {
         $pid = urlencode($pid);
-
-        $request = "/objects/{$pid}";
-        $separator = '?';
-
-        $this->connection->addParam($request, $separator, 'logMessage', $log_message);
-        $response = $this->connection->deleteRequest($request);
+        $url = "objects/{$pid}";
+        $options = ['query' => ['logMessage' => $log_message]];
+        $response = $this->connection->deleteRequest($url, $options);
         $response = $this->serializer->purgeObject($response);
         return $response;
     }
@@ -808,14 +765,10 @@ class FedoraApiM
      */
     public function validate($pid, $as_of_date_time = null)
     {
-        $pid = urlencode($pid);
+        $url = "objects/{$pid}/validate";
+        $options = ['asOfDateTime' => $as_of_date_time];
 
-        $request = "/objects/{$pid}/validate";
-        $separator = '?';
-
-        $this->connection->addParam($request, $separator, 'asOfDateTime', $as_of_date_time);
-
-        $response = $this->connection->getRequest($request);
+        $response = $this->connection->getRequest($url, $options);
         $response = $this->serializer->validate($response);
         return $response;
     }
@@ -831,8 +784,13 @@ class FedoraApiM
      */
     public function upload($file)
     {
-        $request = "/upload";
-        $response = $this->connection->postRequest($request, 'file', $file);
+        $url = "upload";
+        $options = ['multipart' => [[
+            'name' => 'file',
+            'contents' => fopen($file, 'r')
+        ]]];
+
+        $response = $this->connection->postRequest($url, $options);
         $response = $this->serializer->upload($response);
         return $response;
     }
